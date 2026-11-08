@@ -11,7 +11,7 @@ npm install
 npm run dev                     # http://localhost:3000
 ```
 
-You'll need the [Freighter](https://www.freighter.app) browser extension set to **Test Net**.
+You'll need the [Varial](https://varialwallet.com) wallet extension (formerly Freighter) set to **Test Net**.
 
 ## Scripts
 
@@ -25,7 +25,7 @@ You'll need the [Freighter](https://www.freighter.app) browser extension set to 
 ## How sign-in works
 
 1. The browser asks `/api/auth/challenge` for a one-time code for the connected wallet.
-2. Freighter signs a short message containing that code (SEP-53 message signing — no transaction, no fee).
+2. Varial (formerly Freighter) signs a short message containing that code (SEP-53 message signing — no transaction, no fee).
 3. `/api/auth/verify` uses the code once, checks the signature with the Stellar SDK, and sets an HTTP-only session cookie (7 days).
 4. New wallets go to **Finish your profile** (name + email); returning ones go to the dashboard.
 

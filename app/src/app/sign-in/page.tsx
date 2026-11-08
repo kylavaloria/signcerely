@@ -9,7 +9,7 @@ import { getSession } from "@/lib/session";
 export const metadata: Metadata = { title: "Sign in · It's Your Sign" };
 
 const points = [
-  { icon: <LockIcon />, text: "Only you can approve a signature in Freighter. We never see your secret key." },
+  { icon: <LockIcon />, text: "Only you can approve a signature in your Varial wallet. We never see your secret key." },
   { icon: <MailIcon />, text: "We’ll email you when it’s your turn to sign and when everyone is done." },
   { icon: <PersonIcon />, text: "Your documents are visible only to the people you invite." },
 ];

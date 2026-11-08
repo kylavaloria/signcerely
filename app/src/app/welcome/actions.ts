@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { sendEmailConfirmation } from "@/lib/email-confirmation";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/supabase";
 
@@ -48,6 +49,11 @@ export async function saveProfile(_prev: ProfileFormState, formData: FormData): 
     return { errors: { form: "Couldn't save your profile. Please try again." }, values: raw };
   }
 
-  // TODO(email): send the confirmation link once email sending is set up.
-  redirect("/dashboard");
+  // Send the confirmation link. If it fails, the dashboard offers "Send again".
+  const sent = await sendEmailConfirmation({
+    wallet: session.wallet,
+    email: parsed.data.email,
+    name: parsed.data.fullName,
+  });
+  redirect(sent.ok ? "/dashboard?email=sent" : "/dashboard?email=failed");
 }

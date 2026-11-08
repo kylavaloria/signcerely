@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { WALLET_URL } from "@/lib/wallet";
 import { CloseIcon, ExternalIcon, RetryIcon } from "./icons";
 
 type Props = { onCheckAgain: () => void };
@@ -19,8 +20,8 @@ const num = {
   fontSize: 14.5,
 } as const;
 
-/** "Set up Freighter in 3 steps" popup. Open with ref.current.showModal(). */
-export const FreighterGuide = forwardRef<HTMLDialogElement, Props>(function FreighterGuide(
+/** "Set up Varial in 3 steps" popup. Open with ref.current.showModal(). */
+export const WalletGuide = forwardRef<HTMLDialogElement, Props>(function WalletGuide(
   { onCheckAgain },
   ref,
 ) {
@@ -31,10 +32,10 @@ export const FreighterGuide = forwardRef<HTMLDialogElement, Props>(function Frei
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
           <p className="tag">About 2 minutes</p>
           <h2 id="fg-title" className="h" style={{ fontSize: 26, fontWeight: 700 }}>
-            Set up Freighter in 3 steps
+            Set up Varial in 3 steps
           </h2>
           <p className="muted" style={{ fontSize: 15 }}>
-            Freighter is a free browser extension that holds your signing key. You only do this once.
+            Varial (formerly Freighter) is a free Stellar wallet extension that holds your signing key. You only do this once.
           </p>
         </div>
         <button type="button" aria-label="Close" className="btn btn-ghost" style={{ minHeight: 44, padding: "0 10px" }} onClick={close}>
@@ -45,13 +46,13 @@ export const FreighterGuide = forwardRef<HTMLDialogElement, Props>(function Frei
         <li style={{ ...step, borderTop: 0 }}>
           <span style={num} aria-hidden="true">1</span>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h3 style={{ fontSize: 17 }}>Install Freighter</h3>
+            <h3 style={{ fontSize: 17 }}>Install Varial</h3>
             <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
-              Add it to Chrome, Brave or Firefox from the official site, then pin it: click the puzzle icon in your
-              toolbar, then the pin next to Freighter.
+              Add it to Chrome, Edge, Brave or Firefox from the official site, then pin it: click the puzzle icon
+              in your toolbar, then the pin next to Varial. Already had Freighter? It updated to Varial on its own.
             </p>
-            <a className="btn btn-primary" href="https://www.freighter.app" target="_blank" rel="noopener noreferrer" style={{ alignSelf: "flex-start", minHeight: 44 }}>
-              Get Freighter <ExternalIcon />
+            <a className="btn btn-primary" href={WALLET_URL} target="_blank" rel="noopener noreferrer" style={{ alignSelf: "flex-start", minHeight: 44 }}>
+              Get Varial <ExternalIcon />
             </a>
           </div>
         </li>
@@ -60,7 +61,7 @@ export const FreighterGuide = forwardRef<HTMLDialogElement, Props>(function Frei
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <h3 style={{ fontSize: 17 }}>Create your wallet</h3>
             <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
-              Open Freighter, choose <strong>Create new wallet</strong>, and set a password.
+              Open Varial, choose <strong>Create new wallet</strong>, and set a password.
             </p>
             <p className="note note-yellow">
               <span>
@@ -73,17 +74,17 @@ export const FreighterGuide = forwardRef<HTMLDialogElement, Props>(function Frei
         <li style={step}>
           <span style={num} aria-hidden="true">3</span>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h3 style={{ fontSize: 17 }}>Switch Freighter to Test Net</h3>
+            <h3 style={{ fontSize: 17 }}>Switch Varial to Test Net</h3>
             <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
               While It’s Your Sign is in beta, signing happens on a practice network — no real money involved. In
-              Freighter, open <strong>Settings → Network</strong> and choose <strong>Test Net</strong>.
+              Varial, open <strong>Settings → Network</strong> and choose <strong>Test Net</strong>.
             </p>
           </div>
         </li>
       </ol>
       <div style={{ padding: "16px 28px 22px", borderTop: "1px solid var(--line-2)", background: "#FBFCFE", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <p className="muted" style={{ flex: 1, minWidth: 200, fontSize: 14 }}>
-          All set? We’ll look for Freighter again — no need to reload.
+          All set? We’ll look for Varial again. Just installed it? Refresh the page instead.
         </p>
         <button type="button" className="btn btn-ghost" onClick={close}>
           Cancel
