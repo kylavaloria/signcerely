@@ -256,15 +256,15 @@ export const AdoptSignature = forwardRef<HTMLDialogElement, Props>(function Adop
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <p className="tag">How it will look on the document</p>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 24, padding: "14px 18px", borderRadius: 12, background: "var(--mist)" }}>
-            <div style={{ width: 240 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", gap: "10px 24px", padding: "14px 18px", borderRadius: 12, background: "var(--mist)" }}>
+            <div style={{ width: 240, maxWidth: "100%" }}>
               <div style={{ height: 64, display: "flex", alignItems: "flex-end" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                {preview && <img src={preview} alt="" style={{ maxWidth: 230, maxHeight: 60 }} />}
+                {preview && <img src={preview} alt="" style={{ maxWidth: "100%", maxHeight: 60 }} />}
               </div>
               <p style={{ fontFamily: "Georgia, serif", fontSize: 13, borderTop: "1px solid #1C2440", paddingTop: 4 }}>Signed {today}</p>
             </div>
-            <p className="help" style={{ flex: 1 }}>
+            <p className="help" style={{ flex: "1 1 160px" }}>
               The date is filled in for you when you finish signing.
             </p>
           </div>

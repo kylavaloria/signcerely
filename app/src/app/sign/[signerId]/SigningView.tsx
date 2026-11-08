@@ -12,6 +12,7 @@ import { addTestXlm } from "@/app/documents/[id]/review/send-actions";
 import { AdoptSignature, type Adopted } from "./AdoptSignature";
 import { DeclineButton } from "./DeclineButton";
 import { prepareSign, submitSign } from "./actions";
+import { friendlyError } from "@/lib/errors";
 
 export type ViewField = { id: string; signerId: string; page: number; x: number; y: number; width: number; height: number };
 export type ViewSigner = {
@@ -101,10 +102,25 @@ export function SigningView(p: Props) {
       if (!res.ok) throw new Error(res.error);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(friendlyError(e));
       setPhase("idle");
     }
   }
+
+  const showBar = p.canSign && !p.blockedReason;
+  const errorNote = error && (
+    <p className="note note-red" role="alert">
+      <AlertIcon />
+      <span>
+        {error}{" "}
+        {needsFunds && (
+          <button type="button" onClick={fund} disabled={busy} style={{ border: 0, background: "none", padding: 0, font: "inherit", fontWeight: 700, color: "var(--blue)", textDecoration: "underline", cursor: "pointer" }}>
+            Add free test XLM
+          </button>
+        )}
+      </span>
+    </p>
+  );
 
   async function fund() {
     setPhase("funding");
@@ -116,19 +132,19 @@ export function SigningView(p: Props) {
   }
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-start" }}>
+    <div className={showBar ? "has-mobile-bar" : undefined} style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-start" }}>
       <AdoptSignature ref={dialog} signerName={p.myName} today={p.today} savedSignatureUrl={p.savedSignatureUrl} onAdopt={setAdopted} />
 
       <section aria-label={`Page ${page} of ${p.pageCount}`} style={{ flex: "999 1 600px", minWidth: 0, display: "flex", flexDirection: "column", gap: 12 }}>
         <div className="card" style={{ boxShadow: "none", padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button type="button" className="btn btn-secondary" style={{ minHeight: 40, padding: "0 12px" }} disabled={page <= 1} onClick={() => setPage(page - 1)} aria-label="Previous page">
+            <button type="button" className="btn btn-secondary" style={{ minHeight: 44, minWidth: 44, padding: "0 12px" }} disabled={page <= 1} onClick={() => setPage(page - 1)} aria-label="Previous page">
               ‹
             </button>
             <span style={{ fontWeight: 600, fontSize: 14.5 }} aria-live="polite">
               Page {page} of {p.pageCount}
             </span>
-            <button type="button" className="btn btn-secondary" style={{ minHeight: 40, padding: "0 12px" }} disabled={page >= p.pageCount} onClick={() => setPage(page + 1)} aria-label="Next page">
+            <button type="button" className="btn btn-secondary" style={{ minHeight: 44, minWidth: 44, padding: "0 12px" }} disabled={page >= p.pageCount} onClick={() => setPage(page + 1)} aria-label="Next page">
               ›
             </button>
           </div>
@@ -136,7 +152,7 @@ export function SigningView(p: Props) {
             <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
               <span className="help">Your boxes:</span>
               {pagesWithMine.map((pg) => (
-                <button key={pg} type="button" className="btn btn-ghost" style={{ minHeight: 36, padding: "0 10px", fontSize: 13.5, background: pg === page ? "var(--yellow-tint)" : undefined }} onClick={() => setPage(pg)}>
+                <button key={pg} type="button" className="btn btn-ghost" style={{ minHeight: 44, padding: "0 12px", fontSize: 13.5, background: pg === page ? "var(--yellow-tint)" : undefined }} onClick={() => setPage(pg)}>
                   Page {pg}
                 </button>
               ))}
@@ -181,6 +197,7 @@ export function SigningView(p: Props) {
                           key={f.id}
                           type="button"
                           onClick={() => dialog.current?.showModal()}
+                          className="sign-here"
                           style={{
                             ...box,
                             pointerEvents: "auto",
@@ -195,9 +212,14 @@ export function SigningView(p: Props) {
                             cursor: "pointer",
                             font: "700 clamp(10px, 28cqh, 16px) var(--font-body)",
                             color: "var(--navy)",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
                           }}
                         >
-                          <SignatureIcon size={18} /> Sign here
+                          <span className="sh-icon" style={{ display: "inline-flex" }}>
+                            <SignatureIcon size={18} />
+                          </span>
+                          Sign here
                         </button>
                       );
                     }
@@ -261,10 +283,10 @@ export function SigningView(p: Props) {
                 {adopted
                   ? "All set. Finish to record your signature."
                   : myFields.length
-                    ? "Click the yellow Sign here box to add your signature."
+                    ? "Select the yellow Sign here box to add your signature."
                     : "Your signature will go on the summary page of the signed copy."}
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid var(--line-2)", paddingTop: 16 }}>
+              <div className="desktop-only" style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid var(--line-2)", paddingTop: 16 }}>
                 {!adopted && (
                   <button type="button" className="btn btn-secondary btn-block" onClick={() => dialog.current?.showModal()}>
                     Add your signature
@@ -293,19 +315,7 @@ export function SigningView(p: Props) {
               <DeclineButton signerId={p.signerId} wallet={p.wallet} senderName={p.senderName} />
             </div>
           )}
-          {error && (
-            <p className="note note-red" role="alert">
-              <AlertIcon />
-              <span>
-                {error}{" "}
-                {needsFunds && (
-                  <button type="button" onClick={fund} disabled={busy} style={{ border: 0, background: "none", padding: 0, font: "inherit", fontWeight: 700, color: "var(--blue)", textDecoration: "underline", cursor: "pointer" }}>
-                    Add free test XLM
-                  </button>
-                )}
-              </span>
-            </p>
-          )}
+          {errorNote && <div className="desktop-only">{errorNote}</div>}
         </div>
 
         <div className="card" style={{ padding: 20, boxShadow: "none", display: "flex", flexDirection: "column", gap: 12 }}>
@@ -328,6 +338,26 @@ export function SigningView(p: Props) {
           </ul>
         </div>
       </aside>
+
+      {showBar && (
+        <div className="mobile-bar mobile-only" style={{ flexDirection: "column", alignItems: "stretch", gap: 10 }}>
+          {errorNote}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <p style={{ flex: "none", fontSize: 13.5, fontWeight: 600, color: "var(--ink-2)" }} aria-live="polite">
+              {myFields.length > 0 ? `${done} of ${myFields.length} done` : adopted ? "Ready" : "1 step left"}
+            </p>
+            {adopted ? (
+              <button type="button" className="btn btn-sign btn-block" style={{ flex: 1 }} onClick={finish} disabled={busy} aria-busy={busy}>
+                {busy ? <Spinner /> : <SignatureIcon />} {phase === "idle" ? "Finish & sign" : LABEL[phase]}
+              </button>
+            ) : (
+              <button type="button" className="btn btn-primary btn-block" style={{ flex: 1 }} onClick={() => dialog.current?.showModal()}>
+                <SignatureIcon /> Add your signature
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

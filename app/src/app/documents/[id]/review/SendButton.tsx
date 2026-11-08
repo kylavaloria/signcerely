@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AlertIcon, ArrowRight, Spinner } from "@/components/icons";
 import { signTx } from "@/lib/wallet";
 import { addTestXlm, prepareSend, submitSend } from "./send-actions";
+import { friendlyError } from "@/lib/errors";
 
 type Phase = "idle" | "preparing" | "wallet" | "recording" | "funding";
 
@@ -47,7 +48,7 @@ export function SendButton({ documentId, wallet, blocked }: { documentId: string
         : done.next;
       router.push(next);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(friendlyError(e));
       setPhase("idle");
     }
   }
