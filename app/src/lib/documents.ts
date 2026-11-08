@@ -1,6 +1,6 @@
 import "server-only";
 import { notFound } from "next/navigation";
-import { db } from "./supabase";
+import { db, dbError } from "./supabase";
 
 export const DOCS_BUCKET = "documents";
 
@@ -46,7 +46,7 @@ export async function getOwnedDraft(id: string, wallet: string): Promise<DraftDo
     .eq("sender_wallet", wallet)
     .eq("status", "draft")
     .maybeSingle();
-  if (error) throw error;
+  if (error) throw dbError(error);
   if (!data || !data.file_path) notFound();
   return data as DraftDoc;
 }
@@ -57,7 +57,7 @@ export async function getDraftSigners(documentId: string): Promise<DraftSigner[]
     .select("id, slot, invited_name, invited_email")
     .eq("document_id", documentId)
     .order("slot");
-  if (error) throw error;
+  if (error) throw dbError(error);
   return data ?? [];
 }
 
@@ -67,7 +67,7 @@ export async function getDraftFields(documentId: string): Promise<DraftField[]> 
     .select("id, signer_id, page, x, y, width, height")
     .eq("document_id", documentId)
     .order("page");
-  if (error) throw error;
+  if (error) throw dbError(error);
   return (data ?? []).map((f) => ({ ...f, x: Number(f.x), y: Number(f.y), width: Number(f.width), height: Number(f.height) }));
 }
 
@@ -88,7 +88,7 @@ export async function listDrafts(wallet: string): Promise<DraftSummary[]> {
     .eq("status", "draft")
     .not("file_path", "is", null)
     .order("updated_at", { ascending: false });
-  if (error) throw error;
+  if (error) throw dbError(error);
   return (data ?? []).map((d) => {
     const { document_signers, signature_fields, ...doc } = d as typeof d & {
       document_signers: { count: number }[];
@@ -125,7 +125,7 @@ export async function listSent(wallet: string): Promise<SentDoc[]> {
     .eq("sender_wallet", wallet)
     .neq("status", "draft")
     .order("sent_at", { ascending: false });
-  if (error) throw error;
+  if (error) throw dbError(error);
   return (data ?? []).map((d) => ({
     ...d,
     signers: ((d.document_signers as SentDoc["signers"]) ?? []).sort((a, b) => a.slot - b.slot),
@@ -148,7 +148,7 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
     ? q.or(`wallet_address.eq.${wallet},invited_email.ilike."${verifiedEmail.replace(/["\\%_]/g, "")}"`)
     : q.eq("wallet_address", wallet);
   const { data, error } = await q.order("invited_at", { ascending: false });
-  if (error) throw error;
+  if (error) throw dbError(error);
   return (data ?? []).map((r) => {
     const d = r.documents as unknown as { id: string; title: string; profiles: { full_name: string } | null };
     return { signerId: r.id, documentId: d.id, title: d.title, senderName: d.profiles?.full_name ?? "Someone", invitedAt: r.invited_at };

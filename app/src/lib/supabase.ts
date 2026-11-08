@@ -17,3 +17,8 @@ export function db(): SupabaseClient {
   }
   return client;
 }
+
+/** Turn a Supabase/PostgREST error into a real Error with a readable message. */
+export function dbError(e: { message?: string; code?: string; details?: string | null; hint?: string | null }): Error {
+  return new Error(`Database error ${e.code ?? ""}: ${e.message ?? "unknown"}${e.details ? ` — ${e.details}` : ""}${e.hint ? ` (${e.hint})` : ""}`);
+}
