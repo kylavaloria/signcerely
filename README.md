@@ -45,9 +45,9 @@ Events are emitted for every step (`doc/created`, `doc/signed`, `doc/completed`,
 
 | | |
 |---|---|
-| Contract ID | `CCG4G2T6F7K2PVGSGRTRSTB4GSMLB4GLMULEMODGYI74MOWMTNZ5RZMP` |
-| Explorer | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCG4G2T6F7K2PVGSGRTRSTB4GSMLB4GLMULEMODGYI74MOWMTNZ5RZMP) · [Stellar Lab](https://lab.stellar.org/r/testnet/contract/CCG4G2T6F7K2PVGSGRTRSTB4GSMLB4GLMULEMODGYI74MOWMTNZ5RZMP) |
-| Deployed | Nov 8, 2026 from commit `5b0f633` via the *Deploy to testnet* workflow |
+| Contract ID | `CBBZVOGZ7CSEQUW46OUMT3X7K22Q2GZYTRGOKJDTJIZTUGU36I24L3ZR` |
+| Explorer | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CBBZVOGZ7CSEQUW46OUMT3X7K22Q2GZYTRGOKJDTJIZTUGU36I24L3ZR) · [Stellar Lab](https://lab.stellar.org/r/testnet/contract/CBBZVOGZ7CSEQUW46OUMT3X7K22Q2GZYTRGOKJDTJIZTUGU36I24L3ZR) |
+| Deployed | Nov 8, 2026 from commit `bf88bcf` via the *Deploy to testnet* workflow |
 
 **Fees:** each user pays their own small network fee in XLM. On testnet, wallets can be funded for free.
 
