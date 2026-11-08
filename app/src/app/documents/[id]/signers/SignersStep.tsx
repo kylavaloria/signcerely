@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { AlertIcon, ArrowRight, InfoIcon, PlusIcon, Spinner } from "@/components/icons";
 import { MAX_SIGNERS, MIN_SIGNERS } from "@/lib/doc-rules";
 import { saveSigners, type SignersResult } from "./actions";
+import { friendlyError, rethrowNext } from "@/lib/errors";
 
 type Row = { key: number; name: string; email: string };
 
@@ -69,8 +70,13 @@ export function SignersStep({
   function submit() {
     setResult({});
     start(async () => {
-      const r = await saveSigners(documentId, { inOrder, signers: rows.map(({ name, email }) => ({ name, email })) });
-      if (r) setResult(r);
+      try {
+        const r = await saveSigners(documentId, { inOrder, signers: rows.map(({ name, email }) => ({ name, email })) });
+        if (r) setResult(r);
+      } catch (e) {
+        rethrowNext(e);
+        setResult({ error: friendlyError(e) });
+      }
     });
   }
 
@@ -134,14 +140,14 @@ export function SignersStep({
               const me = isMe(r);
               const err = fe[i] ?? {};
               return (
-                <div key={r.key} className="card" style={{ padding: 18, display: "flex", gap: 16, alignItems: "flex-start", boxShadow: "none" }}>
+                <div key={r.key} className="card signer-card" style={{ boxShadow: "none" }}>
                   <span
                     aria-label={inOrder ? `Signs ${["first", "second", "third", "fourth", "fifth"][i]}` : `Signer ${i + 1}`}
                     style={{ flex: "none", width: 32, height: 32, borderRadius: "50%", background: "var(--blue)", color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 14, marginTop: 28 }}
                   >
                     {i + 1}
                   </span>
-                  <div style={{ flex: 1, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: 12 }}>
+                  <div className="signer-fields">
                     <div className="field" style={{ gap: 6 }}>
                       <label htmlFor={`n${r.key}`} style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink-2)", display: "flex", gap: 8, alignItems: "center" }}>
                         Full name
@@ -179,7 +185,7 @@ export function SignersStep({
                       {err.email && <p className="error-text">{err.email}</p>}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 6, paddingTop: 26 }}>
+                  <div className="signer-tools">
                     <button type="button" style={iconBtn} aria-label={`Move ${r.name || `signer ${i + 1}`} up`} disabled={i === 0} onClick={() => move(i, -1)}>
                       <Arrow up />
                     </button>
@@ -268,8 +274,8 @@ export function SignersStep({
         </aside>
       </div>
 
-      <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid var(--line)", margin: "0 -24px", padding: "14px 24px", display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <Link className="btn btn-ghost" href="/dashboard">
+      <div className="wizard-footer">
+        <Link className="btn btn-ghost hide-xs" href="/dashboard">
           Save &amp; exit
         </Link>
         <button type="button" className="btn btn-primary" onClick={submit} disabled={pending} aria-busy={pending}>
@@ -279,7 +285,7 @@ export function SignersStep({
             </>
           ) : (
             <>
-              Continue to signature spots <ArrowRight />
+              Continue <ArrowRight />
             </>
           )}
         </button>

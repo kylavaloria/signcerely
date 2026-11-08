@@ -8,6 +8,7 @@ import { prettyBytes } from "@/lib/doc-rules";
 import { sha256Hex } from "@/lib/pdf";
 import type { VerifyResult } from "@/lib/verify";
 import { checkFingerprint } from "./actions";
+import { friendlyError } from "@/lib/errors";
 
 const MAX = 25 * 1024 * 1024;
 
@@ -30,8 +31,8 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
     try {
       const hash = await sha256Hex(await f.arrayBuffer());
       setResult(await checkFingerprint(hash));
-    } catch {
-      setResult({ kind: "error", message: "We couldn’t read that file. Try again." });
+    } catch (e) {
+      setResult({ kind: "error", message: friendlyError(e, "We couldn’t check that file. Try again.") });
     } finally {
       setBusy(false);
     }

@@ -9,6 +9,7 @@ import { MAX_PDF_BYTES, prettyBytes } from "@/lib/doc-rules";
 import { loadPdf, looksLikePdf, sha256Hex } from "@/lib/pdf";
 import { browserStorage } from "@/lib/supabase-browser";
 import { createDraft, finishUpload } from "./actions";
+import { friendlyError } from "@/lib/errors";
 
 type Picked = { file: File; buf: ArrayBuffer; pdf: PDFDocumentProxy; hash: string };
 
@@ -81,7 +82,7 @@ export function UploadStep() {
       if (!done.ok) throw new Error(done.error);
       router.push(`/documents/${draft.id}/signers`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(friendlyError(e));
       setSaving(null);
     }
   }
@@ -224,7 +225,7 @@ export function UploadStep() {
         </section>
       </div>
 
-      <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid var(--line)", margin: "0 -24px", padding: "14px 24px", display: "flex", justifyContent: "flex-end", gap: 12 }}>
+      <div className="wizard-footer">
         <button type="button" className="btn btn-primary" disabled={!picked || Boolean(saving)} onClick={submit} aria-busy={Boolean(saving)}>
           {busyLabel ? (
             <>

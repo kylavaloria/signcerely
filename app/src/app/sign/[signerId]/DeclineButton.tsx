@@ -6,6 +6,7 @@ import { AlertIcon, CloseIcon, Spinner } from "@/components/icons";
 import { signTx } from "@/lib/wallet";
 import { addTestXlm } from "@/app/documents/[id]/review/send-actions";
 import { prepareDecline, submitDecline } from "./actions";
+import { friendlyError } from "@/lib/errors";
 
 export function DeclineButton({ signerId, wallet, senderName }: { signerId: string; wallet: string; senderName: string }) {
   const router = useRouter();
@@ -37,7 +38,7 @@ export function DeclineButton({ signerId, wallet, senderName }: { signerId: stri
       dialog.current?.close();
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(friendlyError(e));
       setPhase("idle");
     }
   }

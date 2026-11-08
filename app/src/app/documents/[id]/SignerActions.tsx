@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getInviteLink, resendInvite } from "./actions";
+import { friendlyError } from "@/lib/errors";
 
 const small: React.CSSProperties = { minHeight: 38, padding: "0 12px", fontSize: 13.5 };
 
@@ -12,7 +13,7 @@ export function SignerActions({ signerId, canResend }: { signerId: string; canRe
   async function copy() {
     setBusy("copy");
     setMsg(null);
-    const r = await getInviteLink(signerId);
+    const r = await getInviteLink(signerId).catch((e: unknown) => ({ ok: false as const, error: friendlyError(e) }));
     setBusy(null);
     if (!r.ok) return setMsg({ text: r.error, bad: true });
     try {
@@ -26,7 +27,7 @@ export function SignerActions({ signerId, canResend }: { signerId: string; canRe
   async function resend() {
     setBusy("resend");
     setMsg(null);
-    const r = await resendInvite(signerId);
+    const r = await resendInvite(signerId).catch((e: unknown) => ({ ok: false as const, error: friendlyError(e) }));
     setBusy(null);
     setMsg(r.ok ? { text: r.message } : { text: r.error, bad: true });
   }

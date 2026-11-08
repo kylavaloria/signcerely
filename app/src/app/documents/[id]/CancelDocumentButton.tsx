@@ -6,6 +6,7 @@ import { AlertIcon, CloseIcon, Spinner } from "@/components/icons";
 import { signTx } from "@/lib/wallet";
 import { addTestXlm } from "./review/send-actions";
 import { prepareCancel, submitCancel } from "./cancel-actions";
+import { friendlyError } from "@/lib/errors";
 
 export function CancelDocumentButton({ documentId, wallet, signedCount }: { documentId: string; wallet: string; signedCount: number }) {
   const router = useRouter();
@@ -37,7 +38,7 @@ export function CancelDocumentButton({ documentId, wallet, signedCount }: { docu
       dialog.current?.close();
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(friendlyError(e));
       setPhase("idle");
     }
   }

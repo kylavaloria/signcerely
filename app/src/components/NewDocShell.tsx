@@ -20,8 +20,8 @@ export function NewDocShell({
           <Link href="/dashboard" aria-label="Back to documents" className="brand">
             <Logo size={32} />
           </Link>
-          <span className="beta">Beta</span>
-          <h1 className="h" style={{ fontSize: 20, fontWeight: 700, flex: 1 }}>
+          <span className="beta hide-xs">Beta</span>
+          <h1 className="h" style={{ fontSize: "clamp(17px, 4.6vw, 20px)", fontWeight: 700, flex: 1, whiteSpace: "nowrap" }}>
             New document
           </h1>
           <Link className="btn btn-ghost" href="/dashboard" style={{ minHeight: 44, padding: "0 14px" }}>
@@ -29,9 +29,9 @@ export function NewDocShell({
           </Link>
         </div>
       </header>
-      <main style={{ flex: 1, width: "100%", maxWidth: 1240, margin: "0 auto", padding: "28px 24px 120px", display: "flex", flexDirection: "column", gap: 28 }}>
-        <nav aria-label="Progress">
-          <ol style={{ listStyle: "none", padding: 0, display: "flex", alignItems: "center", gap: 12, maxWidth: 780, flexWrap: "wrap" }}>
+      <main className="newdoc-main" style={{ flex: 1, width: "100%", maxWidth: 1240, margin: "0 auto", display: "flex", flexDirection: "column", gap: 28 }}>
+        <nav aria-label="Progress" className="stepper">
+          <ol style={{ listStyle: "none", padding: 0, display: "flex", alignItems: "center", gap: 12, maxWidth: 780 }}>
             {STEPS.map((label, i) => {
               const n = i + 1;
               const done = n < step;
@@ -61,7 +61,7 @@ export function NewDocShell({
                     >
                       {done ? <CheckIcon size={15} strokeWidth={3} /> : n}
                     </b>
-                    {label}
+                    <span className="step-label">{label}</span>
                   </span>
                 </li>
               );
