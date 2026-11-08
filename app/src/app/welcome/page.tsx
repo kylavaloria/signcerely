@@ -36,7 +36,7 @@ export default async function WelcomePage() {
           <p className="note note-green" style={{ alignItems: "center" }}>
             <CheckIcon color="#1F9D61" />
             <span>
-              <strong>Freighter connected</strong>{" "}
+              <strong>Varial connected</strong>{" "}
               <span className="mono" style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 400 }}>
                 · {shortAddress(session.wallet)}
               </span>
