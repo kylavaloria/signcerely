@@ -10,7 +10,7 @@
 |---|---|
 | `contracts/signing` | Soroban smart contract that records documents, signatures and the final signed copy |
 | `scripts/deploy-testnet.sh` | Builds and deploys the contract to testnet |
-| `app/` | Next.js web app (sign-in, profile; documents next) |
+| `app/` | Next.js web app: sign-in, sending, signing, decline/cancel, verification |
 | `supabase/migrations` | Database schema |
 
 ## How it works
