@@ -114,6 +114,11 @@ export default async function DocumentPage({
             </span>
           </div>
           {doc.summary && <p style={{ color: "var(--ink-2)" }}>{doc.summary}</p>}
+          {doc.status === "completed" && (
+            <a className="btn btn-primary" href={`/documents/${doc.id}/download`} style={{ alignSelf: "flex-start" }}>
+              Download signed copy
+            </a>
+          )}
           <p className="help">
             Sent {fmt(doc.sent_at)} · {doc.page_count} {doc.page_count === 1 ? "page" : "pages"} · {doc.in_order ? "one after another" : "all at once"}
           </p>
@@ -135,6 +140,7 @@ export default async function DocumentPage({
             {(signers ?? []).map((s) => {
               const isMe = s.invited_email.toLowerCase() === user.email?.toLowerCase();
               const open = doc.status === "pending" && (s.status === "invited" || s.status === "viewed" || s.status === "waiting");
+              const myTurn = !doc.in_order || (signers ?? []).every((o) => o.slot >= s.slot || o.status === "signed");
               return (
                 <li key={s.id} style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center", padding: "16px 24px", borderTop: "1px solid var(--line-2)" }}>
                   <span style={{ flex: "none", width: 36, height: 36, borderRadius: "50%", background: SIGNER_COLORS[s.slot % 5].solid, color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 14 }}>
@@ -155,7 +161,7 @@ export default async function DocumentPage({
                     </a>
                   )}
                   {open && !isMe && <SignerActions signerId={s.id} canResend={s.status !== "waiting"} />}
-                  {open && isMe && s.status !== "waiting" && (
+                  {open && isMe && myTurn && (
                     <Link className="btn btn-sign" href={`/sign/${s.id}`} style={{ minHeight: 40 }}>
                       Sign now
                     </Link>

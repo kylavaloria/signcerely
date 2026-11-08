@@ -97,20 +97,31 @@ export async function buildCreateTx(c: ChainConfig, a: CreateArgs): Promise<stri
  * so a tampered transaction can't mark the document as sent.
  */
 export function checkSignedCreate(c: ChainConfig, signedXdr: string, a: CreateArgs): Transaction {
+  return checkSignedCall(c, signedXdr, a.sender, "create", createScArgs(a));
+}
+
+/**
+ * Check that a wallet-signed transaction is exactly the contract call we
+ * built (same source account, contract, function and arguments).
+ */
+export function checkSignedCall(
+  c: ChainConfig,
+  signedXdr: string,
+  source: string,
+  fn: string,
+  args: xdr.ScVal[],
+): Transaction {
+  const mismatch = () => new Error("Signed transaction doesn’t match this document.");
   const tx = TransactionBuilder.fromXDR(signedXdr, c.networkPassphrase) as Transaction;
-  if (!("operations" in tx) || tx.source !== a.sender || tx.operations.length !== 1) {
-    throw new Error("Signed transaction doesn’t match this document.");
-  }
+  if (!("operations" in tx) || tx.source !== source || tx.operations.length !== 1) throw mismatch();
   const op = tx.operations[0] as Operation.InvokeHostFunction;
-  if (op.type !== "invokeHostFunction" || op.func.type !== "hostFunctionTypeInvokeContract") {
-    throw new Error("Signed transaction doesn’t match this document.");
-  }
+  if (op.type !== "invokeHostFunction" || op.func.type !== "hostFunctionTypeInvokeContract") throw mismatch();
   const call = op.func.invokeContract;
   const same =
     Address.fromScAddress(call.contractAddress).toString() === c.contractId &&
-    call.functionName.toString() === "create" &&
-    xdr.ScVal.scvVec(call.args).equals(xdr.ScVal.scvVec(createScArgs(a)));
-  if (!same) throw new Error("Signed transaction doesn’t match this document.");
+    call.functionName.toString() === fn &&
+    xdr.ScVal.scvVec(call.args).equals(xdr.ScVal.scvVec(args));
+  if (!same) throw mismatch();
   if (tx.signatures.length === 0) throw new Error("The transaction wasn’t signed.");
   return tx;
 }
@@ -138,6 +149,10 @@ export function signScArgs(a: SignArgs): xdr.ScVal[] {
 }
 
 /** Build and simulate `sign`; returns XDR for the signer's wallet to sign. */
+export function checkSignedSign(c: ChainConfig, signedXdr: string, a: SignArgs): Transaction {
+  return checkSignedCall(c, signedXdr, a.signer, "sign", signScArgs(a));
+}
+
 export async function buildSignTx(c: ChainConfig, a: SignArgs): Promise<string> {
   const s = server(c);
   const account = await s.getAccount(a.signer);

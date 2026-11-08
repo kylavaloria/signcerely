@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { sendEmailConfirmation } from "@/lib/email-confirmation";
+import { safeNext } from "@/lib/format";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/supabase";
 
@@ -55,5 +56,6 @@ export async function saveProfile(_prev: ProfileFormState, formData: FormData): 
     email: parsed.data.email,
     name: parsed.data.fullName,
   });
-  redirect(sent.ok ? "/dashboard?email=sent" : "/dashboard?email=failed");
+  const next = safeNext(formData.get("next"));
+  redirect(next ?? (sent.ok ? "/dashboard?email=sent" : "/dashboard?email=failed"));
 }
