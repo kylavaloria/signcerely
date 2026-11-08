@@ -106,3 +106,51 @@ export async function listDrafts(wallet: string): Promise<DraftSummary[]> {
 export function nextStepHref(d: { id: string; signer_count: number }): string {
   return d.signer_count < 2 ? `/documents/${d.id}/signers` : `/documents/${d.id}/review`;
 }
+
+export type SentDoc = {
+  id: string;
+  title: string;
+  status: string;
+  in_order: boolean;
+  sent_at: string | null;
+  completed_at: string | null;
+  signers: { invited_name: string; status: string; slot: number }[];
+};
+
+/** Documents this wallet sent (anything past draft). */
+export async function listSent(wallet: string): Promise<SentDoc[]> {
+  const { data, error } = await db()
+    .from("documents")
+    .select("id, title, status, in_order, sent_at, completed_at, document_signers(invited_name, status, slot)")
+    .eq("sender_wallet", wallet)
+    .neq("status", "draft")
+    .order("sent_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((d) => ({
+    ...d,
+    signers: ((d.document_signers as SentDoc["signers"]) ?? []).sort((a, b) => a.slot - b.slot),
+  })) as SentDoc[];
+}
+
+export type ToSign = { signerId: string; documentId: string; title: string; senderName: string; invitedAt: string | null };
+
+/**
+ * Documents waiting for this person's signature: invites to their confirmed
+ * email, or already linked to their wallet.
+ */
+export async function listToSign(wallet: string, verifiedEmail: string | null): Promise<ToSign[]> {
+  let q = db()
+    .from("document_signers")
+    .select("id, invited_at, invited_email, wallet_address, status, documents!inner(id, title, status, sender_wallet, profiles(full_name))")
+    .in("status", ["invited", "viewed"])
+    .eq("documents.status", "pending");
+  q = verifiedEmail
+    ? q.or(`wallet_address.eq.${wallet},invited_email.ilike."${verifiedEmail.replace(/["\\%_]/g, "")}"`)
+    : q.eq("wallet_address", wallet);
+  const { data, error } = await q.order("invited_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((r) => {
+    const d = r.documents as unknown as { id: string; title: string; profiles: { full_name: string } | null };
+    return { signerId: r.id, documentId: d.id, title: d.title, senderName: d.profiles?.full_name ?? "Someone", invitedAt: r.invited_at };
+  });
+}

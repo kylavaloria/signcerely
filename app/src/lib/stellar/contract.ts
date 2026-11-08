@@ -84,7 +84,7 @@ function createScArgs(a: CreateArgs): xdr.ScVal[] {
 export async function buildCreateTx(c: ChainConfig, a: CreateArgs): Promise<string> {
   const s = server(c);
   const account = await s.getAccount(a.sender);
-  const tx = new TransactionBuilder(account, { fee: "1000000", networkPassphrase: c.networkPassphrase })
+  const tx = new TransactionBuilder(account, { fee: "100000", networkPassphrase: c.networkPassphrase })
     .addOperation(new Contract(c.contractId).call("create", ...createScArgs(a)))
     .setTimeout(300)
     .build();
@@ -141,7 +141,7 @@ export function signScArgs(a: SignArgs): xdr.ScVal[] {
 export async function buildSignTx(c: ChainConfig, a: SignArgs): Promise<string> {
   const s = server(c);
   const account = await s.getAccount(a.signer);
-  const tx = new TransactionBuilder(account, { fee: "1000000", networkPassphrase: c.networkPassphrase })
+  const tx = new TransactionBuilder(account, { fee: "100000", networkPassphrase: c.networkPassphrase })
     .addOperation(new Contract(c.contractId).call("sign", ...signScArgs(a)))
     .setTimeout(300)
     .build();
