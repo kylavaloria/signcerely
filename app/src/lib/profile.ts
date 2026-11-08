@@ -1,6 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
-import { db } from "./supabase";
+import { db, dbError } from "./supabase";
 import { getSession } from "./session";
 
 export type Profile = {
@@ -17,7 +17,7 @@ export async function getProfile(wallet: string): Promise<Profile | null> {
     .select("wallet_address, full_name, email, email_verified_at, signature_path")
     .eq("wallet_address", wallet)
     .maybeSingle();
-  if (error) throw error;
+  if (error) throw dbError(error);
   return data;
 }
 
