@@ -7,15 +7,17 @@ import { saveProfile, type ProfileFormState } from "./actions";
 type Props = {
   defaults: { fullName: string; email: string };
   invite: { invitedBy: string | null; invitedAs: string } | null;
+  next?: string | null;
 };
 
-export function ProfileForm({ defaults, invite }: Props) {
+export function ProfileForm({ defaults, invite, next }: Props) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveProfile, {});
   const values = state.values ?? defaults;
   const e = state.errors ?? {};
 
   return (
     <form action={action} noValidate style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+      {next && <input type="hidden" name="next" value={next} />}
       {invite && (
         <p className="note note-yellow">
           <MailIcon color="#0F1B3D" />

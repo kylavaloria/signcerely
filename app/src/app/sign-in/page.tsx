@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { SignInCard } from "@/components/SignInCard";
 import { SiteHeader } from "@/components/SiteHeader";
 import { LockIcon, MailIcon, PersonIcon } from "@/components/icons";
+import { safeNext } from "@/lib/format";
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 
@@ -14,9 +15,12 @@ const points = [
   { icon: <PersonIcon />, text: "Your documents are visible only to the people you invite." },
 ];
 
-export default async function SignInPage() {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const next = safeNext((await searchParams).next);
   const session = await getSession();
-  if (session) redirect((await getProfile(session.wallet)) ? "/dashboard" : "/welcome");
+  if (session) {
+    redirect((await getProfile(session.wallet)) ? (next ?? "/dashboard") : `/welcome${next ? `?next=${encodeURIComponent(next)}` : ""}`);
+  }
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -59,7 +63,7 @@ export default async function SignInPage() {
               ))}
             </ul>
           </div>
-          <SignInCard />
+          <SignInCard next={next} />
         </div>
       </main>
     </div>

@@ -80,3 +80,35 @@ export async function inviteSigners(
   }
   return { failed };
 }
+
+/** Tell everyone the document is complete, with a link to their copy. */
+export async function sendCompletedEmails(documentId: string): Promise<void> {
+  const [{ data: doc }, { data: signers }] = await Promise.all([
+    db().from("documents").select("id, title, sender_wallet, profiles(full_name, email)").eq("id", documentId).single(),
+    db().from("document_signers").select("id, invited_name, invited_email").eq("document_id", documentId).order("slot"),
+  ]);
+  if (!doc || !signers) return;
+  const base = await appUrl();
+  const sender = doc.profiles as unknown as { full_name: string; email: string | null } | null;
+  const names = signers.map((s) => s.invited_name).join(", ");
+  const recipients = new Map<string, { name: string; url: string }>();
+  for (const s of signers) recipients.set(s.invited_email.toLowerCase(), { name: s.invited_name, url: `${base}/sign/${s.id}` });
+  if (sender?.email && !recipients.has(sender.email.toLowerCase())) {
+    recipients.set(sender.email.toLowerCase(), { name: sender.full_name, url: `${base}/documents/${doc.id}` });
+  }
+  for (const [email, r] of recipients) {
+    const first = r.name.split(/\s+/)[0];
+    const res = await sendEmail({
+      to: email,
+      subject: `Signed by everyone: ${doc.title}`,
+      text: `Hi ${first},\n\nEveryone has signed "${doc.title}" (${names}).\n\nDownload the signed copy: ${r.url}\n\nAnyone can check it at ${base}/verify.`,
+      html: layout({
+        heading: "Everyone has signed",
+        body: `Hi ${escapeHtml(first)}, <strong>${escapeHtml(doc.title)}</strong> is complete. Signed by ${escapeHtml(names)}.`,
+        button: { label: "Download the signed copy", url: r.url },
+        footer: `Anyone can check the signed copy at ${escapeHtml(base)}/verify — no account needed.`,
+      }),
+    });
+    if (!res.ok) console.warn(`[email] completed notice to ${email} not sent: ${res.reason}`);
+  }
+}
