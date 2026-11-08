@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/SiteHeader";
-import { InfoIcon, PlusIcon, SignatureIcon } from "@/components/icons";
+import { PlusIcon, SignatureIcon } from "@/components/icons";
 import { requireUser } from "@/lib/profile";
+import { EmailNotice } from "./EmailNotice";
 
 export const metadata: Metadata = { title: "Documents · It's Your Sign" };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
   const user = await requireUser();
+  const { email: emailFlag } = await searchParams;
+  const justSent = emailFlag === "sent" || emailFlag === "failed" ? emailFlag : null;
   const firstName = user.full_name.split(/\s+/)[0];
 
   return (
@@ -25,14 +28,7 @@ export default async function DashboardPage() {
           </button>
         </div>
 
-        {!user.email_verified_at && user.email && (
-          <p className="note" style={{ background: "#fff", border: "1px solid var(--line)" }}>
-            <InfoIcon />
-            <span>
-              We’ll confirm <strong>{user.email}</strong> before sending you signing updates.
-            </span>
-          </p>
-        )}
+        {!user.email_verified_at && user.email && <EmailNotice email={user.email} justSent={justSent} />}
 
         <section
           className="card"
