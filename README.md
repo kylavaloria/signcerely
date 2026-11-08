@@ -16,10 +16,11 @@
 
 The PDF never goes on-chain. The contract keeps a small, permanent record:
 
-1. **Send** — the sender registers the document: the SHA-256 fingerprint of the original PDF, the 2–5 signer wallets, and whether they sign in order. The sender approves this in their wallet.
-2. **Sign** — each signer approves in their wallet. The contract checks it's really them, that it's their turn (if signing in order), and that they haven't signed already. It also stores the fingerprint of the signature image they used, so a swapped image can be spotted later.
-3. **Complete** — the last signer's approval also carries the fingerprint of the final signed copy (the PDF with every signature and date stamped on it). No extra transaction is needed.
-4. **Verify** — anyone can upload a file; the app fingerprints it in the browser and asks the contract whether it matches an original or a final signed copy.
+1. **Send** — the sender registers the document: the SHA-256 fingerprint of the original PDF, one *signing slot* per invited person, and whether slots sign in order. The sender approves this in their wallet.
+2. **Invite** — people are invited by email and may not have a wallet yet, so the app makes a one-time *invite key* per slot. Only its public half goes on-chain; the secret half is in that person's invite link.
+3. **Sign** — the invitee connects any wallet. Their browser uses the invite secret to sign a short message naming that wallet (`invite_message`), and the wallet approves the transaction. The contract checks both, checks it's their turn (if signing in order), and binds that wallet to the slot. A copied proof is useless to anyone else because it names the invitee's wallet. The contract also stores the fingerprint of the signature image they used, so a swapped image can be spotted later.
+4. **Complete** — the last signer's approval also carries the fingerprint of the final signed copy (the PDF with every signature and date stamped on it). No extra transaction is needed.
+5. **Verify** — anyone can upload a file; the app fingerprints it in the browser and asks the contract whether it matches an original or a final signed copy.
 
 Signers can **decline**, and the sender can **cancel** while a document is still waiting.
 
@@ -27,15 +28,18 @@ Signers can **decline**, and the sender can **cancel** while a document is still
 
 | Function | Who calls it | Notes |
 |---|---|---|
-| `create(sender, doc_id, original_hash, signers, in_order)` | Sender | 2–5 unique signers; id and fingerprint must be new |
-| `sign(signer, doc_id, image_hash, final_hash?)` | Signer | `final_hash` required on the last signature only |
-| `decline(signer, doc_id)` | Signer | Stops the document |
+| `create(sender, doc_id, original_hash, invite_keys, in_order)` | Sender | 2–5 unique invite keys; id and fingerprint must be new |
+| `sign(signer, doc_id, slot, invite_proof, image_hash, final_hash?)` | Invitee | `final_hash` required on the last signature only; one wallet per document |
+| `decline(signer, doc_id, slot, invite_proof)` | Invitee | Stops the document |
 | `cancel(sender, doc_id)` | Sender | Only while pending |
-| `get_document(doc_id)` | Anyone (read) | Status, signers, fingerprints, times |
-| `get_signatures(doc_id)` | Anyone (read) | One entry per signer, in order |
+| `invite_message(doc_id, slot, signer)` | Anyone (read) | The exact bytes an invite proof signs |
+| `get_document(doc_id)` | Anyone (read) | Status, invite keys, fingerprints, times |
+| `get_signatures(doc_id)` | Anyone (read) | One entry per slot: wallet, image fingerprint, time |
 | `find_by_hash(hash)` | Anyone (read) | `Original(id)`, `Final(id)` or `None` |
 
 Events are emitted for every step (`doc/created`, `doc/signed`, `doc/completed`, `doc/declined`, `doc/cancelled`).
+
+**Known limit:** the final fingerprint is supplied by the last signer's app. A wrong value can't fake anyone's signature, but the real signed copy would then not match on Verify.
 
 ### Testnet deployment
 

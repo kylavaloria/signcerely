@@ -2,26 +2,37 @@
 //!
 //! The PDF itself never touches the chain. The contract stores:
 //! - the SHA-256 fingerprint of the original file (when it is sent),
-//! - who must sign, and whether they sign in order,
-//! - each signer's approval (their wallet's auth), the fingerprint of the
-//!   signature image they used, and the ledger time it happened,
+//! - one *signing slot* per invited person, and whether slots sign in order,
+//! - each signer's wallet approval, the fingerprint of the signature image
+//!   they used, and the ledger time it happened,
 //! - the fingerprint of the final signed copy (sent with the last signature).
 //!
-//! Lookups by fingerprint let the public Verify page find a document from an
-//! uploaded file alone.
+//! ## Why invite keys
+//! People are invited by email and may not have a wallet yet, so the sender
+//! can't list wallet addresses up front. Instead the app makes a one-time
+//! ed25519 *invite key* for each slot. Only the public half goes on-chain; the
+//! secret half travels in that person's invite link. To sign, the invitee's
+//! browser uses the invite secret to sign a short message naming their wallet
+//! (`invite_message`), and their wallet approves the transaction. The contract
+//! checks both, then binds that wallet to the slot. A copied proof is useless
+//! to anyone else because it names the invitee's wallet.
 #![no_std]
 
 use soroban_sdk::{
-    contract, contracterror, contractevent, contractimpl, contracttype, Address, BytesN, Env, Vec,
+    contract, contracterror, contractevent, contractimpl, contracttype, xdr::ToXdr, Address,
+    Bytes, BytesN, Env, Vec,
 };
 
 /// Smallest and largest number of signers a document may have.
 pub const MIN_SIGNERS: u32 = 2;
 pub const MAX_SIGNERS: u32 = 5;
 
-/// Persistent entries are bumped to ~30 days on every write and read-through
-/// helper, and re-bumped once they fall below ~7 days. Archived entries can be
-/// restored, so this only affects rent, never correctness.
+/// Domain separator for invite proofs. Bump the version if the format changes.
+const PROOF_DOMAIN: &[u8] = b"its-your-sign:invite:v1";
+
+/// Persistent entries are bumped to ~30 days on every write, and re-bumped
+/// once they fall below ~7 days. Archived entries can be restored, so this
+/// only affects rent, never correctness.
 const DAY_IN_LEDGERS: u32 = 17_280;
 const BUMP_TO: u32 = 30 * DAY_IN_LEDGERS;
 const BUMP_THRESHOLD: u32 = 7 * DAY_IN_LEDGERS;
@@ -36,13 +47,13 @@ pub enum Error {
     NotFound = 2,
     /// Signer count must be between MIN_SIGNERS and MAX_SIGNERS.
     InvalidSignerCount = 3,
-    /// The same wallet appears twice in the signer list.
-    DuplicateSigner = 4,
-    /// The caller is not on this document's signer list.
-    NotASigner = 5,
-    /// The caller has already signed.
+    /// The same invite key appears twice.
+    DuplicateInvite = 4,
+    /// The slot number is out of range.
+    NoSuchSlot = 5,
+    /// This slot has already been signed.
     AlreadySigned = 6,
-    /// Signing in order, and an earlier signer has not signed yet.
+    /// Signing in order, and an earlier slot has not signed yet.
     NotYourTurn = 7,
     /// The document is completed, declined or cancelled.
     NotPending = 8,
@@ -54,6 +65,8 @@ pub enum Error {
     NotSender = 11,
     /// This fingerprint is already registered to another document.
     HashInUse = 12,
+    /// This wallet already signed another slot of this document.
+    WalletAlreadyUsed = 13,
 }
 
 #[contracttype]
@@ -71,7 +84,8 @@ pub enum Status {
 pub struct Document {
     pub sender: Address,
     pub original_hash: BytesN<32>,
-    pub signers: Vec<Address>,
+    /// Public invite key per slot, in signing order.
+    pub invite_keys: Vec<BytesN<32>>,
     pub in_order: bool,
     pub status: Status,
     pub signed_count: u32,
@@ -84,6 +98,7 @@ pub struct Document {
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Signature {
+    /// The wallet that signed this slot.
     pub signer: Address,
     /// Fingerprint of the signature image stamped on the PDF, so a swapped
     /// image can be detected later.
@@ -106,8 +121,10 @@ pub enum HashMatch {
 #[derive(Clone)]
 enum DataKey {
     Doc(BytesN<32>),
-    /// (doc_id, signer index in the signer list)
+    /// (doc_id, slot) -> Signature
     Sig(BytesN<32>, u32),
+    /// (doc_id, wallet) -> slot, so one wallet can't fill two slots.
+    Wallet(BytesN<32>, Address),
     OriginalHash(BytesN<32>),
     FinalHash(BytesN<32>),
 }
@@ -128,6 +145,7 @@ pub struct DocCreated {
 pub struct DocSigned {
     #[topic]
     pub doc_id: BytesN<32>,
+    pub slot: u32,
     pub signer: Address,
     pub image_hash: BytesN<32>,
     pub signed_count: u32,
@@ -146,6 +164,7 @@ pub struct DocCompleted {
 pub struct DocDeclined {
     #[topic]
     pub doc_id: BytesN<32>,
+    pub slot: u32,
     pub signer: Address,
 }
 
@@ -163,13 +182,14 @@ pub struct SigningContract;
 impl SigningContract {
     /// Register a document for signing. Called by the sender, who approves in
     /// their wallet. `doc_id` is chosen by the app (e.g. SHA-256 of a UUID) so
-    /// the app's database and the chain share one id.
+    /// the app's database and the chain share one id. `invite_keys` holds the
+    /// public invite key for each signer, in signing order.
     pub fn create(
         env: Env,
         sender: Address,
         doc_id: BytesN<32>,
         original_hash: BytesN<32>,
-        signers: Vec<Address>,
+        invite_keys: Vec<BytesN<32>>,
         in_order: bool,
     ) -> Result<(), Error> {
         sender.require_auth();
@@ -178,14 +198,14 @@ impl SigningContract {
         if env.storage().persistent().has(&doc_key) {
             return Err(Error::AlreadyExists);
         }
-        let n = signers.len();
+        let n = invite_keys.len();
         if n < MIN_SIGNERS || n > MAX_SIGNERS {
             return Err(Error::InvalidSignerCount);
         }
         for i in 0..n {
             for j in (i + 1)..n {
-                if signers.get_unchecked(i) == signers.get_unchecked(j) {
-                    return Err(Error::DuplicateSigner);
+                if invite_keys.get_unchecked(i) == invite_keys.get_unchecked(j) {
+                    return Err(Error::DuplicateInvite);
                 }
             }
         }
@@ -197,7 +217,7 @@ impl SigningContract {
         let doc = Document {
             sender: sender.clone(),
             original_hash: original_hash.clone(),
-            signers,
+            invite_keys,
             in_order,
             status: Status::Pending,
             signed_count: 0,
@@ -219,12 +239,18 @@ impl SigningContract {
         Ok(())
     }
 
-    /// Record `signer`'s signature. The last signer must also pass the
-    /// fingerprint of the final signed copy, which completes the document.
+    /// Sign `slot` as `signer`. `invite_proof` is the ed25519 signature, made
+    /// with that slot's invite secret, over `invite_message(doc_id, slot,
+    /// signer)`. The last signer must also pass the final signed copy's
+    /// fingerprint, which completes the document.
+    ///
+    /// An invalid `invite_proof` aborts the transaction.
     pub fn sign(
         env: Env,
         signer: Address,
         doc_id: BytesN<32>,
+        slot: u32,
+        invite_proof: BytesN<64>,
         image_hash: BytesN<32>,
         final_hash: Option<BytesN<32>>,
     ) -> Result<(), Error> {
@@ -235,37 +261,29 @@ impl SigningContract {
         if doc.status != Status::Pending {
             return Err(Error::NotPending);
         }
-        let idx = doc
-            .signers
-            .first_index_of(&signer)
-            .ok_or(Error::NotASigner)?;
-        if env
-            .storage()
-            .persistent()
-            .has(&DataKey::Sig(doc_id.clone(), idx))
-        {
+        let invite_key = doc.invite_keys.get(slot).ok_or(Error::NoSuchSlot)?;
+        let store = env.storage().persistent();
+        if store.has(&DataKey::Sig(doc_id.clone(), slot)) {
             return Err(Error::AlreadySigned);
         }
+        if store.has(&DataKey::Wallet(doc_id.clone(), signer.clone())) {
+            return Err(Error::WalletAlreadyUsed);
+        }
         if doc.in_order {
-            for earlier in 0..idx {
-                if !env
-                    .storage()
-                    .persistent()
-                    .has(&DataKey::Sig(doc_id.clone(), earlier))
-                {
+            for earlier in 0..slot {
+                if !store.has(&DataKey::Sig(doc_id.clone(), earlier)) {
                     return Err(Error::NotYourTurn);
                 }
             }
         }
 
-        let is_last = doc.signed_count + 1 == doc.signers.len();
+        let is_last = doc.signed_count + 1 == doc.invite_keys.len();
         match (&final_hash, is_last) {
             (None, true) => return Err(Error::FinalHashRequired),
             (Some(_), false) => return Err(Error::FinalHashNotExpected),
             _ => {}
         }
         if let Some(fh) = &final_hash {
-            let store = env.storage().persistent();
             if store.has(&DataKey::FinalHash(fh.clone()))
                 || store.has(&DataKey::OriginalHash(fh.clone()))
             {
@@ -273,20 +291,24 @@ impl SigningContract {
             }
         }
 
+        check_invite(&env, &invite_key, &doc_id, slot, &signer, &invite_proof);
+
         let now = env.ledger().timestamp();
         save(
             &env,
-            &DataKey::Sig(doc_id.clone(), idx),
+            &DataKey::Sig(doc_id.clone(), slot),
             &Signature {
                 signer: signer.clone(),
                 image_hash: image_hash.clone(),
                 signed_at: now,
             },
         );
+        save(&env, &DataKey::Wallet(doc_id.clone(), signer.clone()), &slot);
         doc.signed_count += 1;
 
         DocSigned {
             doc_id: doc_id.clone(),
+            slot,
             signer,
             image_hash,
             signed_count: doc.signed_count,
@@ -294,11 +316,10 @@ impl SigningContract {
         .publish(&env);
 
         if let Some(fh) = final_hash {
-            let final_key = DataKey::FinalHash(fh.clone());
             doc.status = Status::Completed;
             doc.final_hash = Some(fh.clone());
             doc.completed_at = Some(now);
-            save(&env, &final_key, &doc_id);
+            save(&env, &DataKey::FinalHash(fh.clone()), &doc_id);
             DocCompleted {
                 doc_id: doc_id.clone(),
                 final_hash: fh,
@@ -310,20 +331,39 @@ impl SigningContract {
         Ok(())
     }
 
-    /// A signer declines. The document stops; no one else can sign it.
-    pub fn decline(env: Env, signer: Address, doc_id: BytesN<32>) -> Result<(), Error> {
+    /// The invitee for `slot` declines. The document stops; no one else can
+    /// sign it. Needs the same invite proof as `sign`.
+    pub fn decline(
+        env: Env,
+        signer: Address,
+        doc_id: BytesN<32>,
+        slot: u32,
+        invite_proof: BytesN<64>,
+    ) -> Result<(), Error> {
         signer.require_auth();
         let doc_key = DataKey::Doc(doc_id.clone());
         let mut doc = load_doc(&env, &doc_key)?;
         if doc.status != Status::Pending {
             return Err(Error::NotPending);
         }
-        if doc.signers.first_index_of(&signer).is_none() {
-            return Err(Error::NotASigner);
+        let invite_key = doc.invite_keys.get(slot).ok_or(Error::NoSuchSlot)?;
+        if env
+            .storage()
+            .persistent()
+            .has(&DataKey::Sig(doc_id.clone(), slot))
+        {
+            return Err(Error::AlreadySigned);
         }
+        check_invite(&env, &invite_key, &doc_id, slot, &signer, &invite_proof);
+
         doc.status = Status::Declined;
         save(&env, &doc_key, &doc);
-        DocDeclined { doc_id, signer }.publish(&env);
+        DocDeclined {
+            doc_id,
+            slot,
+            signer,
+        }
+        .publish(&env);
         Ok(())
     }
 
@@ -346,15 +386,21 @@ impl SigningContract {
 
     // ---- Read-only helpers (free to simulate, used by the app and Verify) ----
 
+    /// The exact bytes an invite proof must sign. The app fetches this by
+    /// simulation, so it never has to rebuild the format itself.
+    pub fn invite_message(env: Env, doc_id: BytesN<32>, slot: u32, signer: Address) -> Bytes {
+        build_message(&env, &doc_id, slot, &signer)
+    }
+
     pub fn get_document(env: Env, doc_id: BytesN<32>) -> Result<Document, Error> {
         load_doc(&env, &DataKey::Doc(doc_id))
     }
 
-    /// One entry per signer, in signer-list order; `None` where not signed yet.
+    /// One entry per slot, in signing order; `None` where not signed yet.
     pub fn get_signatures(env: Env, doc_id: BytesN<32>) -> Result<Vec<Option<Signature>>, Error> {
         let doc = load_doc(&env, &DataKey::Doc(doc_id.clone()))?;
         let mut out = Vec::new(&env);
-        for i in 0..doc.signers.len() {
+        for i in 0..doc.invite_keys.len() {
             out.push_back(
                 env.storage()
                     .persistent()
@@ -376,6 +422,28 @@ impl SigningContract {
         }
         HashMatch::None
     }
+}
+
+/// domain || contract address (XDR) || doc_id || slot (big-endian u32) || signer (XDR)
+fn build_message(env: &Env, doc_id: &BytesN<32>, slot: u32, signer: &Address) -> Bytes {
+    let mut msg = Bytes::from_slice(env, PROOF_DOMAIN);
+    msg.append(&env.current_contract_address().to_xdr(env));
+    msg.append(&Bytes::from_array(env, &doc_id.to_array()));
+    msg.append(&Bytes::from_array(env, &slot.to_be_bytes()));
+    msg.append(&signer.clone().to_xdr(env));
+    msg
+}
+
+fn check_invite(
+    env: &Env,
+    invite_key: &BytesN<32>,
+    doc_id: &BytesN<32>,
+    slot: u32,
+    signer: &Address,
+    proof: &BytesN<64>,
+) {
+    let msg = build_message(env, doc_id, slot, signer);
+    env.crypto().ed25519_verify(invite_key, &msg, proof);
 }
 
 fn load_doc(env: &Env, key: &DataKey) -> Result<Document, Error> {
