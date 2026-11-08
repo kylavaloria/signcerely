@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
-import { CheckIcon, SignatureIcon } from "@/components/icons";
+import { AlertIcon, CheckIcon, SignatureIcon } from "@/components/icons";
 import { DOCS_BUCKET } from "@/lib/documents";
 import { formatSignedDate } from "@/lib/final-pdf";
 import { getAccess } from "@/lib/invite-access";
@@ -129,9 +129,14 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
             {a.doc.summary && <p style={{ color: "var(--ink-2)", maxWidth: 720 }}>{a.doc.summary}</p>}
           </div>
           {completed && (
-            <a className="btn btn-primary" href={`/sign/${signerId}/download`}>
-              Download signed copy
-            </a>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <a className="btn btn-primary" href={`/sign/${signerId}/download`}>
+                Download signed copy
+              </a>
+              <a className="btn btn-secondary" href={`/v/${a.doc.chain_doc_id}`}>
+                Verification page
+              </a>
+            </div>
           )}
         </div>
 
@@ -140,6 +145,21 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
             <CheckIcon color="#1F9D61" />
             <span>
               <strong>Everyone has signed.</strong> This is the final signed copy, with each signature recorded on Stellar.
+            </span>
+          </p>
+        )}
+        {a.doc.status === "cancelled" && (
+          <p className="note" role="status" style={{ background: "var(--line-2)" }}>
+            <span>
+              <strong>{sender?.full_name ?? "The sender"} cancelled this document</strong>, so it no longer needs your signature.
+            </span>
+          </p>
+        )}
+        {a.doc.status === "declined" && (
+          <p className="note note-red" role="status">
+            <AlertIcon />
+            <span>
+              <strong>This document was declined</strong>, so it can’t be signed. The sender can send a revised version as a new document.
             </span>
           </p>
         )}
@@ -177,6 +197,8 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
             myName={profile?.full_name ?? a.signer.invited_name}
             today={formatSignedDate(new Date())}
             savedSignatureUrl={saved}
+            canDecline={a.canSign && a.invited && a.doc.status === "pending" && !iSigned}
+            senderName={sender?.full_name ?? "The sender"}
           />
         )}
       </main>
