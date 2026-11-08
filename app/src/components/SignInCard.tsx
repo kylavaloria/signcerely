@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { shortAddress } from "@/lib/format";
-import { connectWallet, hasFreighter, isOnAppNetwork, signText } from "@/lib/wallet";
-import { FreighterGuide } from "./FreighterGuide";
+import { WALLET_URL, connectWallet, hasWallet, isOnAppNetwork, signText } from "@/lib/wallet";
+import { WalletGuide } from "./WalletGuide";
 import { AlertIcon, ArrowRight, CheckIcon, ExternalIcon, InfoIcon, Spinner, WalletIcon } from "./icons";
 
 type State =
   | { step: "checking" }
-  | { step: "no-freighter" }
+  | { step: "no-wallet" }
   | { step: "ready" }
   | { step: "connecting" }
   | { step: "connected"; address: string; wrongNetwork: boolean }
@@ -24,24 +24,32 @@ export function SignInCard() {
   const check = useCallback(async () => {
     setError(null);
     setState({ step: "checking" });
-    setState((await hasFreighter()) ? { step: "ready" } : { step: "no-freighter" });
+    setState((await hasWallet()) ? { step: "ready" } : { step: "no-wallet" });
   }, []);
 
   useEffect(() => {
-    // Detect Freighter after mount (it injects into the page).
+    // Detect the wallet after mount (it injects into the page).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void check();
   }, [check]);
+
+  // Coming back to this tab after installing or unlocking the wallet: look again.
+  useEffect(() => {
+    if (state.step !== "no-wallet") return;
+    const onFocus = () => void check();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [state.step, check]);
 
   async function connect() {
     setError(null);
     setState({ step: "connecting" });
     const res = await connectWallet();
     if ("error" in res) {
-      if (res.error.kind === "not-installed") return setState({ step: "no-freighter" });
+      if (res.error.kind === "not-installed") return setState({ step: "no-wallet" });
       setError(
         res.error.kind === "declined"
-          ? "The connection was declined. Nothing was shared — try again and choose Approve in Freighter."
+          ? "The connection was declined. Nothing was shared — try again and choose Approve in Varial."
           : res.error.message,
       );
       return setState({ step: "ready" });
@@ -65,7 +73,7 @@ export function SignInCard() {
       if ("error" in signed) {
         throw new Error(
           signed.error.kind === "declined"
-            ? "Sign-in was declined in Freighter. Try again and choose Approve — it doesn't cost anything."
+            ? "Sign-in was declined in Varial. Try again and choose Approve — it doesn't cost anything."
             : signed.error.message,
         );
       }
@@ -87,25 +95,28 @@ export function SignInCard() {
 
   return (
     <section className="card" aria-labelledby="si-title" style={{ padding: "clamp(24px, 5vw, 40px)", display: "flex", flexDirection: "column", gap: 24 }}>
-      <FreighterGuide ref={guide} onCheckAgain={check} />
+      <WalletGuide ref={guide} onCheckAgain={check} />
 
-      {state.step === "no-freighter" ? (
+      {state.step === "no-wallet" ? (
         <>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <h2 id="si-title" className="h" style={{ fontSize: 28, fontWeight: 700 }}>
-              Let’s get Freighter first
+              Let’s get Varial first
             </h2>
             <p className="muted">
-              Freighter is a free browser extension that lets you sign securely. Setup takes about two minutes.
+              Varial (formerly Freighter) is a free Stellar wallet extension that lets you sign securely. Setup takes about two minutes.
             </p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <a className="btn btn-primary btn-lg btn-block" href="https://www.freighter.app" target="_blank" rel="noopener noreferrer">
-              Install Freighter <ExternalIcon />
+            <a className="btn btn-primary btn-lg btn-block" href={WALLET_URL} target="_blank" rel="noopener noreferrer">
+              Install Varial <ExternalIcon />
             </a>
             <button type="button" className="btn btn-secondary btn-block" onClick={check}>
               I’ve installed it
             </button>
+            <p className="help" style={{ textAlign: "center" }}>
+              Already have it? Unlock Varial, then refresh this page.
+            </p>
             <p className="help" style={{ textAlign: "center" }}>
               New to wallets?{" "}
               <button type="button" onClick={() => guide.current?.showModal()} style={linkButton}>
@@ -135,13 +146,13 @@ export function SignInCard() {
                 >
                   {state.step === "ready" ? <WalletIcon /> : <Spinner />}
                   {state.step === "connecting"
-                    ? "Waiting for Freighter…"
+                    ? "Waiting for Varial…"
                     : state.step === "checking"
-                      ? "Looking for Freighter…"
-                      : "Connect Freighter wallet"}
+                      ? "Looking for your wallet…"
+                      : "Connect Varial wallet"}
                 </button>
                 <p className="help" style={{ textAlign: "center" }}>
-                  New to Freighter?{" "}
+                  New to Varial?{" "}
                   <button type="button" onClick={() => guide.current?.showModal()} style={linkButton}>
                     See how to set it up
                   </button>
@@ -163,7 +174,7 @@ export function SignInCard() {
               <div className="note note-green" role="status" style={{ alignItems: "center" }}>
                 <CheckIcon color="#1F9D61" />
                 <span style={{ flex: 1 }}>
-                  <strong style={{ display: "block" }}>Freighter connected</strong>
+                  <strong style={{ display: "block" }}>Varial connected</strong>
                   <span className="mono" style={{ fontSize: 13, color: "var(--ink-2)" }}>
                     {shortAddress(state.address)}
                   </span>
@@ -176,7 +187,7 @@ export function SignInCard() {
                 <p className="note note-yellow">
                   <InfoIcon color="#0F1B3D" />
                   <span>
-                    Freighter isn’t on <strong>Test Net</strong>. You can sign in, but switch it in Freighter’s{" "}
+                    Varial isn’t on <strong>Test Net</strong>. You can sign in, but switch it in Varial’s{" "}
                     <strong>Settings → Network</strong> before signing documents.
                   </span>
                 </p>
@@ -190,7 +201,7 @@ export function SignInCard() {
               >
                 {state.step === "signing" ? (
                   <>
-                    <Spinner /> Approve in Freighter…
+                    <Spinner /> Approve in Varial…
                   </>
                 ) : (
                   <>
@@ -200,7 +211,7 @@ export function SignInCard() {
               </button>
               {state.step === "signing" && (
                 <p className="help" style={{ textAlign: "center" }}>
-                  Freighter will ask you to sign a short message. It doesn’t send a transaction or cost anything.
+                  Varial will ask you to sign a short message. It doesn’t send a transaction or cost anything.
                 </p>
               )}
             </>
