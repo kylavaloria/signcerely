@@ -1,6 +1,13 @@
 import { createPrivateKey, createPublicKey, sign, verify } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { chainDocId, decryptSecret, encryptSecret, generateInviteKey } from "./invite-keys";
+import {
+  chainDocId,
+  decryptSecret,
+  encryptSecret,
+  generateInviteKey,
+  publicKeyFromSecret,
+  signWithInvite,
+} from "./invite-keys";
 
 const KEY = "test-key-test-key-test-key-test-key-1234";
 
@@ -58,5 +65,20 @@ describe("invite keys", () => {
     expect(a).toMatch(/^[0-9a-f]{64}$/);
     expect(chainDocId("00000000-0000-0000-0000-000000000001")).toBe(a);
     expect(chainDocId("00000000-0000-0000-0000-000000000002")).not.toBe(a);
+  });
+});
+
+describe("invite key helpers", () => {
+  it("recovers the public key from the secret", () => {
+    const k = generateInviteKey();
+    expect(publicKeyFromSecret(k.secretHex)).toBe(k.publicKeyHex);
+    expect(() => publicKeyFromSecret("zz")).toThrow();
+  });
+  it("makes deterministic proofs that verify with the public key", () => {
+    const k = generateInviteKey();
+    const msg = Buffer.from("hello");
+    const p1 = signWithInvite(k.secretHex, msg);
+    expect(p1).toBe(signWithInvite(k.secretHex, msg));
+    expect(verify(null, msg, pubFromHex(k.publicKeyHex), Buffer.from(p1, "hex"))).toBe(true);
   });
 });

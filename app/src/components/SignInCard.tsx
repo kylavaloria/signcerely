@@ -15,7 +15,7 @@ type State =
   | { step: "connected"; address: string; wrongNetwork: boolean }
   | { step: "signing"; address: string };
 
-export function SignInCard() {
+export function SignInCard({ next = null }: { next?: string | null }) {
   const router = useRouter();
   const guide = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<State>({ step: "checking" });
@@ -81,7 +81,7 @@ export function SignInCard() {
       const v = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, nonce: challenge.nonce, signature: signed.signature }),
+        body: JSON.stringify({ address, nonce: challenge.nonce, signature: signed.signature, next }),
       });
       const verified = await v.json();
       if (!v.ok) throw new Error(verified.error ?? "Couldn't finish sign-in.");

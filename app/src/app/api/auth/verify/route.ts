@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { buildSignInMessage, isStellarAccount, verifySignedMessage } from "@/lib/auth-message";
+import { safeNext } from "@/lib/format";
 import { getProfile } from "@/lib/profile";
 import { createSession } from "@/lib/session";
 import { db } from "@/lib/supabase";
@@ -40,5 +41,8 @@ export async function POST(request: NextRequest) {
 
   await createSession(address);
   const profile = await getProfile(address);
-  return NextResponse.json({ next: profile ? "/dashboard" : "/welcome" });
+  const next = safeNext(body?.next);
+  return NextResponse.json({
+    next: profile ? (next ?? "/dashboard") : `/welcome${next ? `?next=${encodeURIComponent(next)}` : ""}`,
+  });
 }

@@ -1,4 +1,13 @@
-import { createCipheriv, createDecipheriv, createHash, generateKeyPairSync, randomBytes } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createPrivateKey,
+  createPublicKey,
+  generateKeyPairSync,
+  randomBytes,
+  sign,
+} from "node:crypto";
 
 /**
  * Invite keys (see contracts/signing): one ed25519 key per signing slot.
@@ -45,4 +54,22 @@ export function decryptSecret(blob: string, rawKey?: string): string {
 /** 32-byte id used on-chain for a document, derived from its database id. */
 export function chainDocId(documentId: string): string {
   return createHash("sha256").update(`its-your-sign:doc:${documentId}`).digest("hex");
+}
+
+function privateKeyFromSeed(secretHex: string) {
+  // PKCS#8 wrapper for a raw 32-byte Ed25519 seed.
+  const der = Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), Buffer.from(secretHex, "hex")]);
+  return createPrivateKey({ key: der, format: "der", type: "pkcs8" });
+}
+
+/** Public half (hex) for an invite secret, to check a link's key. */
+export function publicKeyFromSecret(secretHex: string): string {
+  if (!/^[0-9a-f]{64}$/.test(secretHex)) throw new Error("Bad invite key.");
+  const jwk = createPublicKey(privateKeyFromSeed(secretHex)).export({ format: "jwk" });
+  return Buffer.from(jwk.x!, "base64url").toString("hex");
+}
+
+/** Ed25519 signature (hex) over `message` with the invite secret: the contract's invite proof. */
+export function signWithInvite(secretHex: string, message: Uint8Array): string {
+  return sign(null, Buffer.from(message), privateKeyFromSeed(secretHex)).toString("hex");
 }
