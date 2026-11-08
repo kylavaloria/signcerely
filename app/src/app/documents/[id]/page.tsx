@@ -7,6 +7,7 @@ import { SIGNER_COLORS } from "@/lib/doc-rules";
 import { requireUser } from "@/lib/profile";
 import { chainConfigFromEnv } from "@/lib/stellar/contract";
 import { db } from "@/lib/supabase";
+import { CancelDocumentButton } from "./CancelDocumentButton";
 import { SignerActions } from "./SignerActions";
 
 export const metadata: Metadata = { title: "Document · It's Your Sign" };
@@ -114,6 +115,18 @@ export default async function DocumentPage({
             </span>
           </div>
           {doc.summary && <p style={{ color: "var(--ink-2)" }}>{doc.summary}</p>}
+          {doc.status === "pending" && (
+            <div>
+              <CancelDocumentButton documentId={doc.id} wallet={user.wallet_address} signedCount={signed} />
+            </div>
+          )}
+          {doc.status === "cancelled" && (
+            <p className="note" role="status" style={{ background: "var(--line-2)" }}>
+              <span>
+                <strong>You cancelled this document</strong>, so it can’t be signed. To try again, send a revised version as a new document.
+              </span>
+            </p>
+          )}
           {doc.status === "completed" && (
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <a className="btn btn-primary" href={`/documents/${doc.id}/download`}>
@@ -189,7 +202,7 @@ export default async function DocumentPage({
                 </span>
                 <span>
                   {EVENT[e.kind] ?? e.kind} {e.signer_id ? <strong>{nameOf(e.signer_id)}</strong> : null}
-                  {e.kind === "declined" && (e.detail as { reason?: string } | null)?.reason ? (
+                  {(e.kind === "declined" || e.kind === "cancelled") && (e.detail as { reason?: string } | null)?.reason ? (
                     <span className="muted"> — “{(e.detail as { reason: string }).reason}”</span>
                   ) : null}
                   {e.tx_hash && (
