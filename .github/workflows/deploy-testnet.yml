@@ -1,0 +1,62 @@
+name: Deploy to testnet
+
+# Run from the Actions tab: "Deploy to testnet" -> "Run workflow".
+# Uses a throwaway testnet wallet funded by Friendbot, so no secrets are needed.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+      - uses: Swatinem/rust-cache@v2
+      - uses: stellar/stellar-cli@v30.0.1
+
+      - name: Test
+        run: cargo test --locked
+
+      - name: Create and fund a testnet deployer
+        run: stellar keys generate deployer --network testnet --fund
+
+      - name: Build
+        run: stellar contract build
+
+      - name: Deploy
+        id: deploy
+        run: |
+          CONTRACT_ID=$(stellar contract deploy \
+            --wasm target/wasm32v1-none/release/its_your_sign.wasm \
+            --source-account deployer \
+            --network testnet)
+          echo "contract_id=$CONTRACT_ID" >> "$GITHUB_OUTPUT"
+          echo "$CONTRACT_ID" > contract-id.txt
+
+      - name: Summary
+        run: |
+          ID="${{ steps.deploy.outputs.contract_id }}"
+          {
+            echo "## Deployed to Stellar testnet"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Contract ID | \`$ID\` |"
+            echo "| Explorer | https://stellar.expert/explorer/testnet/contract/$ID |"
+            echo "| Commit | \`${GITHUB_SHA::7}\` |"
+            echo
+            echo "Add to the app's \`.env.local\`:"
+            echo
+            echo '```'
+            echo "NEXT_PUBLIC_CONTRACT_ID=$ID"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: testnet-deployment
+          path: |
+            contract-id.txt
+            target/wasm32v1-none/release/its_your_sign.wasm

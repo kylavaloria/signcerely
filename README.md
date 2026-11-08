@@ -55,6 +55,8 @@ stellar contract build
 ./scripts/deploy-testnet.sh
 ```
 
+**No local setup?** Open the repo's **Actions** tab → **Deploy to testnet** → **Run workflow**. It runs the tests, deploys with a throwaway funded testnet wallet, and shows the contract ID and explorer link on the run page.
+
 Built with `soroban-sdk` 28 (Stellar protocol 28).
 
 ## License
