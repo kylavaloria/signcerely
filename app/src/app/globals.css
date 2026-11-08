@@ -255,6 +255,7 @@ a:hover {
   gap: 12px 24px;
 }
 .brand {
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -325,5 +326,154 @@ dialog.modal::backdrop {
   .nav {
     order: 3;
     flex-basis: 100%;
+  }
+}
+
+/* ---------- responsive helpers ---------- */
+.wizard-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: #fff;
+  border-top: 1px solid var(--line);
+  margin: 0 -24px;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.wizard-footer-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.newdoc-main {
+  padding: 28px 24px 120px;
+}
+.signer-card {
+  padding: 18px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.signer-fields {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 12px;
+}
+.signer-tools {
+  display: flex;
+  gap: 6px;
+  padding-top: 26px;
+}
+.spots-layout {
+  display: flex;
+  gap: 16px;
+}
+.spots-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 900px;
+  overflow-y: auto;
+}
+.sign-here {
+  container-type: size;
+}
+@container (max-width: 130px) {
+  .sign-here .sh-icon {
+    display: none;
+  }
+}
+.mobile-only {
+  display: none;
+}
+.mobile-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  background: #fff;
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -8px 24px rgba(15, 27, 61, 0.08);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .mobile-only {
+    display: flex;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+  .has-mobile-bar {
+    padding-bottom: 96px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .newdoc-main {
+    padding: 20px 16px 120px;
+  }
+  .wizard-footer {
+    margin: 0 -16px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  .wizard-footer .btn {
+    flex: 1 1 auto;
+  }
+  .wizard-footer > .btn-primary,
+  .wizard-footer-group:last-child {
+    order: -1;
+    flex: 1 1 100%;
+  }
+  .wizard-footer-group:last-child .btn {
+    flex: 1 1 100%;
+  }
+  .signer-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  .signer-tools {
+    padding-top: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .spots-layout {
+    flex-direction: column;
+  }
+  .spots-pages {
+    flex-direction: row;
+    max-height: none;
+    overflow-x: auto;
+    padding: 6px 2px;
+  }
+  .stepper .step-label {
+    display: none;
+  }
+  .stepper [aria-current] .step-label {
+    display: inline;
+  }
+  .hide-xs {
+    display: none !important;
+  }
+  /* Popups slide up from the bottom on phones. */
+  dialog.modal {
+    width: 100vw !important;
+    max-width: 100vw;
+    margin: auto 0 0 0;
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
   }
 }

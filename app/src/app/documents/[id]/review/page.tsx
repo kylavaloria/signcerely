@@ -126,14 +126,14 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
 
       </div>
 
-      <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid var(--line)", margin: "0 -24px", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", gap: 8 }}>
+      <div className="wizard-footer">
+        <div className="wizard-footer-group">
           <Link className="btn btn-ghost" href={`/documents/${doc.id}/spots`}>
             Back
           </Link>
           <DeleteDraftButton documentId={doc.id} />
         </div>
-        <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
+        <div className="wizard-footer-group">
           <Link className="btn btn-secondary" href="/dashboard">
             Save draft
           </Link>

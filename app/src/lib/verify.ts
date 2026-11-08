@@ -46,8 +46,11 @@ export async function loadRecord(chainDocId: string): Promise<VerifiedRecord | n
   let chainDoc: Record<string, unknown>;
   try {
     chainDoc = await getChainDocument(c, chainDocId);
-  } catch {
-    return null;
+  } catch (e) {
+    // Contract error #2 = no such document. Anything else is the network being
+    // unreachable, which must not be shown as "not found".
+    if (/Error\(Contract, #2\)/.test(e instanceof Error ? e.message : String(e))) return null;
+    throw new Error("Couldn’t reach the Stellar network to load this record.", { cause: e });
   }
   const sigs = await getChainSignatures(c, chainDocId).catch(() => []);
 
@@ -105,7 +108,13 @@ export async function verifyFingerprint(fileHash: string): Promise<VerifyResult>
   }
   const tag = Array.isArray(found) ? found[0] : found;
   if (tag !== "Final" && tag !== "Original") return { kind: "none", fileHash };
-  const record = await loadRecord(hex((found as unknown[])[1]));
+  let record: VerifiedRecord | null;
+  try {
+    record = await loadRecord(hex((found as unknown[])[1]));
+  } catch (e) {
+    console.error("load record failed", e);
+    return { kind: "error", message: "We couldn’t reach the Stellar network. Try again in a moment." };
+  }
   if (!record) return { kind: "none", fileHash };
   return { kind: tag === "Final" ? "final" : "original", fileHash, record };
 }

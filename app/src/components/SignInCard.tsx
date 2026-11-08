@@ -6,6 +6,7 @@ import { shortAddress } from "@/lib/format";
 import { WALLET_URL, connectWallet, hasWallet, isOnAppNetwork, signText } from "@/lib/wallet";
 import { WalletGuide } from "./WalletGuide";
 import { AlertIcon, ArrowRight, CheckIcon, ExternalIcon, InfoIcon, Spinner, WalletIcon } from "./icons";
+import { friendlyError } from "@/lib/errors";
 
 type State =
   | { step: "checking" }
@@ -88,7 +89,7 @@ export function SignInCard({ next = null }: { next?: string | null }) {
       router.push(verified.next);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(friendlyError(e));
       setState({ step: "connected", address, wrongNetwork: !(await isOnAppNetwork()) });
     }
   }
