@@ -1,0 +1,329 @@
+/* It's Your Sign — design tokens and shared components (ported from the design canvas). */
+:root {
+  --blue: #1f3fbf;
+  --blue-hover: #1a35a3;
+  --blue-tint: #e8ecfa;
+  --yellow: #ffd23f;
+  --yellow-hover: #f7c51f;
+  --yellow-tint: #fff6d6;
+  --navy: #0f1b3d;
+  --ink-2: #33406a;
+  --ink-3: #4a5578;
+  --ink-4: #5b6585;
+  --line: #e3e8f2;
+  --line-2: #eef1f7;
+  --field: #cbd3e6;
+  --mist: #f5f7fb;
+  --white: #ffffff;
+  --green: #1f9d61;
+  --green-ink: #146b42;
+  --green-tint: #e3f5ec;
+  --red: #d64545;
+  --red-ink: #a82e2e;
+  --red-tint: #fdf3f3;
+
+  --font-head: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--mist);
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+a {
+  color: var(--blue);
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: #15308f;
+}
+
+:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.h {
+  font-family: var(--font-head);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.muted {
+  color: var(--ink-3);
+}
+.tag {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font: 600 15px/1.2 var(--font-body);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-lg {
+  min-height: 54px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+.btn-block {
+  width: 100%;
+}
+.btn-primary {
+  background: var(--blue);
+  color: var(--white);
+}
+.btn-primary:hover {
+  background: var(--blue-hover);
+  color: var(--white);
+}
+.btn-secondary {
+  background: var(--white);
+  color: var(--blue);
+  border-color: #c7d0ec;
+}
+.btn-secondary:hover {
+  background: var(--mist);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--navy);
+}
+.btn-ghost:hover {
+  background: var(--line-2);
+}
+.btn-sign {
+  background: var(--yellow);
+  color: var(--navy);
+  font-weight: 700;
+}
+.btn-sign:hover {
+  background: var(--yellow-hover);
+  color: var(--navy);
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background: var(--line-2);
+  color: #8a93ad;
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* ---------- surfaces ---------- */
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04), 0 12px 32px rgba(15, 27, 61, 0.08);
+}
+.note {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--mist);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.note svg {
+  flex: none;
+  margin-top: 2px;
+}
+.note-yellow {
+  background: var(--yellow-tint);
+  border: 1px solid #f3df95;
+}
+.note-red {
+  background: var(--red-tint);
+  border: 1px solid #f0cfcf;
+}
+.note-green {
+  background: #f3fbf7;
+  border: 1px solid #cdebdc;
+  color: var(--green-ink);
+}
+
+.beta {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1.5px solid var(--blue);
+  background: var(--white);
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ---------- forms ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.label {
+  font-size: 15px;
+  font-weight: 600;
+}
+.help {
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+.error-text {
+  font-size: 13.5px;
+  color: var(--red-ink);
+  font-weight: 600;
+}
+.input {
+  height: 50px;
+  border: 1px solid var(--field);
+  border-radius: 10px;
+  padding: 0 14px;
+  font: 400 16px var(--font-body);
+  color: var(--navy);
+  background: var(--white);
+  width: 100%;
+}
+.input::placeholder {
+  color: var(--ink-4);
+}
+.input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(31, 63, 191, 0.18);
+  outline: none;
+}
+.input[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+/* ---------- header ---------- */
+.site-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--line-2);
+}
+.site-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--navy);
+}
+.brand:hover {
+  color: var(--navy);
+}
+.nav {
+  display: flex;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+.nav a {
+  color: var(--navy);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.nav a:hover {
+  background: var(--mist);
+}
+.nav a[aria-current="page"] {
+  background: var(--blue-tint);
+  color: var(--blue);
+  font-weight: 700;
+}
+
+/* ---------- dialog ---------- */
+dialog.modal {
+  border: 0;
+  padding: 0;
+  border-radius: 16px;
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  box-shadow: 0 24px 64px rgba(15, 27, 61, 0.28);
+  color: var(--navy);
+}
+dialog.modal::backdrop {
+  background: rgba(15, 27, 61, 0.55);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin {
+  animation: spin 1.1s linear infinite;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .site-header-inner {
+    padding: 10px 16px;
+  }
+  .nav {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
