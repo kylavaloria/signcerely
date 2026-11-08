@@ -11,8 +11,10 @@ import { Keypair, TransactionBuilder, type Transaction } from "@stellar/stellar-
 import { describe, expect, it } from "vitest";
 import { chainDocId, generateInviteKey } from "../invite-keys";
 import {
+  buildCancelTx,
   buildCreateTx,
   buildDeclineTx,
+  checkSignedCancel,
   buildSignTx,
   checkSignedDecline,
   getChainSignatures,
@@ -191,6 +193,31 @@ describe.skipIf(!run)("testnet: full signing flow", () => {
       console.log("decline tx", (await submitAndWait(c, checkSignedDecline(c, signed.toXDR(), dArgs))).hash);
       const doc = await getChainDocument(c, docId);
       expect(Number(doc.status)).toBe(2); // Declined
+    },
+    120_000,
+  );
+
+  it(
+    "lets the sender cancel a pending document",
+    async () => {
+      const sender = Keypair.random();
+      await fundWithFriendbot(c, sender.publicKey());
+      const keys = [generateInviteKey(), generateInviteKey()];
+      const docId = chainDocId(crypto.randomUUID());
+      const args: CreateArgs = {
+        sender: sender.publicKey(),
+        chainDocId: docId,
+        originalHash: randomBytes(32).toString("hex"),
+        inviteKeys: keys.map((k) => k.publicKeyHex),
+        inOrder: false,
+      };
+      await submitAndWait(c, checkSignedCreate(c, signXdr(await buildCreateTx(c, args), sender).toXDR(), args));
+      const cArgs = { sender: sender.publicKey(), chainDocId: docId };
+      const signed = signXdr(await buildCancelTx(c, cArgs), sender);
+      console.log("cancel tx", (await submitAndWait(c, checkSignedCancel(c, signed.toXDR(), cArgs))).hash);
+      expect(Number((await getChainDocument(c, docId)).status)).toBe(3); // Cancelled
+      // Cancelling again is refused by the contract.
+      await expect(buildCancelTx(c, cArgs)).rejects.toThrow();
     },
     120_000,
   );

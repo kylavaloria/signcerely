@@ -148,6 +148,13 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
             </span>
           </p>
         )}
+        {a.doc.status === "cancelled" && (
+          <p className="note" role="status" style={{ background: "var(--line-2)" }}>
+            <span>
+              <strong>{sender?.full_name ?? "The sender"} cancelled this document</strong>, so it no longer needs your signature.
+            </span>
+          </p>
+        )}
         {a.doc.status === "declined" && (
           <p className="note note-red" role="status">
             <AlertIcon />
