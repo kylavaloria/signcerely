@@ -8,6 +8,7 @@ import { PdfPage } from "@/components/PdfPage";
 import { BOX_HEIGHT, BOX_WIDTH, SIGNER_COLORS, type FieldInput } from "@/lib/doc-rules";
 import { loadPdf } from "@/lib/pdf";
 import { saveSpots } from "./actions";
+import { friendlyError, rethrowNext } from "@/lib/errors";
 
 type Signer = { id: string; slot: number; name: string };
 type Box = FieldInput & { key: string };
@@ -143,23 +144,31 @@ export function SpotsEditor({
   function save(skip: boolean) {
     setError(null);
     start(async () => {
-      const r = await saveSpots(
-        documentId,
-        boxes.map(({ signerId, page, x, y, width, height }) => ({ signerId, page, x, y, width, height })),
-        skip,
-      );
-      if (r?.error) setError(r.error);
+      try {
+        const r = await saveSpots(
+          documentId,
+          boxes.map(({ signerId, page, x, y, width, height }) => ({ signerId, page, x, y, width, height })),
+          skip,
+        );
+        if (r?.error) setError(r.error);
+      } catch (e) {
+        rethrowNext(e);
+        setError(friendlyError(e));
+      }
     });
   }
 
   return (
     <>
+      <p className="note note-yellow mobile-only">
+        <span>Placing boxes is easiest on a computer. On a phone, tap the page to drop a box, then drag it into place.</span>
+      </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <h2 className="h" style={{ fontSize: 32, fontWeight: 700 }}>
           Show each person where to sign
         </h2>
         <p className="muted" style={{ fontSize: 17 }}>
-          Pick a signer, then click on the page where they should sign. Drag a box to move it. The date is added under it
+          Pick a signer, then click (or tap) on the page where they should sign. Drag a box to move it. The date is added under it
           automatically when they sign.
         </p>
       </div>
@@ -235,8 +244,8 @@ export function SpotsEditor({
           </div>
         </aside>
 
-        <section aria-label={`Page ${page} of ${pageCount}`} style={{ flex: "999 1 560px", minWidth: 0, background: "#E3E8F2", borderRadius: 16, padding: 20, display: "flex", gap: 16 }}>
-          <nav aria-label="Pages" style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 900, overflowY: "auto" }}>
+        <section className="spots-layout" aria-label={`Page ${page} of ${pageCount}`} style={{ flex: "999 1 560px", minWidth: 0, background: "#E3E8F2", borderRadius: 16, padding: "clamp(10px, 3vw, 20px)" }}>
+          <nav aria-label="Pages" className="spots-pages">
             {Array.from({ length: pageCount }, (_, i) => i + 1).map((p) => {
               const n = boxes.filter((b) => b.page === p).length;
               return (
@@ -251,6 +260,7 @@ export function SpotsEditor({
                   }}
                   style={{
                     position: "relative",
+                    flex: "none",
                     width: 52,
                     height: 66,
                     borderRadius: 6,
@@ -360,7 +370,7 @@ export function SpotsEditor({
         </p>
       )}
 
-      <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid var(--line)", margin: "0 -24px", padding: "14px 24px", display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+      <div className="wizard-footer">
         <Link className="btn btn-ghost" href={`/documents/${documentId}/signers`}>
           Back
         </Link>
