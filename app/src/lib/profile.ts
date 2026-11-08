@@ -8,12 +8,13 @@ export type Profile = {
   full_name: string;
   email: string | null;
   email_verified_at: string | null;
+  signature_path: string | null;
 };
 
 export async function getProfile(wallet: string): Promise<Profile | null> {
   const { data, error } = await db()
     .from("profiles")
-    .select("wallet_address, full_name, email, email_verified_at")
+    .select("wallet_address, full_name, email, email_verified_at, signature_path")
     .eq("wallet_address", wallet)
     .maybeSingle();
   if (error) throw error;

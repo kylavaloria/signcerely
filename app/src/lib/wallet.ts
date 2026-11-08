@@ -5,6 +5,7 @@ import {
   isConnected,
   requestAccess,
   signMessage,
+  signTransaction,
 } from "@stellar/varial-sdk";
 import { networkPassphrase } from "./env";
 
@@ -96,6 +97,34 @@ export async function signText(
     const signature = toBase64(res.signedMessage);
     if (!signature) return { error: { kind: "other", message: `${WALLET_NAME} didn't return a signature.` } };
     return { signature };
+  } catch (e) {
+    return { error: toError(e) };
+  }
+}
+
+/** Ask the wallet to approve (sign) a transaction. Returns the signed XDR. */
+export async function signTx(
+  txXdr: string,
+  address: string,
+): Promise<{ signedXdr: string } | { error: WalletError }> {
+  try {
+    if (!(await hasWallet())) return { error: { kind: "not-installed", message: `${WALLET_NAME} isn't installed.` } };
+    if (!(await isOnAppNetwork())) {
+      return {
+        error: { kind: "other", message: `${WALLET_NAME} is on a different network. Switch it to Test Net in Settings → Network.` },
+      };
+    }
+    const res = await signTransaction(txXdr, { address, networkPassphrase });
+    if (res.error) return { error: toError(res.error) };
+    if (res.signerAddress && res.signerAddress !== address) {
+      return {
+        error: {
+          kind: "other",
+          message: `${WALLET_NAME} is using a different account than the one you signed in with. Switch accounts and try again.`,
+        },
+      };
+    }
+    return { signedXdr: res.signedTxXdr };
   } catch (e) {
     return { error: toError(e) };
   }
