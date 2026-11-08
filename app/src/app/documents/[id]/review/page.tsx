@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { NewDocShell } from "@/components/NewDocShell";
-import { AlertIcon, InfoIcon, ShieldIcon } from "@/components/icons";
+import { AlertIcon, ShieldIcon } from "@/components/icons";
 import { SIGNER_COLORS } from "@/lib/doc-rules";
 import { getDraftFields, getDraftSigners, getOwnedDraft } from "@/lib/documents";
 import { requireUser } from "@/lib/profile";
 import { DeleteDraftButton } from "./DeleteDraftButton";
+import { SendButton } from "./SendButton";
 
 export const metadata: Metadata = { title: "Review · New document · It's Your Sign" };
 
@@ -123,10 +124,6 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        <p className="note" style={{ background: "#fff", border: "1px solid var(--line)" }}>
-          <InfoIcon />
-          <span>Sending is coming in the next build. Your draft is saved — you can come back to it from your dashboard.</span>
-        </p>
       </div>
 
       <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid var(--line)", margin: "0 -24px", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -136,13 +133,15 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
           </Link>
           <DeleteDraftButton documentId={doc.id} />
         </div>
-        <div style={{ display: "flex", gap: 12 }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
           <Link className="btn btn-secondary" href="/dashboard">
             Save draft
           </Link>
-          <button type="button" className="btn btn-primary" disabled title="Sending is coming in the next build">
-            Send for signing
-          </button>
+          <SendButton
+            documentId={doc.id}
+            wallet={user.wallet_address}
+            blocked={missing.length > 0 ? "Every signer needs a signature box first." : undefined}
+          />
         </div>
       </div>
     </NewDocShell>
