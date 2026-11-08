@@ -10,6 +10,7 @@ import { loadPdf } from "@/lib/pdf";
 import { signTx } from "@/lib/wallet";
 import { addTestXlm } from "@/app/documents/[id]/review/send-actions";
 import { AdoptSignature, type Adopted } from "./AdoptSignature";
+import { DeclineButton } from "./DeclineButton";
 import { prepareSign, submitSign } from "./actions";
 
 export type ViewField = { id: string; signerId: string; page: number; x: number; y: number; width: number; height: number };
@@ -34,6 +35,8 @@ type Props = {
   myName: string;
   today: string;
   savedSignatureUrl: string | null;
+  canDecline: boolean;
+  senderName: string;
 };
 
 type Phase = "idle" | "preparing" | "wallet" | "recording" | "funding";
@@ -284,6 +287,11 @@ export function SigningView(p: Props) {
                 </p>
               </div>
             </>
+          )}
+          {p.canDecline && p.wallet && (
+            <div style={{ borderTop: "1px solid var(--line-2)", paddingTop: 14 }}>
+              <DeclineButton signerId={p.signerId} wallet={p.wallet} senderName={p.senderName} />
+            </div>
           )}
           {error && (
             <p className="note note-red" role="alert">

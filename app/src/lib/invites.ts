@@ -112,3 +112,31 @@ export async function sendCompletedEmails(documentId: string): Promise<void> {
     if (!res.ok) console.warn(`[email] completed notice to ${email} not sent: ${res.reason}`);
   }
 }
+
+/** Tell the sender someone declined, with their reason if they gave one. */
+export async function sendDeclinedEmail(documentId: string, declinerName: string, reason: string): Promise<void> {
+  const { data: doc } = await db()
+    .from("documents")
+    .select("id, title, profiles(full_name, email)")
+    .eq("id", documentId)
+    .single();
+  const sender = doc?.profiles as unknown as { full_name: string; email: string | null } | null;
+  if (!doc || !sender?.email) return;
+  const url = `${await appUrl()}/documents/${doc.id}`;
+  const first = sender.full_name.split(/\s+/)[0];
+  const why = reason ? `\n\nTheir reason: “${reason}”` : "";
+  const res = await sendEmail({
+    to: sender.email,
+    subject: `${declinerName} declined to sign ${doc.title}`,
+    text: `Hi ${first},\n\n${declinerName} declined to sign "${doc.title}". The document has stopped, so no one else can sign it.${why}\n\nDetails: ${url}\n\nTo try again, upload a revised version and send it as a new document.`,
+    html: layout({
+      heading: `${declinerName} declined to sign`,
+      body: `Hi ${escapeHtml(first)}, ${escapeHtml(declinerName)} declined to sign <strong>${escapeHtml(doc.title)}</strong>. The document has stopped, so no one else can sign it.${
+        reason ? `<br><br>Their reason: <em>“${escapeHtml(reason)}”</em>` : ""
+      }<br><br>To try again, upload a revised version and send it as a new document.`,
+      button: { label: "View the document", url },
+      footer: "The decline is recorded on Stellar along with the other steps.",
+    }),
+  });
+  if (!res.ok) console.warn(`[email] declined notice not sent: ${res.reason}`);
+}

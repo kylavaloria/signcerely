@@ -12,7 +12,10 @@ import { describe, expect, it } from "vitest";
 import { chainDocId, generateInviteKey } from "../invite-keys";
 import {
   buildCreateTx,
+  buildDeclineTx,
   buildSignTx,
+  checkSignedDecline,
+  getChainSignatures,
   chainConfigFromEnv,
   checkSignedCreate,
   findByHash,
@@ -106,9 +109,21 @@ describe.skipIf(!run)("testnet: full signing flow", () => {
       const done = await getChainDocument(c, docId);
       expect(done.signed_count).toBe(2);
       expect(Buffer.from(done.final_hash as Uint8Array).toString("hex")).toBe(finalHash);
+      expect(Number(done.status)).toBe(1); // Completed
       const found = (await findByHash(c, finalHash)) as unknown[];
       expect(found[0]).toBe("Final");
       expect(Buffer.from(found[1] as Uint8Array).toString("hex")).toBe(docId);
+      const orig = (await findByHash(c, original)) as unknown[];
+      expect(orig[0]).toBe("Original");
+      const none = await findByHash(c, randomBytes(32).toString("hex"));
+      console.log("find_by_hash(unknown) =", JSON.stringify(none));
+
+      // What the Verify page reads
+      const sigs = await getChainSignatures(c, docId);
+      expect(sigs).toHaveLength(2);
+      expect(sigs[0]!.signer).toBe(ana.publicKey());
+      expect(sigs[1]!.signer).toBe(jomar.publicKey());
+      expect(Number(sigs[1]!.signed_at)).toBeGreaterThan(1_700_000_000);
     },
     180_000,
   );
@@ -143,6 +158,39 @@ describe.skipIf(!run)("testnet: full signing flow", () => {
           finalHash: null,
         }),
       ).rejects.toThrow();
+    },
+    120_000,
+  );
+
+  it(
+    "lets an invitee decline, which stops the document",
+    async () => {
+      const sender = Keypair.random();
+      const invitee = Keypair.random();
+      await Promise.all([sender, invitee].map((k) => fundWithFriendbot(c, k.publicKey())));
+      const keys = [generateInviteKey(), generateInviteKey()];
+      const docId = chainDocId(crypto.randomUUID());
+      const args: CreateArgs = {
+        sender: sender.publicKey(),
+        chainDocId: docId,
+        originalHash: randomBytes(32).toString("hex"),
+        inviteKeys: keys.map((k) => k.publicKeyHex),
+        inOrder: true,
+      };
+      await submitAndWait(c, checkSignedCreate(c, signXdr(await buildCreateTx(c, args), sender).toXDR(), args));
+
+      // Slot 1 declines even though it isn't their turn yet.
+      const msg = await inviteMessage(c, docId, 1, invitee.publicKey());
+      const dArgs = {
+        signer: invitee.publicKey(),
+        chainDocId: docId,
+        slot: 1,
+        inviteProof: proof(keys[1].secretHex, keys[1].publicKeyHex, msg),
+      };
+      const signed = signXdr(await buildDeclineTx(c, dArgs), invitee);
+      console.log("decline tx", (await submitAndWait(c, checkSignedDecline(c, signed.toXDR(), dArgs))).hash);
+      const doc = await getChainDocument(c, docId);
+      expect(Number(doc.status)).toBe(2); // Declined
     },
     120_000,
   );
