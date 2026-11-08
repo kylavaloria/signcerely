@@ -4,6 +4,6 @@
 alter table public.documents
   add column pending_final_hash text check (pending_final_hash ~ '^[0-9a-f]{64}$'),
   add column pending_final_path text,
-  add column pending_final_signer uuid references public.document_signers (id) on delete set null;
+  add column pending_final_signer uuid;
 
 create index document_signers_document_idx on public.document_signers (document_id);

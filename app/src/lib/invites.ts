@@ -112,3 +112,65 @@ export async function sendCompletedEmails(documentId: string): Promise<void> {
     if (!res.ok) console.warn(`[email] completed notice to ${email} not sent: ${res.reason}`);
   }
 }
+
+/** Tell the sender someone declined, with their reason if they gave one. */
+export async function sendDeclinedEmail(documentId: string, declinerName: string, reason: string): Promise<void> {
+  const { data: doc } = await db()
+    .from("documents")
+    .select("id, title, profiles(full_name, email)")
+    .eq("id", documentId)
+    .single();
+  const sender = doc?.profiles as unknown as { full_name: string; email: string | null } | null;
+  if (!doc || !sender?.email) return;
+  const url = `${await appUrl()}/documents/${doc.id}`;
+  const first = sender.full_name.split(/\s+/)[0];
+  const why = reason ? `\n\nTheir reason: “${reason}”` : "";
+  const res = await sendEmail({
+    to: sender.email,
+    subject: `${declinerName} declined to sign ${doc.title}`,
+    text: `Hi ${first},\n\n${declinerName} declined to sign "${doc.title}". The document has stopped, so no one else can sign it.${why}\n\nDetails: ${url}\n\nTo try again, upload a revised version and send it as a new document.`,
+    html: layout({
+      heading: `${declinerName} declined to sign`,
+      body: `Hi ${escapeHtml(first)}, ${escapeHtml(declinerName)} declined to sign <strong>${escapeHtml(doc.title)}</strong>. The document has stopped, so no one else can sign it.${
+        reason ? `<br><br>Their reason: <em>“${escapeHtml(reason)}”</em>` : ""
+      }<br><br>To try again, upload a revised version and send it as a new document.`,
+      button: { label: "View the document", url },
+      footer: "The decline is recorded on Stellar along with the other steps.",
+    }),
+  });
+  if (!res.ok) console.warn(`[email] declined notice not sent: ${res.reason}`);
+}
+
+/** Tell everyone who was already invited that the sender cancelled the document. */
+export async function sendCancelledEmails(documentId: string, reason: string): Promise<void> {
+  const [{ data: doc }, { data: signers }] = await Promise.all([
+    db().from("documents").select("id, title, profiles(full_name, email)").eq("id", documentId).single(),
+    db()
+      .from("document_signers")
+      .select("id, invited_name, invited_email, status")
+      .eq("document_id", documentId)
+      .in("status", ["invited", "viewed", "signed"]),
+  ]);
+  const sender = doc?.profiles as unknown as { full_name: string; email: string | null } | null;
+  if (!doc || !signers) return;
+  const base = await appUrl();
+  for (const s of signers) {
+    if (sender?.email && s.invited_email.toLowerCase() === sender.email.toLowerCase()) continue;
+    const first = s.invited_name.split(/\s+/)[0];
+    const who = sender?.full_name ?? "The sender";
+    const res = await sendEmail({
+      to: s.invited_email,
+      subject: `${who} cancelled ${doc.title}`,
+      text: `Hi ${first},\n\n${who} cancelled "${doc.title}", so it no longer needs your signature.${reason ? `\n\nTheir note: “${reason}”` : ""}\n\nDetails: ${base}/sign/${s.id}`,
+      html: layout({
+        heading: "This document was cancelled",
+        body: `Hi ${escapeHtml(first)}, ${escapeHtml(who)} cancelled <strong>${escapeHtml(doc.title)}</strong>, so it no longer needs your signature.${
+          reason ? `<br><br>Their note: <em>“${escapeHtml(reason)}”</em>` : ""
+        }`,
+        button: { label: "View details", url: `${base}/sign/${s.id}` },
+        footer: "The cancellation is recorded on Stellar along with the other steps. Nothing else is needed from you.",
+      }),
+    });
+    if (!res.ok) console.warn(`[email] cancelled notice to ${s.invited_email} not sent: ${res.reason}`);
+  }
+}

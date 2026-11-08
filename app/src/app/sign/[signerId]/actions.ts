@@ -7,11 +7,13 @@ import { appUrl } from "@/lib/email";
 import { buildFinalPdf, type FinalSigner } from "@/lib/final-pdf";
 import { getAccess, unlockWithKey, type Access } from "@/lib/invite-access";
 import { decryptSecret, signWithInvite } from "@/lib/invite-keys";
-import { inviteSigners, sendCompletedEmails } from "@/lib/invites";
+import { inviteSigners, sendCompletedEmails, sendDeclinedEmail } from "@/lib/invites";
 import { getProfile } from "@/lib/profile";
 import {
+  buildDeclineTx,
   buildSignTx,
   chainConfigFromEnv,
+  checkSignedDecline,
   checkSignedSign,
   explainChainError,
   inviteMessage,
@@ -102,7 +104,7 @@ async function prepareFinalCopy(a: Access, wallet: string, myImage: Uint8Array, 
     title: a.doc.title,
     originalHash: a.doc.original_hash,
     documentRef: a.doc.chain_doc_id,
-    verifyUrl: `${await appUrl()}/verify`,
+    verifyUrl: `${await appUrl()}/v/${a.doc.chain_doc_id}`,
     signers: final,
     fields: (fields ?? []).map((f) => ({
       signerId: f.signer_id,
@@ -265,4 +267,80 @@ export async function markViewed(signerId: string): Promise<void> {
   if (!a?.invited || a.signer.status !== "invited") return;
   await db().from("document_signers").update({ status: "viewed", viewed_at: new Date().toISOString() }).eq("id", signerId).eq("status", "invited");
   await db().from("document_events").insert({ document_id: a.doc.id, kind: "viewed", signer_id: signerId, actor_wallet: a.wallet });
+}
+
+// ---------- decline ----------
+
+async function readyToDecline(signerId: string): Promise<{ a: Access; wallet: string } | Fail> {
+  const a = await getAccess(signerId);
+  if (!a) return { ok: false, error: "This invite doesn’t exist." };
+  if (!a.wallet) redirect(`/sign-in?next=/sign/${signerId}`);
+  if (!a.canSign) return { ok: false, error: "Open this page from your invite email to respond." };
+  if (a.doc.status !== "pending") return { ok: false, error: "This document is no longer waiting for signatures." };
+  if (a.signer.status === "signed") return { ok: false, error: "You’ve already signed this document." };
+  if (a.signer.wallet_address && a.signer.wallet_address !== a.wallet) {
+    return { ok: false, error: "This spot is linked to a different wallet. Switch to that wallet in Varial." };
+  }
+  return { a, wallet: a.wallet };
+}
+
+async function declineArgs(a: Access, wallet: string) {
+  const c = chainConfigFromEnv();
+  const msg = await inviteMessage(c, a.doc.chain_doc_id, a.signer.slot, wallet);
+  return {
+    signer: wallet,
+    chainDocId: a.doc.chain_doc_id,
+    slot: a.signer.slot,
+    inviteProof: signWithInvite(decryptSecret(a.signer.invite_secret_enc), msg),
+  };
+}
+
+/** Step 1 of declining: build the `decline` transaction for the wallet to approve. */
+export async function prepareDecline(signerId: string): Promise<{ ok: true; xdr: string } | Fail> {
+  const ready = await readyToDecline(signerId);
+  if ("ok" in ready) return ready;
+  try {
+    return { ok: true, xdr: await buildDeclineTx(chainConfigFromEnv(), await declineArgs(ready.a, ready.wallet)) };
+  } catch (e) {
+    console.error("prepareDecline failed", e);
+    const why = explainChainError(e);
+    if (why === "NO_ACCOUNT") {
+      return { ok: false, needsFunds: true, error: "Your wallet isn’t on the test network yet. Add free test XLM to cover the fee." };
+    }
+    return { ok: false, error: why };
+  }
+}
+
+/** Step 2: record the decline, stop the document, tell the sender. */
+export async function submitDecline(signerId: string, signedXdr: string, reason: string): Promise<{ ok: true } | Fail> {
+  const ready = await readyToDecline(signerId);
+  if ("ok" in ready) return ready;
+  const { a, wallet } = ready;
+  const note = reason.trim().slice(0, 500);
+  let hash: string;
+  try {
+    const c = chainConfigFromEnv();
+    hash = (await submitAndWait(c, checkSignedDecline(c, signedXdr, await declineArgs(a, wallet)))).hash;
+  } catch (e) {
+    console.error("submitDecline failed", e);
+    const msg = e instanceof Error ? e.message : "";
+    return { ok: false, error: /doesn’t match|wasn’t signed|Still waiting|busy/.test(msg) ? msg : explainChainError(e) };
+  }
+  const now = new Date().toISOString();
+  await db()
+    .from("document_signers")
+    .update({ status: "declined", declined_at: now, wallet_address: wallet })
+    .eq("id", a.signer.id);
+  await db().from("documents").update({ status: "declined" }).eq("id", a.doc.id).eq("status", "pending");
+  await db().from("document_events").insert({
+    document_id: a.doc.id,
+    kind: "declined",
+    signer_id: a.signer.id,
+    actor_wallet: wallet,
+    tx_hash: hash,
+    detail: note ? { reason: note } : {},
+  });
+  const profile = await getProfile(wallet);
+  await sendDeclinedEmail(a.doc.id, profile?.full_name ?? a.signer.invited_name, note);
+  return { ok: true };
 }

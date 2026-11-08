@@ -163,6 +163,50 @@ export async function buildSignTx(c: ChainConfig, a: SignArgs): Promise<string> 
   return (await s.prepareTransaction(tx)).toXDR();
 }
 
+// ---------- decline ----------
+
+export type DeclineArgs = { signer: string; chainDocId: string; slot: number; inviteProof: string };
+
+export function declineScArgs(a: DeclineArgs): xdr.ScVal[] {
+  return [new Address(a.signer).toScVal(), bytes(a.chainDocId), xdr.ScVal.scvU32(a.slot), bytes(a.inviteProof)];
+}
+
+export async function buildDeclineTx(c: ChainConfig, a: DeclineArgs): Promise<string> {
+  const s = server(c);
+  const account = await s.getAccount(a.signer);
+  const tx = new TransactionBuilder(account, { fee: "100000", networkPassphrase: c.networkPassphrase })
+    .addOperation(new Contract(c.contractId).call("decline", ...declineScArgs(a)))
+    .setTimeout(300)
+    .build();
+  return (await s.prepareTransaction(tx)).toXDR();
+}
+
+export function checkSignedDecline(c: ChainConfig, signedXdr: string, a: DeclineArgs): Transaction {
+  return checkSignedCall(c, signedXdr, a.signer, "decline", declineScArgs(a));
+}
+
+// ---------- cancel ----------
+
+export type CancelArgs = { sender: string; chainDocId: string };
+
+export function cancelScArgs(a: CancelArgs): xdr.ScVal[] {
+  return [new Address(a.sender).toScVal(), bytes(a.chainDocId)];
+}
+
+export async function buildCancelTx(c: ChainConfig, a: CancelArgs): Promise<string> {
+  const s = server(c);
+  const account = await s.getAccount(a.sender);
+  const tx = new TransactionBuilder(account, { fee: "100000", networkPassphrase: c.networkPassphrase })
+    .addOperation(new Contract(c.contractId).call("cancel", ...cancelScArgs(a)))
+    .setTimeout(300)
+    .build();
+  return (await s.prepareTransaction(tx)).toXDR();
+}
+
+export function checkSignedCancel(c: ChainConfig, signedXdr: string, a: CancelArgs): Transaction {
+  return checkSignedCall(c, signedXdr, a.sender, "cancel", cancelScArgs(a));
+}
+
 // ---------- submit ----------
 
 export type Submitted = { hash: string; ledger: number; returnValue?: unknown };
@@ -214,6 +258,13 @@ export async function inviteMessage(c: ChainConfig, chainDocId: string, slot: nu
 
 export async function getChainDocument(c: ChainConfig, chainDocId: string): Promise<Record<string, unknown>> {
   return scValToNative(await readCall(c, "get_document", [bytes(chainDocId)]));
+}
+
+export type ChainSignature = { signer: string; image_hash: Uint8Array; signed_at: bigint } | null;
+
+/** One entry per slot, in signing order (null where not signed yet). */
+export async function getChainSignatures(c: ChainConfig, chainDocId: string): Promise<ChainSignature[]> {
+  return scValToNative(await readCall(c, "get_signatures", [bytes(chainDocId)])) as ChainSignature[];
 }
 
 export async function findByHash(c: ChainConfig, hashHex: string): Promise<unknown> {

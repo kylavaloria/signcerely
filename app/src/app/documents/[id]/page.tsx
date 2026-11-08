@@ -7,6 +7,7 @@ import { SIGNER_COLORS } from "@/lib/doc-rules";
 import { requireUser } from "@/lib/profile";
 import { chainConfigFromEnv } from "@/lib/stellar/contract";
 import { db } from "@/lib/supabase";
+import { CancelDocumentButton } from "./CancelDocumentButton";
 import { SignerActions } from "./SignerActions";
 
 export const metadata: Metadata = { title: "Document · It's Your Sign" };
@@ -57,7 +58,7 @@ export default async function DocumentPage({
       .select("id, slot, invited_name, invited_email, status, signed_at, sign_tx_hash")
       .eq("document_id", doc.id)
       .order("slot"),
-    db().from("document_events").select("kind, created_at, tx_hash, signer_id").eq("document_id", doc.id).order("created_at"),
+    db().from("document_events").select("kind, created_at, tx_hash, signer_id, detail").eq("document_id", doc.id).order("created_at"),
   ]);
   const signed = (signers ?? []).filter((s) => s.status === "signed").length;
   const total = signers?.length ?? 0;
@@ -114,10 +115,27 @@ export default async function DocumentPage({
             </span>
           </div>
           {doc.summary && <p style={{ color: "var(--ink-2)" }}>{doc.summary}</p>}
+          {doc.status === "pending" && (
+            <div>
+              <CancelDocumentButton documentId={doc.id} wallet={user.wallet_address} signedCount={signed} />
+            </div>
+          )}
+          {doc.status === "cancelled" && (
+            <p className="note" role="status" style={{ background: "var(--line-2)" }}>
+              <span>
+                <strong>You cancelled this document</strong>, so it can’t be signed. To try again, send a revised version as a new document.
+              </span>
+            </p>
+          )}
           {doc.status === "completed" && (
-            <a className="btn btn-primary" href={`/documents/${doc.id}/download`} style={{ alignSelf: "flex-start" }}>
-              Download signed copy
-            </a>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <a className="btn btn-primary" href={`/documents/${doc.id}/download`}>
+                Download signed copy
+              </a>
+              <a className="btn btn-secondary" href={`/v/${doc.chain_doc_id}`}>
+                Open verification page
+              </a>
+            </div>
           )}
           <p className="help">
             Sent {fmt(doc.sent_at)} · {doc.page_count} {doc.page_count === 1 ? "page" : "pages"} · {doc.in_order ? "one after another" : "all at once"}
@@ -184,6 +202,9 @@ export default async function DocumentPage({
                 </span>
                 <span>
                   {EVENT[e.kind] ?? e.kind} {e.signer_id ? <strong>{nameOf(e.signer_id)}</strong> : null}
+                  {(e.kind === "declined" || e.kind === "cancelled") && (e.detail as { reason?: string } | null)?.reason ? (
+                    <span className="muted"> — “{(e.detail as { reason: string }).reason}”</span>
+                  ) : null}
                   {e.tx_hash && (
                     <>
                       {" · "}
