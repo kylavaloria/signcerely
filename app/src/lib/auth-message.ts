@@ -1,9 +1,9 @@
 import { Keypair, StrKey, hash } from "@stellar/stellar-sdk";
 
-/** SEP-53 prefix that Freighter (and other Stellar wallets) add before signing. */
+/** SEP-53 prefix that Varial/Freighter (and other Stellar wallets) add before signing. */
 export const SEP53_PREFIX = "Stellar Signed Message:\n";
 
-/** The text the user sees in Freighter when signing in. Rebuilt on the server to verify. */
+/** The text the user sees in their wallet when signing in. Rebuilt on the server to verify. */
 export function buildSignInMessage(input: { address: string; nonce: string; origin: string }): string {
   return [
     "It's Your Sign — sign in",

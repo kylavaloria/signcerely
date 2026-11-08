@@ -51,7 +51,7 @@ export default async function Home() {
               </Link>
             </div>
             <p className="help" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <CheckIcon size={16} color="#1F9D61" /> Free during beta. You only need a free Freighter wallet.
+              <CheckIcon size={16} color="#1F9D61" /> Free during beta. You only need a free Varial wallet.
             </p>
           </div>
         </section>

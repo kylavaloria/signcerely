@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@stellar/freighter-api": "^6.0.1",
     "@stellar/stellar-sdk": "^17.4.0",
+    "@stellar/varial-sdk": "^7.0.0",
     "@supabase/supabase-js": "^2.119.0",
     "jose": "^6.2.15",
     "next": "16.4.5",
