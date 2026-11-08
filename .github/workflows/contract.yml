@@ -11,15 +11,16 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32v1-none
       - uses: Swatinem/rust-cache@v2
       - name: Test
         run: cargo test --locked
+      - uses: stellar/stellar-cli@v30.0.1
       - name: Build WASM
-        run: cargo build --locked --release --target wasm32v1-none -p its-your-sign
+        run: stellar contract build
       - uses: actions/upload-artifact@v4
         with:
           name: its_your_sign.wasm
