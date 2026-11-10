@@ -477,3 +477,45 @@ dialog.modal::backdrop {
     overflow-y: auto;
   }
 }
+
+/* Expandable sections: a chevron shows they open, and turns when open. */
+summary.disclosure {
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+}
+summary.disclosure::-webkit-details-marker {
+  display: none;
+}
+summary.disclosure::after {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-right: 2.5px solid var(--ink-3);
+  border-bottom: 2.5px solid var(--ink-3);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.15s ease;
+}
+details[open] > summary.disclosure::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+summary.disclosure:hover::after {
+  border-color: var(--ink-2);
+}
+summary.disclosure:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  summary.disclosure::after {
+    transition: none;
+  }
+}

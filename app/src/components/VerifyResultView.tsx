@@ -72,7 +72,7 @@ export function RecordDetails({ record, testnet, contractId }: { record: Verifie
         </ul>
       </div>
       <details>
-        <summary style={{ cursor: "pointer", fontWeight: 700, minHeight: 44, display: "flex", alignItems: "center" }}>Technical details</summary>
+        <summary className="disclosure">Technical details</summary>
         <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 13, paddingTop: 6 }}>
           <div>
             <p className="tag">Signed copy fingerprint recorded on Stellar</p>
