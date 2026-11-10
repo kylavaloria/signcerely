@@ -330,14 +330,21 @@ dialog.modal::backdrop {
 }
 
 /* ---------- responsive helpers ---------- */
+.newdoc-main {
+  /* Page gutter: 24px, or wider so content stays inside 1240px on big screens. */
+  --gutter: max(24px, calc((100vw - 1240px) / 2));
+  width: 100%;
+  padding: 28px var(--gutter) 0;
+}
+/* The action bar runs edge to edge and sits flush with the bottom of the window. */
 .wizard-footer {
   position: sticky;
   bottom: 0;
   z-index: 5;
   background: #fff;
   border-top: 1px solid var(--line);
-  margin: 0 -24px;
-  padding: 14px 24px;
+  margin: auto calc(-1 * var(--gutter)) 0;
+  padding: 14px var(--gutter);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -349,9 +356,6 @@ dialog.modal::backdrop {
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
-}
-.newdoc-main {
-  padding: 28px 24px 120px;
 }
 .signer-card {
   padding: 18px;
@@ -423,11 +427,11 @@ dialog.modal::backdrop {
 
 @media (max-width: 640px) {
   .newdoc-main {
-    padding: 20px 16px 120px;
+    --gutter: 16px;
+    padding-top: 20px;
   }
   .wizard-footer {
-    margin: 0 -16px;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    padding-block: 12px calc(12px + env(safe-area-inset-bottom));
   }
   .wizard-footer .btn {
     flex: 1 1 auto;
