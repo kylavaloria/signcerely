@@ -29,7 +29,7 @@ export function NewDocShell({
           </Link>
         </div>
       </header>
-      <main className="newdoc-main" style={{ flex: 1, width: "100%", maxWidth: 1240, margin: "0 auto", display: "flex", flexDirection: "column", gap: 28 }}>
+      <main className="newdoc-main" style={{ flex: 1, display: "flex", flexDirection: "column", gap: 28 }}>
         <nav aria-label="Progress" className="stepper">
           <ol style={{ listStyle: "none", padding: 0, display: "flex", alignItems: "center", gap: 12, maxWidth: 780 }}>
             {STEPS.map((label, i) => {
