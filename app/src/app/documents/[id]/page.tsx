@@ -220,7 +220,7 @@ export default async function DocumentPage({
         </section>
 
         <details className="card" style={{ padding: "4px 24px", boxShadow: "none" }}>
-          <summary style={{ cursor: "pointer", minHeight: 52, display: "flex", alignItems: "center", fontWeight: 700 }}>Technical details</summary>
+          <summary className="disclosure">Technical details</summary>
           <div style={{ paddingBottom: 20, display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
             <div>
               <p className="tag">Document fingerprint (SHA-256)</p>
