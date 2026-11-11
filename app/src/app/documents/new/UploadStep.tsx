@@ -196,7 +196,7 @@ export function UploadStep() {
               <span>{error}</span>
             </p>
           )}
-        <div className="wizard-footer">
+        <div className="wizard-footer" style={{ justifyContent: "flex-end" }}>
           <button type="button" className="btn btn-primary" disabled={!picked || Boolean(saving)} onClick={submit} aria-busy={Boolean(saving)}>
             {busyLabel ? (
               <>
