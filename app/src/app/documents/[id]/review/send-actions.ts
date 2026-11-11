@@ -35,7 +35,7 @@ async function createArgsFor(documentId: string, wallet: string): Promise<Create
   if (error || !keys) return { ok: false, error: "Couldn’t load the signers. Please try again." };
   return {
     sender: wallet,
-    chainDocId: chainDocId(doc.id),
+    chainDocId: doc.chain_doc_id ?? chainDocId(doc.id),
     originalHash: doc.original_hash!,
     inviteKeys: keys.map((k) => k.invite_public_key),
     inOrder: doc.in_order,

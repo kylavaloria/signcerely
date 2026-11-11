@@ -53,7 +53,7 @@ export function decryptSecret(blob: string, rawKey?: string): string {
 
 /** 32-byte id used on-chain for a document, derived from its database id. */
 export function chainDocId(documentId: string): string {
-  return createHash("sha256").update(`its-your-sign:doc:${documentId}`).digest("hex");
+  return createHash("sha256").update(`signcerely:doc:${documentId}`).digest("hex");
 }
 
 function privateKeyFromSeed(secretHex: string) {
