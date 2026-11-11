@@ -5,6 +5,7 @@ import { serverEnv } from "./env";
 import { publicKeyFromSecret } from "./invite-keys";
 import { getProfile } from "./profile";
 import { getSession } from "./session";
+import { decideAccess } from "./signer-identity";
 import { db } from "./supabase";
 
 /**
@@ -14,6 +15,7 @@ import { db } from "./supabase";
  *  - the signed-in person whose confirmed email the invite was sent to, or
  *    whose wallet already signed this slot, or
  *  - the document's sender (view only).
+ * Signing is narrower: the account must also be the invited person's (see signer-identity.ts).
  */
 
 const COOKIE = "sc_invites";
@@ -100,6 +102,8 @@ export type Access = {
   canSign: boolean;
   /** Has this visitor proven the invite (link key or confirmed email)? */
   invited: boolean;
+  /** Signed in with the invite in hand, but as an account the invite wasn't meant for. */
+  wrongAccount: boolean;
   isSender: boolean;
   wallet: string | null;
 };
@@ -119,15 +123,18 @@ export async function getAccess(signerId: string): Promise<Access | null> {
   const session = await getSession();
   const wallet = session?.wallet ?? null;
   const profile = wallet ? await getProfile(wallet) : null;
-  const byLink = (await unlockedIds()).includes(signer.id);
-  const byWallet = Boolean(wallet && signer.wallet_address === wallet);
   const isSender = Boolean(wallet && doc.sender_wallet === wallet);
-  const sameEmail = Boolean(profile?.email && profile.email.toLowerCase() === signer.invited_email.toLowerCase());
-  // A confirmed email counts; so does the sender's own (unconfirmed) email on their own document.
-  const byEmail = sameEmail && Boolean(profile?.email_verified_at || isSender);
-  const invited = byLink || byEmail || byWallet;
-  if (!invited && !isSender) return { signer, doc, canSign: false, invited: false, isSender: false, wallet };
-  return { signer, doc, canSign: invited && Boolean(wallet), invited, isSender, wallet };
+  const { invited, canSign, wrongAccount } = decideAccess({
+    wallet,
+    slotWallet: signer.wallet_address,
+    invitedEmail: signer.invited_email,
+    profileEmail: profile?.email ?? null,
+    emailConfirmed: Boolean(profile?.email_verified_at),
+    isSender,
+    byLink: (await unlockedIds()).includes(signer.id),
+  });
+  if (!invited && !isSender) return { signer, doc, canSign: false, invited: false, wrongAccount: false, isSender: false, wallet };
+  return { signer, doc, canSign, invited, wrongAccount, isSender, wallet };
 }
 
 /** Name/email to prefill "Finish your profile" from invites opened in this browser. */
