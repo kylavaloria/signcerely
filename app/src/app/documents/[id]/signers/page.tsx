@@ -17,6 +17,7 @@ export default async function SignersPage({ params }: { params: Promise<{ id: st
       <SignersStep
         documentId={doc.id}
         title={doc.title}
+        summary={doc.summary}
         me={{ name: user.full_name, email: user.email }}
         initial={signers.map((s) => ({ name: s.invited_name, email: s.invited_email }))}
         initialInOrder={doc.in_order}
