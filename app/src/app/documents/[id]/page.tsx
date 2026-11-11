@@ -10,7 +10,7 @@ import { db } from "@/lib/supabase";
 import { CancelDocumentButton } from "./CancelDocumentButton";
 import { SignerActions } from "./SignerActions";
 
-export const metadata: Metadata = { title: "Document · It's Your Sign" };
+export const metadata: Metadata = { title: "Document · Signcerely" };
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   pending: { label: "Waiting for signatures", bg: "#E8ECFA", fg: "#1F3FBF" },

@@ -9,7 +9,7 @@ import { requireUser } from "@/lib/profile";
 import { DeleteDraftButton } from "./DeleteDraftButton";
 import { SendButton } from "./SendButton";
 
-export const metadata: Metadata = { title: "Review · New document · It's Your Sign" };
+export const metadata: Metadata = { title: "Review · New document · Signcerely" };
 
 const row: React.CSSProperties = {
   display: "flex",

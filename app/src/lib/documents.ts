@@ -6,6 +6,7 @@ export const DOCS_BUCKET = "documents";
 
 export type DraftDoc = {
   id: string;
+  chain_doc_id: string | null;
   title: string;
   summary: string | null;
   file_path: string | null;
@@ -34,7 +35,7 @@ export type DraftField = {
   height: number;
 };
 
-const DOC_COLS = "id, title, summary, file_path, page_count, original_hash, in_order, status, created_at, updated_at";
+const DOC_COLS = "id, chain_doc_id, title, summary, file_path, page_count, original_hash, in_order, status, created_at, updated_at";
 
 /** A draft owned by `wallet`, or 404. Drafts are visible only to their sender. */
 export async function getOwnedDraft(id: string, wallet: string): Promise<DraftDoc> {

@@ -30,7 +30,7 @@ describe("invite keys", () => {
     const k = generateInviteKey();
     expect(k.publicKeyHex).toMatch(/^[0-9a-f]{64}$/);
     expect(k.secretHex).toMatch(/^[0-9a-f]{64}$/);
-    const msg = Buffer.from("its-your-sign:invite:v1 test");
+    const msg = Buffer.from("signcerely:invite:v1 test");
     const sig = sign(null, msg, privFromHex(k.secretHex, k.publicKeyHex));
     expect(sig.length).toBe(64);
     expect(verify(null, msg, pubFromHex(k.publicKeyHex), sig)).toBe(true);

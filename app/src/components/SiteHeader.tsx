@@ -11,10 +11,10 @@ export function SiteHeader({ current, user }: Props) {
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <Link href={user ? "/dashboard" : "/"} className="brand" aria-label="It's Your Sign home">
+        <Link href={user ? "/dashboard" : "/"} className="brand" aria-label="Signcerely home">
           <Logo />
           <span className="h" style={{ fontSize: 21, fontWeight: 700 }}>
-            It’s Your Sign
+            Signcerely
           </span>
           <span className="beta">Beta</span>
         </Link>

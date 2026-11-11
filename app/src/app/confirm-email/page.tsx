@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { AlertIcon, CheckIcon } from "@/components/icons";
 import { confirmEmailToken } from "@/lib/email-confirmation";
 
-export const metadata: Metadata = { title: "Confirm email · It's Your Sign" };
+export const metadata: Metadata = { title: "Confirm email · Signcerely" };
 
 const messages = {
   invalid: "This confirmation link isn’t valid. It may have been replaced by a newer one.",

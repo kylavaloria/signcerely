@@ -5,7 +5,7 @@ import { getDraftFields, getDraftSigners, getOwnedDraft, signedPdfUrl } from "@/
 import { requireUser } from "@/lib/profile";
 import { SpotsEditor } from "./SpotsEditor";
 
-export const metadata: Metadata = { title: "Signature spots · New document · It's Your Sign" };
+export const metadata: Metadata = { title: "Signature spots · New document · Signcerely" };
 
 export default async function SpotsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

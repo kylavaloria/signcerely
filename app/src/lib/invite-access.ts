@@ -16,7 +16,7 @@ import { db } from "./supabase";
  *  - the document's sender (view only).
  */
 
-const COOKIE = "iys_invites";
+const COOKIE = "sc_invites";
 const MAX_AGE = 60 * 60 * 24 * 30;
 const key = () => new TextEncoder().encode(serverEnv("SESSION_SECRET"));
 
