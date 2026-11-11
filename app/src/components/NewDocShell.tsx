@@ -23,7 +23,7 @@ export function NewDocShell({
             New document
           </h1>
           <Link className="btn btn-ghost" href="/dashboard" style={{ minHeight: 44, padding: "0 14px" }}>
-            Save &amp; exit
+            Exit
           </Link>
         </div>
       </header>
