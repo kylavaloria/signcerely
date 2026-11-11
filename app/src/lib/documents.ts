@@ -111,6 +111,9 @@ export function nextStepHref(d: { id: string; signer_count: number }): string {
 export type SentDoc = {
   id: string;
   title: string;
+  summary: string | null;
+  page_count: number | null;
+  updated_at: string;
   status: string;
   in_order: boolean;
   sent_at: string | null;
@@ -122,7 +125,7 @@ export type SentDoc = {
 export async function listSent(wallet: string): Promise<SentDoc[]> {
   const { data, error } = await db()
     .from("documents")
-    .select("id, title, status, in_order, sent_at, completed_at, document_signers(invited_name, status, slot)")
+    .select("id, title, summary, page_count, updated_at, status, in_order, sent_at, completed_at, document_signers(invited_name, status, slot)")
     .eq("sender_wallet", wallet)
     .neq("status", "draft")
     .order("sent_at", { ascending: false });
@@ -133,7 +136,18 @@ export async function listSent(wallet: string): Promise<SentDoc[]> {
   })) as SentDoc[];
 }
 
-export type ToSign = { signerId: string; documentId: string; title: string; senderName: string; invitedAt: string | null };
+export type ToSign = {
+  signerId: string;
+  documentId: string;
+  title: string;
+  summary: string | null;
+  pageCount: number | null;
+  inOrder: boolean;
+  senderName: string;
+  invitedAt: string | null;
+  /** Everyone on the document, in signing order. */
+  signers: { invited_name: string; status: string; slot: number }[];
+};
 
 /**
  * Documents waiting for this person's signature: invites to their confirmed
@@ -142,7 +156,9 @@ export type ToSign = { signerId: string; documentId: string; title: string; send
 export async function listToSign(wallet: string, verifiedEmail: string | null): Promise<ToSign[]> {
   let q = db()
     .from("document_signers")
-    .select("id, invited_at, invited_email, wallet_address, status, documents!inner(id, title, status, sender_wallet, profiles(full_name))")
+    .select(
+      "id, invited_at, invited_email, wallet_address, status, documents!inner(id, title, summary, page_count, in_order, status, sender_wallet, profiles(full_name))",
+    )
     .in("status", ["invited", "viewed"])
     .eq("documents.status", "pending");
   q = verifiedEmail
@@ -150,8 +166,42 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
     : q.eq("wallet_address", wallet);
   const { data, error } = await q.order("invited_at", { ascending: false });
   if (error) throw dbError(error);
-  return (data ?? []).map((r) => {
-    const d = r.documents as unknown as { id: string; title: string; profiles: { full_name: string } | null };
-    return { signerId: r.id, documentId: d.id, title: d.title, senderName: d.profiles?.full_name ?? "Someone", invitedAt: r.invited_at };
-  });
+  const rows = (data ?? []).map((r) => ({
+    r,
+    d: r.documents as unknown as {
+      id: string;
+      title: string;
+      summary: string | null;
+      page_count: number | null;
+      in_order: boolean;
+      profiles: { full_name: string } | null;
+    },
+  }));
+
+  const signersByDoc = new Map<string, ToSign["signers"]>();
+  const ids = [...new Set(rows.map(({ d }) => d.id))];
+  if (ids.length) {
+    const { data: all, error: e2 } = await db()
+      .from("document_signers")
+      .select("document_id, invited_name, status, slot")
+      .in("document_id", ids);
+    if (e2) throw dbError(e2);
+    for (const s of all ?? []) {
+      const list = signersByDoc.get(s.document_id) ?? [];
+      list.push({ invited_name: s.invited_name, status: s.status, slot: s.slot });
+      signersByDoc.set(s.document_id, list);
+    }
+  }
+
+  return rows.map(({ r, d }) => ({
+    signerId: r.id,
+    documentId: d.id,
+    title: d.title,
+    summary: d.summary,
+    pageCount: d.page_count,
+    inOrder: d.in_order,
+    senderName: d.profiles?.full_name ?? "Someone",
+    invitedAt: r.invited_at,
+    signers: (signersByDoc.get(d.id) ?? []).sort((a, b) => a.slot - b.slot),
+  }));
 }
