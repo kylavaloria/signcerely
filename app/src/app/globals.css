@@ -1600,3 +1600,515 @@ dialog.modal::backdrop {
     animation: none;
   }
 }
+
+/* =====================================================================
+   Landing: scroll story. --s1/--s2/--s3 (0..1) are set from the scroll
+   position; everything below is a function of them, so it scrubs both ways.
+   ===================================================================== */
+.story {
+  --s1: 0;
+  --s2: 0;
+  --s3: 0;
+  height: 360vh;
+  position: relative;
+}
+.story-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 40px;
+  overflow: hidden;
+}
+.story-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.story-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.story-steps li {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  opacity: 0.42;
+  transition: opacity 0.35s ease, background 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
+}
+.story-steps li[data-active="true"] {
+  opacity: 1;
+  background: var(--glass);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transform: translateX(10px);
+}
+.story-steps h3 {
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 700;
+}
+.story-steps p {
+  color: var(--ink-2);
+  font-size: 16px;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease, margin 0.35s ease;
+  overflow: hidden;
+}
+.story-steps p::before {
+  content: "";
+}
+.story-steps li p {
+  max-height: 0;
+  transition: max-height 0.4s ease, margin-top 0.3s ease;
+}
+.story-steps li[data-active="true"] p {
+  max-height: 140px;
+  margin-top: 6px;
+}
+.story-num {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: var(--blue);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid #bcd4f2;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+li[data-active="true"] > .story-num {
+  background: linear-gradient(180deg, #ffe95c 0%, #ffd400 100%);
+  border-color: transparent;
+  color: var(--navy);
+}
+
+.story-stage {
+  position: relative;
+  height: min(78svh, 620px);
+  display: grid;
+  place-items: center;
+}
+.story-orb {
+  position: absolute;
+  width: min(46vw, 520px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 26%, #d6ebff 0%, #7fbcf8 28%, #3d8fe8 62%, #1f6fd6 100%);
+  box-shadow: inset -20px -26px 50px rgba(18, 72, 150, 0.35), 0 30px 70px rgba(31, 111, 214, 0.3);
+  scale: calc(0.55 + var(--s1) * 0.45);
+  translate: 0 calc((1 - var(--s1)) * 80px);
+}
+.paper {
+  position: relative;
+  width: min(100%, 360px);
+  padding: 26px 24px 22px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(18, 48, 92, 0.08), 0 30px 60px rgba(18, 48, 92, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  /* Step 1: slides up and straightens */
+  translate: 0 calc((1 - var(--s1)) * 70vh);
+  rotate: calc((1 - var(--s1)) * -14deg + var(--s3) * -3deg);
+  scale: calc(1 - var(--s3) * 0.04);
+}
+.paper .bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: #e1eaf6;
+}
+.paper-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.paper-head .bar {
+  height: 12px;
+  background: #b9cfea;
+}
+.paper-logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #6bb3f7, #1a5fc0);
+}
+.paper-signs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+.sign-slot {
+  --k: clamp(0, calc(var(--s2) * 2.2), 1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px 10px;
+  border-radius: 10px;
+  border: 1.5px dashed #9cc8f7;
+  background: rgba(225, 238, 252, 0.6);
+  font-size: 12px;
+  color: var(--navy);
+}
+.sign-slot.two {
+  --k: clamp(0, calc(var(--s2) * 2.2 - 1.1), 1);
+  border-color: #f2c200;
+  background: rgba(255, 248, 204, 0.7);
+}
+.sign-slot svg {
+  width: 100%;
+  height: auto;
+  border-bottom: 1.5px solid #c9d8ec;
+}
+.sign-slot path {
+  fill: none;
+  stroke: var(--navy);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--k));
+}
+.sign-slot b {
+  font-weight: 700;
+}
+.sign-slot small {
+  color: var(--ink-3);
+  font-size: 10.5px;
+  opacity: clamp(0, calc(var(--k) * 4 - 3), 1);
+}
+.paper-result {
+  --r: clamp(0, calc(var(--s3) * 2.4 - 0.5), 1);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--green-tint);
+  color: var(--green-ink);
+  font-size: 12px;
+  opacity: var(--r);
+  translate: 0 calc((1 - var(--r)) * 18px);
+}
+.paper-result b,
+.paper-result small {
+  display: block;
+}
+.paper-result small {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+.paper-result .tick {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #1f9d61;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+.paper-stamp {
+  --t: clamp(0, calc(var(--s3) * 5 - 2.6), 1);
+  position: absolute;
+  right: -18px;
+  top: 34px;
+  padding: 6px 14px;
+  border: 3px solid #1f9d61;
+  border-radius: 10px;
+  color: #146b42;
+  background: rgba(227, 245, 236, 0.94);
+  font: 800 15px var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: var(--t);
+  rotate: 10deg;
+  scale: calc(2.8 - var(--t) * 1.8);
+}
+.story-chip {
+  --c: clamp(0, calc(var(--s1) * 3 - 2), 1);
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 20px rgba(31, 111, 214, 0.2);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--navy);
+  opacity: var(--c);
+}
+.story-chip svg {
+  filter: none !important;
+}
+.chip-a {
+  left: -34px;
+  top: 9%;
+  translate: calc((1 - var(--c)) * 140px) calc(var(--s2) * -14px);
+}
+.chip-b {
+  right: -24px;
+  bottom: 20%;
+  translate: calc((1 - var(--c)) * -140px) calc(var(--s2) * 14px);
+}
+.story-lens {
+  --l: clamp(0, calc(var(--s3) * 2.2), 1);
+  position: absolute;
+  left: calc(4% + var(--l) * 74%);
+  top: calc(30% + var(--l) * 22%);
+  opacity: clamp(0, calc(var(--s3) * 6), 1);
+  rotate: calc(var(--l) * 20deg - 10deg);
+}
+
+@media (max-width: 860px) {
+  .story-pin {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 8px;
+    padding: 16px;
+    align-items: start;
+  }
+  .story-copy {
+    gap: 8px;
+  }
+  .story-steps {
+    gap: 2px;
+  }
+  .story-steps li {
+    padding: 8px 12px;
+    gap: 12px;
+  }
+  .story-steps li[data-active="true"] {
+    transform: none;
+  }
+  .story-steps li:not([data-active="true"]) p {
+    display: none;
+  }
+  .story-steps h3 {
+    font-size: 19px;
+  }
+  .story-steps p {
+    font-size: 14px;
+  }
+  .story-num {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+  .story-stage {
+    height: 100%;
+    min-height: 0;
+  }
+  .paper {
+    width: min(74vw, 290px);
+    padding: 18px 16px 16px;
+    gap: 6px;
+  }
+  .story-orb {
+    width: min(86vw, 380px);
+  }
+  .paper-stamp {
+    right: -8px;
+    font-size: 12px;
+  }
+  .story-lens {
+    scale: 0.7;
+  }
+  .chip-a {
+    left: 0;
+  }
+  .chip-b {
+    right: 0;
+  }
+}
+/* No motion: no pinning; show the finished document and all three steps. */
+@media (prefers-reduced-motion: reduce) {
+  .story {
+    --s1: 1;
+    --s2: 1;
+    --s3: 1;
+    height: auto;
+  }
+  .story-pin {
+    position: static;
+    height: auto;
+    padding-block: 64px;
+  }
+  .story-steps li {
+    opacity: 1;
+  }
+  .story-steps li p {
+    max-height: none;
+    margin-top: 6px;
+  }
+}
+
+/* Hero scroll hint */
+.scroll-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--blue);
+}
+.scroll-hint span {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffe95c 0%, #ffd400 100%);
+  color: var(--navy);
+}
+
+/* Why it's different: big cards that stack over each other while scrolling */
+.stack {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.stack-card {
+  position: sticky;
+  top: calc(28px + var(--i) * 26px);
+  min-height: min(56svh, 380px);
+  border-radius: 34px;
+  padding: clamp(26px, 5vw, 52px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 -10px 40px rgba(31, 111, 214, 0.14), 0 24px 60px rgba(31, 111, 214, 0.18);
+}
+.stack-card h3 {
+  font-family: var(--font-head);
+  font-size: clamp(26px, 3.6vw, 42px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+.stack-card p {
+  font-size: clamp(16px, 1.6vw, 19px);
+}
+.stack-num {
+  font: 800 15px var(--font-mono);
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+.stack-yellow {
+  background: linear-gradient(180deg, #ffef85 0%, #ffd91a 100%);
+  color: var(--navy);
+}
+.stack-blue {
+  background: linear-gradient(180deg, #2673d3 0%, #144fa8 100%);
+  color: #fff;
+}
+.stack-glass {
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  color: var(--navy);
+}
+.stack-glass h3 {
+  color: var(--blue);
+}
+.stack-art {
+  flex: none;
+  display: inline-flex;
+}
+@media (max-width: 760px) {
+  .stack-card {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    top: calc(16px + var(--i) * 16px);
+  }
+  .stack-art {
+    scale: 0.6;
+    transform-origin: 0 100%;
+    margin: -40px 0 -30px;
+  }
+}
+
+/* Closing banner: the cursor clicks once when the banner arrives, then stays. */
+@keyframes cursor-click-once {
+  0% {
+    translate: 0 0;
+    scale: 1;
+  }
+  60% {
+    translate: 150px -44px;
+    scale: 1;
+  }
+  72% {
+    translate: 150px -44px;
+    scale: 0.82;
+  }
+  100% {
+    translate: 150px -44px;
+    scale: 1;
+  }
+}
+@keyframes cta-press-once {
+  0%,
+  68% {
+    scale: 1;
+    outline: 3px solid rgba(255, 221, 31, 0);
+    outline-offset: 0;
+  }
+  76% {
+    scale: 0.94;
+    outline: 3px solid rgba(255, 221, 31, 0.9);
+    outline-offset: 2px;
+  }
+  100% {
+    scale: 1;
+    outline: 3px solid rgba(255, 221, 31, 0);
+    outline-offset: 18px;
+  }
+}
+.cta-cursor,
+.cta-band .btn-sign {
+  animation: none;
+}
+.reveal-in .cta-cursor {
+  animation: cursor-click-once 1.5s ease-in-out 0.7s both;
+}
+.reveal-in.cta-band .btn-sign {
+  animation: cta-press-once 1.5s ease-in-out 0.7s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-in .cta-cursor,
+  .reveal-in.cta-band .btn-sign {
+    animation: none;
+  }
+}
