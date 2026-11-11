@@ -196,6 +196,19 @@ export function UploadStep() {
               <span>{error}</span>
             </p>
           )}
+        <div className="wizard-footer">
+          <button type="button" className="btn btn-primary" disabled={!picked || Boolean(saving)} onClick={submit} aria-busy={Boolean(saving)}>
+            {busyLabel ? (
+              <>
+                <Spinner /> {busyLabel}
+              </>
+            ) : (
+              <>
+                Continue to signers <ArrowRight />
+              </>
+            )}
+          </button>
+        </div>
         </div>
 
         <section aria-label="Document preview" style={{ background: "#E9EDF5", borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 12, }}>
@@ -231,20 +244,6 @@ export function UploadStep() {
             </div>
           )}
         </section>
-      </div>
-
-      <div className="wizard-footer">
-        <button type="button" className="btn btn-primary" disabled={!picked || Boolean(saving)} onClick={submit} aria-busy={Boolean(saving)}>
-          {busyLabel ? (
-            <>
-              <Spinner /> {busyLabel}
-            </>
-          ) : (
-            <>
-              Continue to signers <ArrowRight />
-            </>
-          )}
-        </button>
       </div>
     </>
   );
