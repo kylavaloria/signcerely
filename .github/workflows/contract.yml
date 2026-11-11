@@ -23,5 +23,5 @@ jobs:
         run: stellar contract build
       - uses: actions/upload-artifact@v4
         with:
-          name: its_your_sign.wasm
-          path: target/wasm32v1-none/release/its_your_sign.wasm
+          name: signcerely.wasm
+          path: target/wasm32v1-none/release/signcerely.wasm
