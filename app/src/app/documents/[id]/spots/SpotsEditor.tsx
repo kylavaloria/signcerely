@@ -242,6 +242,29 @@ export function SpotsEditor({
               — signatures will go on the summary page of the signed copy.
             </p>
           </div>
+        {error && (
+          <p className="note note-red" role="alert">
+            <AlertIcon />
+            <span>{error}</span>
+          </p>
+        )}
+
+        <div className="wizard-footer">
+          <Link className="btn btn-ghost" href={`/documents/${documentId}/signers`}>
+            Back
+          </Link>
+          <button type="button" className="btn btn-primary" onClick={() => save(false)} disabled={pending || missing.length > 0} aria-busy={pending}>
+            {pending ? (
+              <>
+                <Spinner /> Saving…
+              </>
+            ) : (
+              <>
+                Continue to review <ArrowRight />
+              </>
+            )}
+          </button>
+        </div>
         </aside>
 
         <section className="spots-layout" aria-label={`Page ${page} of ${pageCount}`} style={{ flex: "999 1 560px", minWidth: 0, background: "#E3E8F2", borderRadius: 16, padding: "clamp(10px, 3vw, 20px)" }}>
@@ -361,30 +384,6 @@ export function SpotsEditor({
             </p>
           </div>
         </section>
-      </div>
-
-      {error && (
-        <p className="note note-red" role="alert">
-          <AlertIcon />
-          <span>{error}</span>
-        </p>
-      )}
-
-      <div className="wizard-footer">
-        <Link className="btn btn-ghost" href={`/documents/${documentId}/signers`}>
-          Back
-        </Link>
-        <button type="button" className="btn btn-primary" onClick={() => save(false)} disabled={pending || missing.length > 0} aria-busy={pending}>
-          {pending ? (
-            <>
-              <Spinner /> Saving…
-            </>
-          ) : (
-            <>
-              Continue to review <ArrowRight />
-            </>
-          )}
-        </button>
       </div>
     </>
   );

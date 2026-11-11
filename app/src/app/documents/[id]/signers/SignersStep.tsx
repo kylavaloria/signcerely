@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { AlertIcon, ArrowRight, InfoIcon, PlusIcon, Spinner } from "@/components/icons";
 import { MAX_SIGNERS, MIN_SIGNERS } from "@/lib/doc-rules";
@@ -67,11 +66,11 @@ export function SignersStep({
     setNextKey((k) => k + 1);
   };
 
-  function submit() {
+  function submit(then: "next" | "exit" = "next") {
     setResult({});
     start(async () => {
       try {
-        const r = await saveSigners(documentId, { inOrder, signers: rows.map(({ name, email }) => ({ name, email })) });
+        const r = await saveSigners(documentId, { inOrder, signers: rows.map(({ name, email }) => ({ name, email })) }, then);
         if (r) setResult(r);
       } catch (e) {
         rethrowNext(e);
@@ -239,6 +238,22 @@ export function SignersStep({
               <span>{result.error ?? "Fix the highlighted fields."}</span>
             </p>
           )}
+        <div className="wizard-footer">
+          <button type="button" className="btn btn-ghost" onClick={() => submit("exit")} disabled={pending}>
+            Save &amp; exit
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => submit()} disabled={pending} aria-busy={pending}>
+            {pending ? (
+              <>
+                <Spinner /> Saving…
+              </>
+            ) : (
+              <>
+                Continue <ArrowRight />
+              </>
+            )}
+          </button>
+        </div>
         </div>
 
         <aside aria-label="Document" style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -269,23 +284,6 @@ export function SignersStep({
             </ol>
           </div>
         </aside>
-      </div>
-
-      <div className="wizard-footer">
-        <Link className="btn btn-ghost hide-xs" href="/dashboard">
-          Save &amp; exit
-        </Link>
-        <button type="button" className="btn btn-primary" onClick={submit} disabled={pending} aria-busy={pending}>
-          {pending ? (
-            <>
-              <Spinner /> Saving…
-            </>
-          ) : (
-            <>
-              Continue <ArrowRight />
-            </>
-          )}
-        </button>
       </div>
     </>
   );
