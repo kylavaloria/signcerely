@@ -307,9 +307,6 @@ export function SigningView(p: Props) {
                     ? "Varial shows the transaction. A small fee in test XLM applies."
                     : "You’ll approve in Varial before anything is recorded."}
                 </p>
-                <p className="help" style={{ textAlign: "center", fontWeight: 600, color: "var(--navy)" }}>
-                  Mean it once. We’ll remember.
-                </p>
               </div>
             </>
           )}
