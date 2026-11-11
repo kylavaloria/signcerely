@@ -12,7 +12,7 @@ export type SignersResult = {
   fieldErrors?: Record<number, { name?: string; email?: string }>;
 };
 
-export async function saveSigners(documentId: string, input: unknown): Promise<SignersResult> {
+export async function saveSigners(documentId: string, input: unknown, then: "next" | "exit" = "next"): Promise<SignersResult> {
   const session = await getSession();
   if (!session) redirect("/sign-in");
   const doc = await getOwnedDraft(documentId, session.wallet);
@@ -54,5 +54,5 @@ export async function saveSigners(documentId: string, input: unknown): Promise<S
   }
   await db().from("documents").update({ in_order: parsed.data.inOrder }).eq("id", doc.id);
 
-  redirect(`/documents/${doc.id}/spots`);
+  redirect(then === "exit" ? "/dashboard" : `/documents/${doc.id}/spots`);
 }
