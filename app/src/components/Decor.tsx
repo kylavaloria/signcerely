@@ -90,6 +90,56 @@ const ART = {
     "...BBBBBB...",
     ".....BB.....",
   ],
+  pen: [
+    ".........NN.",
+    "........NYYN",
+    ".......NYYYN",
+    "......NYYYN.",
+    ".....NYYYN..",
+    "....NYYYN...",
+    "...NYYYN....",
+    "..NWYYN.....",
+    ".NWWYN......",
+    ".NWWN.......",
+    "NNNN........",
+    "NN..........",
+  ],
+  magnifier: [
+    "...BBBB.....",
+    "..BbbbbB....",
+    ".BbWbbbbB...",
+    ".BbWbbbbB...",
+    ".BbbbbbbB...",
+    ".BbbbbbbB...",
+    "..BbbbbB....",
+    "...BBBBBB...",
+    ".......BBB..",
+    "........BBB.",
+    ".........BBB",
+    "..........BB",
+  ],
+  star: [
+    "....Y....",
+    "....Y....",
+    "...YYY...",
+    ".YYYYYYY.",
+    "YYYYYYYYY",
+    ".YYYYYYY.",
+    "...YYY...",
+    "....Y....",
+    "....Y....",
+  ],
+  people: [
+    "..BBB.....YYY.",
+    ".BBBBB...YYYYY",
+    ".BBBBB...YYYYY",
+    "..BBB.....YYY.",
+    "..............",
+    ".BBBBB...YYYYY",
+    "BBBBBBB.YYYYYY",
+    "BBBBBBB.YYYYYY",
+    "BBBBBBB.YYYYYY",
+  ],
 } as const;
 
 export function PixelArt({ name, pixel = 6, className, style }: { name: keyof typeof ART; pixel?: number; className?: string; style?: React.CSSProperties }) {
@@ -131,5 +181,69 @@ export function DecorLayer({ children, wideOnly = true }: { children: React.Reac
     <div aria-hidden="true" className={`decor-layer${wideOnly ? " wide-only" : ""}`}>
       {children}
     </div>
+  );
+}
+
+type ArtName = keyof typeof ART;
+
+/**
+ * Decorations for the empty page margins beside the content. They sit near
+ * the top of the page and only show when the window is wide enough that
+ * they cannot touch the content (`content` is the page's max content width).
+ */
+export function PageDecor({
+  content,
+  left,
+  right,
+  leftChip,
+  rightChip,
+}: {
+  content: 720 | 1000 | 1200 | 1240 | 1320;
+  left: ArtName;
+  right: ArtName;
+  leftChip?: string;
+  rightChip?: string;
+}) {
+  const edge = `calc(50% - ${content / 2}px - 150px)`;
+  return (
+    <div aria-hidden="true" className={`page-decor page-decor-${content}`}>
+      <Orb size={104} style={{ left: edge, top: 40 }} />
+      <span className="decor-float" style={{ left: `calc(${edge} + 22px)`, top: 58, ["--tilt" as string]: "-8deg" }}>
+        <PixelArt name={left} pixel={5} />
+      </span>
+      {leftChip && (
+        <Chip tone="yellow" style={{ left: `calc(${edge} + 6px)`, top: 172 }}>
+          {leftChip}
+        </Chip>
+      )}
+      <Orb size={30} tone="yellow" style={{ left: `calc(${edge} + 96px)`, top: 24 }} />
+      <span className="decor-float slow" style={{ left: `calc(${edge} + 30px)`, top: 430, ["--tilt" as string]: "10deg" }}>
+        <PixelArt name="star" pixel={5} />
+      </span>
+
+      <Orb size={84} style={{ right: edge, top: 250 }} />
+      <span className="decor-float slow" style={{ right: `calc(${edge} + 12px)`, top: 262, ["--tilt" as string]: "9deg" }}>
+        <PixelArt name={right} pixel={5} />
+      </span>
+      {rightChip && (
+        <Chip tone="glass" style={{ right: `calc(${edge} + 4px)`, top: 356 }}>
+          {rightChip}
+        </Chip>
+      )}
+      <Orb size={46} style={{ right: `calc(${edge} + 70px)`, top: 96 }} />
+      <span className="decor-float" style={{ right: `calc(${edge} + 6px)`, top: 60, ["--tilt" as string]: "-12deg" }}>
+        <PixelArt name="star" pixel={4} />
+      </span>
+    </div>
+  );
+}
+
+/** A small sphere with a pixel icon on it, for use inside a row or card. */
+export function Badge({ name, size = 72, pixel = 4, tone = "blue" }: { name: ArtName; size?: number; pixel?: number; tone?: "blue" | "yellow" }) {
+  return (
+    <span aria-hidden="true" style={{ position: "relative", display: "inline-grid", placeItems: "center", width: size, height: size, flex: "none" }}>
+      <Orb size={size} tone={tone} style={{ position: "absolute", inset: 0 }} />
+      <PixelArt name={name} pixel={pixel} style={{ position: "relative", transform: "rotate(-6deg)" }} />
+    </span>
   );
 }

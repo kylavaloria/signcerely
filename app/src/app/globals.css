@@ -1160,3 +1160,66 @@ dialog.modal::backdrop {
   background: linear-gradient(180deg, #ffe95c 0%, #ffd400 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 22px rgba(240, 190, 0, 0.28);
 }
+
+/* Decorations in the page margins: anchored to the top of the page, scroll with it. */
+.page-decor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 70px;
+  height: 0;
+  pointer-events: none;
+  display: none;
+  z-index: 0;
+}
+.page-decor > * {
+  position: absolute;
+}
+@media (min-width: 1080px) {
+  .page-decor-720 {
+    display: block;
+  }
+}
+@media (min-width: 1360px) {
+  .page-decor-1000 {
+    display: block;
+  }
+}
+@media (min-width: 1560px) {
+  .page-decor-1200 {
+    display: block;
+  }
+}
+@media (min-width: 1600px) {
+  .page-decor-1240 {
+    display: block;
+  }
+}
+@media (min-width: 1680px) {
+  .page-decor-1320 {
+    display: block;
+  }
+}
+/* Small in-row decorations hide where rows get tight. */
+@media (max-width: 899px) {
+  .decor-inline {
+    display: none !important;
+  }
+}
+.stepper {
+  position: relative;
+}
+.stepper-decor {
+  position: absolute;
+  right: 0;
+  top: -14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+@media (max-width: 1139px) {
+  .stepper-decor {
+    display: none;
+  }
+}

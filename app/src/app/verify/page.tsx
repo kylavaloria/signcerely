@@ -1,3 +1,4 @@
+import { PageDecor } from "@/components/Decor";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getProfile } from "@/lib/profile";
@@ -14,6 +15,7 @@ export default async function VerifyPage() {
   return (
     <div style={{ minHeight: "100vh" }}>
       <SiteHeader current="verify" user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
+      <PageDecor content={720} left="magnifier" right="shield" leftChip="{ verify }" rightChip="• unchanged" />
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "56px 24px 96px", display: "flex", flexDirection: "column", gap: 28 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "center", alignItems: "center" }}>
           <h1 className="h" style={{ fontSize: "clamp(34px, 4vw, 48px)", fontWeight: 700 }}>
