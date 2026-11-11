@@ -4,7 +4,7 @@ import { getDraftSigners, getOwnedDraft } from "@/lib/documents";
 import { requireUser } from "@/lib/profile";
 import { SignersStep } from "./SignersStep";
 
-export const metadata: Metadata = { title: "Signers · New document · It's Your Sign" };
+export const metadata: Metadata = { title: "Signers · New document · Signcerely" };
 
 export default async function SignersPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

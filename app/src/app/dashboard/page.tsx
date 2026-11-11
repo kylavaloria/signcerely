@@ -6,7 +6,7 @@ import { listDrafts, listSent, listToSign, nextStepHref, type SentDoc } from "@/
 import { requireUser } from "@/lib/profile";
 import { EmailNotice } from "./EmailNotice";
 
-export const metadata: Metadata = { title: "Documents · It's Your Sign" };
+export const metadata: Metadata = { title: "Documents · Signcerely" };
 
 const day = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
@@ -80,7 +80,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <p className="muted">
               {toSign.length === 0
                 ? "Nothing is waiting for your signature right now."
-                : `${toSign.length} ${toSign.length === 1 ? "document is" : "documents are"} waiting for your sign.`}
+                : `${toSign.length} ${toSign.length === 1 ? "document is" : "documents are"} waiting for your signature.`}
             </p>
           </div>
           <Link className="btn btn-primary" href="/documents/new">
@@ -96,7 +96,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         )}
 
         {toSign.length > 0 && (
-          <Section id="ts" title="Waiting for your sign" count={toSign.length}>
+          <Section id="ts" title="Waiting for your signature" count={toSign.length}>
             {toSign.map((t) => (
               <article key={t.signerId} className="card" style={{ ...cardStyle, background: "var(--yellow-tint)", borderColor: "#F3DF95" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>

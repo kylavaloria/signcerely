@@ -9,7 +9,7 @@ import { getInvitePrefill, getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 import { ProfileForm } from "./ProfileForm";
 
-export const metadata: Metadata = { title: "Finish your profile · It's Your Sign" };
+export const metadata: Metadata = { title: "Finish your profile · Signcerely" };
 
 export default async function WelcomePage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const next = safeNext((await searchParams).next);

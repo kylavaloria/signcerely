@@ -26,7 +26,7 @@ describe("buildFinalPdf", () => {
       title: "Event Catering Agreement – Tech Summit 2026",
       originalHash: "ab".repeat(32),
       documentRef: "cd".repeat(32),
-      verifyUrl: "https://itsyoursign.app/verify",
+      verifyUrl: "https://signcerely.com/verify",
       signers,
       fields: [
         { signerId: "a", page: 3, x: 0.1, y: 0.8, width: 0.3, height: 0.085 },
@@ -44,7 +44,7 @@ describe("buildFinalPdf", () => {
       title: "Kasunduan ✍️ sa Pag-upa",
       originalHash: "ab".repeat(32),
       documentRef: "cd".repeat(32),
-      verifyUrl: "https://itsyoursign.app/verify",
+      verifyUrl: "https://signcerely.com/verify",
       signers,
       fields: [],
     });

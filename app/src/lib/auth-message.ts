@@ -6,7 +6,7 @@ export const SEP53_PREFIX = "Stellar Signed Message:\n";
 /** The text the user sees in their wallet when signing in. Rebuilt on the server to verify. */
 export function buildSignInMessage(input: { address: string; nonce: string; origin: string }): string {
   return [
-    "It's Your Sign — sign in",
+    "Signcerely — sign in",
     "",
     `Account: ${input.address}`,
     `Website: ${input.origin}`,

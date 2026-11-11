@@ -36,7 +36,7 @@ export default async function Home() {
               Signing that anyone can check
             </span>
             <h1 className="h" style={{ fontSize: "clamp(44px, 7vw, 84px)", fontWeight: 800, maxWidth: 820 }}>
-              This is your sign.
+              Mean it once. We’ll remember.
             </h1>
             <p style={{ fontSize: 20, color: "var(--ink-2)", maxWidth: 620 }}>
               Send an agreement, get everyone’s signature in the right order, and keep a signed copy that proves who
@@ -78,7 +78,7 @@ export default async function Home() {
       </main>
       <footer style={{ borderTop: "1px solid var(--line)", background: "#fff" }}>
         <div style={{ maxWidth: 1080, margin: "0 auto", padding: 24, display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12, fontSize: 13.5, color: "var(--ink-3)" }}>
-          <p>© 2026 It’s Your Sign · Beta</p>
+          <p>© 2026 Signcerely · Beta</p>
           <p style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <ShieldIcon size={13} /> Secured by Stellar
           </p>

@@ -128,7 +128,7 @@ export function VerifyResultView({ result, testnet, contractId }: { result: Veri
         </div>
         <div style={{ padding: "18px 28px", display: "flex", flexDirection: "column", gap: 8 }}>
           <p style={{ color: "var(--ink-2)", fontSize: 14.5 }}>
-            Use the signed copy downloaded from It’s Your Sign. Even printing to PDF or saving it again in another app changes the fingerprint.
+            Use the signed copy downloaded from Signcerely. Even printing to PDF or saving it again in another app changes the fingerprint.
           </p>
           <p className="help">
             Fingerprint of your file: <span className="mono" style={{ wordBreak: "break-all" }}>{result.fileHash}</span>
