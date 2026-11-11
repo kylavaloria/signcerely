@@ -7,11 +7,9 @@ const STEPS = ["Upload", "Signers", "Signature spots", "Review"] as const;
 export function NewDocShell({
   step,
   children,
-  footer,
 }: {
   step: 1 | 2 | 3 | 4;
   children: React.ReactNode;
-  footer?: React.ReactNode;
 }) {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -70,13 +68,6 @@ export function NewDocShell({
         </nav>
         {children}
       </main>
-      {footer && (
-        <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid var(--line)" }}>
-          <div style={{ maxWidth: 1240, margin: "0 auto", padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            {footer}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
