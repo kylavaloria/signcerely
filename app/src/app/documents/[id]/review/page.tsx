@@ -60,12 +60,10 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
                   <dt>Pages</dt>
                   <dd>{doc.page_count ?? "—"}</dd>
                 </div>
-                {doc.summary && (
-                  <div>
-                    <dt>What signers are agreeing to</dt>
-                    <dd>{doc.summary}</dd>
-                  </div>
-                )}
+                <div>
+                  <dt>Description</dt>
+                  <dd>{doc.summary || "—"}</dd>
+                </div>
               </dl>
             </div>
           </div>
