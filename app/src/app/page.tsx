@@ -8,7 +8,7 @@ const steps = [
   {
     icon: <SignatureIcon />,
     title: "Upload and invite",
-    text: "Add a PDF, choose 2–5 people, and decide if they sign one after another or all at once.",
+    text: "Add a PDF, choose who signs, and decide if they sign one after another or all at once.",
   },
   {
     icon: <MailIcon />,

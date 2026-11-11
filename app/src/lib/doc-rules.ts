@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 export const MIN_SIGNERS = 2;
-export const MAX_SIGNERS = 5;
+export const MAX_SIGNERS = 20; // must match the contract
 
 /** Default signature box size, as a fraction of the page (includes the date line). */
 export const BOX_WIDTH = 0.3;

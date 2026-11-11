@@ -94,7 +94,8 @@ export async function buildFinalPdf(input: FinalInput): Promise<Uint8Array> {
   }
 
   // ---- summary page (A4) ----
-  const page = pdf.addPage([595.28, 841.89]);
+  const A4: [number, number] = [595.28, 841.89];
+  let page = pdf.addPage(A4);
   const { width, height } = page.getSize();
   const m = 56;
   let y = height - m;
@@ -116,8 +117,15 @@ export async function buildFinalPdf(input: FinalInput): Promise<Uint8Array> {
   for (const s of input.signers) {
     const boxH = 92;
     if (y - boxH < m + 90) {
-      // keep it to one page for up to 5 signers; this is a safety stop
-      break;
+      // Out of room: carry on with the next signers on a new summary page.
+      page = pdf.addPage(A4);
+      y = height - m;
+      text("Signature summary (continued)", { size: 14, f: bold });
+      y -= 22;
+      text(title, { size: 10, color: INK });
+      y -= 20;
+      page.drawLine({ start: { x: m, y }, end: { x: width - m, y }, thickness: 1, color: LINE });
+      y -= 24;
     }
     const img = images.get(s.id)!;
     const size = fitImage(img, 150, 48);

@@ -27,6 +27,19 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
   const header = <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />;
   const sender = await getProfile(a.doc.sender_wallet);
 
+  const senderName = sender?.full_name ?? "Someone";
+  const signerIsSender =
+    a.signer.wallet_address === a.doc.sender_wallet ||
+    Boolean(sender?.email && a.signer.invited_email.toLowerCase() === sender.email.toLowerCase());
+  const inviteLine =
+    a.isSender && signerIsSender
+      ? "You added yourself as a signer on this agreement."
+      : a.isSender
+        ? `You invited ${a.signer.invited_name} to sign this agreement.`
+        : a.invited
+          ? `${senderName} invited you to sign this agreement.`
+          : `${senderName} invited ${a.signer.invited_name} to sign this agreement.`;
+
   const banner = (
     <div style={{ background: "var(--yellow-tint)", borderBottom: "1px solid #F0DE9C" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "16px 24px", display: "flex", alignItems: "center", gap: 16 }}>
@@ -37,7 +50,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
           <strong className="h" style={{ fontSize: 21, fontWeight: 700 }}>
             Your turn to sign.
           </strong>{" "}
-          {sender?.full_name ?? "Someone"} invited {a.signer.invited_name} to sign this agreement.
+          {inviteLine}
         </p>
       </div>
     </div>

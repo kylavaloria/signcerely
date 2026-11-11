@@ -11,7 +11,7 @@ export function SiteHeader({ current, user }: Props) {
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <Link href={user ? "/dashboard" : "/"} className="brand" aria-label="Signcerely home">
+        <Link href="/" className="brand" aria-label="Signcerely home">
           <Logo />
           <span className="h" style={{ fontSize: 21, fontWeight: 700 }}>
             Signcerely

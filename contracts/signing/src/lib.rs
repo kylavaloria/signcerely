@@ -25,7 +25,7 @@ use soroban_sdk::{
 
 /// Smallest and largest number of signers a document may have.
 pub const MIN_SIGNERS: u32 = 2;
-pub const MAX_SIGNERS: u32 = 5;
+pub const MAX_SIGNERS: u32 = 20;
 
 /// Domain separator for invite proofs. Bump the version if the format changes.
 const PROOF_DOMAIN: &[u8] = b"signcerely:invite:v1";
