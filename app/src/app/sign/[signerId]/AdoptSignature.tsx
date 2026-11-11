@@ -276,7 +276,7 @@ export const AdoptSignature = forwardRef<HTMLDialogElement, Props>(function Adop
         </label>
 
         <p className="note" style={{ background: "var(--blue-tint)" }}>
-          <ShieldIcon size={18} color="#1F3FBF" />
+          <ShieldIcon size={18} color="#1F6FD6" />
           <span>This image shows where you signed. Your approval in Varial is what makes it count — anyone can copy a picture, but not that.</span>
         </p>
 

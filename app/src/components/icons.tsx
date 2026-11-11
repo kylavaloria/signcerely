@@ -17,7 +17,7 @@ const base = (size: number, color: string, strokeWidth: number) => ({
 export function Logo({ size = 34 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="10" fill="#1F3FBF" />
+      <rect width="40" height="40" rx="10" fill="#1F6FD6" />
       <path
         d="M8 25.5c2.6-5.8 5.6-10 7.6-9.4 2.2.7-1.8 8.4.2 8.9 1.8.4 4.2-4.6 6-4 1.3.4.2 2.6 1.6 2.9"
         fill="none"
@@ -29,7 +29,7 @@ export function Logo({ size = 34 }: { size?: number }) {
       <path
         d="M23.4 23.9l3.4 3.4 7-9.6"
         fill="none"
-        stroke="#FFD23F"
+        stroke="#FFDD1F"
         strokeWidth="2.8"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -58,7 +58,7 @@ export const ArrowRight = ({ size = 18, color = "currentColor", strokeWidth = 2.
   </svg>
 );
 
-export const InfoIcon = ({ size = 18, color = "#1F3FBF", strokeWidth = 2 }: P) => (
+export const InfoIcon = ({ size = 18, color = "#1F6FD6", strokeWidth = 2 }: P) => (
   <svg {...base(size, color, strokeWidth)}>
     <circle cx="12" cy="12" r="8.5" />
     <path d="M12 11v5M12 8v.01" />

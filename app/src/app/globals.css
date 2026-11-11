@@ -1,19 +1,20 @@
 /* Signcerely — design tokens and shared components (ported from the design canvas). */
 :root {
-  --blue: #1f3fbf;
-  --blue-hover: #1a35a3;
-  --blue-tint: #e8ecfa;
-  --yellow: #ffd23f;
-  --yellow-hover: #f7c51f;
-  --yellow-tint: #fff6d6;
-  --navy: #0f1b3d;
-  --ink-2: #33406a;
-  --ink-3: #4a5578;
-  --ink-4: #5b6585;
-  --line: #e3e8f2;
-  --line-2: #eef1f7;
-  --field: #cbd3e6;
-  --mist: #f5f7fb;
+  --blue: #1f6fd6;
+  --blue-hover: #175cb8;
+  --blue-soft: #4a9bf0;
+  --blue-tint: #e1eefc;
+  --yellow: #ffdd1f;
+  --yellow-hover: #f5cf00;
+  --yellow-tint: #fff8cc;
+  --navy: #12305c;
+  --ink-2: #2f4a75;
+  --ink-3: #4a6088;
+  --ink-4: #5a6f96;
+  --line: #d6e4f5;
+  --line-2: #e6eff9;
+  --field: #b9cfea;
+  --mist: #eef4fb;
   --white: #ffffff;
   --green: #1f9d61;
   --green-ink: #146b42;
@@ -21,6 +22,9 @@
   --red: #d64545;
   --red-ink: #a82e2e;
   --red-tint: #fdf3f3;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 1px 2px rgba(31, 111, 214, 0.06), 0 14px 40px rgba(31, 111, 214, 0.14);
 
   --font-head: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
   --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -58,7 +62,7 @@ a {
   text-underline-offset: 3px;
 }
 a:hover {
-  color: #15308f;
+  color: #134c99;
 }
 
 :focus-visible {
@@ -233,7 +237,7 @@ a:hover {
 }
 .input:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(31, 63, 191, 0.18);
+  box-shadow: 0 0 0 3px rgba(31, 111, 214, 0.2);
   outline: none;
 }
 .input[aria-invalid="true"] {
@@ -882,4 +886,176 @@ summary.disclosure:focus-visible {
   .pager-go {
     margin-left: 0;
   }
+}
+
+
+/* =====================================================================
+   Sky-glass theme: soft sky background with blurred orbs, frosted cards,
+   glossy buttons. Only looks change here; layout rules are above.
+   ===================================================================== */
+html {
+  background: #e9f1fb;
+}
+body {
+  background: transparent;
+  position: relative;
+  min-height: 100vh;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 88% 6%, rgba(74, 155, 240, 0.55) 0, rgba(74, 155, 240, 0.28) 9%, rgba(74, 155, 240, 0) 20%),
+    radial-gradient(circle at 6% 34%, rgba(74, 155, 240, 0.5) 0, rgba(74, 155, 240, 0.22) 10%, rgba(74, 155, 240, 0) 22%),
+    radial-gradient(circle at 94% 62%, rgba(74, 155, 240, 0.42) 0, rgba(74, 155, 240, 0.18) 8%, rgba(74, 155, 240, 0) 18%),
+    radial-gradient(circle at 12% 96%, rgba(74, 155, 240, 0.45) 0, rgba(74, 155, 240, 0.2) 10%, rgba(74, 155, 240, 0) 22%),
+    radial-gradient(circle at 55% 110%, rgba(255, 221, 31, 0.22) 0, rgba(255, 221, 31, 0) 26%),
+    linear-gradient(180deg, #f3f8fe 0%, #e6eff9 100%);
+}
+
+/* Headings: tight, with a blue gradient fill */
+.h {
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, #2f86e8 0%, #1556b0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  padding-bottom: 0.06em; /* keeps descenders inside the clipped fill */
+}
+
+/* Frosted surfaces */
+.card,
+dialog.modal {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+dialog.modal {
+  background: rgba(255, 255, 255, 0.92);
+}
+dialog.modal::backdrop {
+  background: rgba(18, 48, 92, 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.site-header {
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 0 rgba(31, 111, 214, 0.08);
+}
+.note {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.note-yellow {
+  background: var(--yellow-tint);
+}
+.note-red {
+  background: var(--red-tint);
+}
+.note-green {
+  background: #f3fbf7;
+}
+
+/* Glossy buttons */
+.btn {
+  border-radius: 14px;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.btn-lg {
+  border-radius: 16px;
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn-primary {
+  background: linear-gradient(180deg, #4a9bf0 0%, #1f6fd6 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 6px 16px rgba(31, 111, 214, 0.32);
+  text-shadow: 0 1px 0 rgba(18, 72, 150, 0.35);
+}
+.btn-primary:hover {
+  background: linear-gradient(180deg, #3f90e8 0%, #175cb8 100%);
+}
+.btn-sign {
+  background: linear-gradient(180deg, #ffe95c 0%, #ffd400 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 16px rgba(240, 190, 0, 0.35);
+}
+.btn-sign:hover {
+  background: linear-gradient(180deg, #ffe340 0%, #f5c800 100%);
+}
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: #bcd4f2;
+  box-shadow: inset 0 1px 0 #fff, 0 2px 8px rgba(31, 111, 214, 0.08);
+}
+.btn-secondary:hover {
+  background: #fff;
+  border-color: var(--blue-soft);
+}
+.btn-ghost:hover {
+  background: rgba(31, 111, 214, 0.08);
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background: rgba(214, 228, 245, 0.8);
+  box-shadow: none;
+  text-shadow: none;
+  color: #7f92b3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}
+
+/* Inputs */
+.input,
+.doc-search,
+.page-stepper-field,
+.pager-go input {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Pills and chips */
+.beta {
+  border-color: var(--blue-soft);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--blue);
+}
+.nav a {
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+.nav a:hover {
+  background: rgba(31, 111, 214, 0.08);
+}
+.doc-tab {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: var(--glass-border);
+  box-shadow: 0 2px 8px rgba(31, 111, 214, 0.08);
+}
+.doc-tab.is-active,
+.pager-btn.is-current {
+  background: linear-gradient(180deg, #4a9bf0 0%, #1f6fd6 100%);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 6px 16px rgba(31, 111, 214, 0.28);
+}
+.doc-card-sign {
+  background: linear-gradient(180deg, rgba(255, 248, 204, 0.92) 0%, rgba(255, 240, 150, 0.85) 100%);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+.or-divider::before,
+.or-divider::after {
+  background: var(--line);
 }
