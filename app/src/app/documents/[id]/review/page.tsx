@@ -37,7 +37,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
 
   return (
     <NewDocShell step={4}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ width: "100%", maxWidth: 860, margin: "0 auto", display: "flex", flexDirection: "column", gap: 8 }}>
         <h2 className="h" style={{ fontSize: 32, fontWeight: 700 }}>
           Check everything, then send
         </h2>
@@ -46,7 +46,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         </p>
       </div>
 
-      <div style={{ maxWidth: 860, display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={{ width: "100%", maxWidth: 860, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
         <div className="card" style={{ boxShadow: "none" }}>
           <div style={{ ...row, borderTop: 0 }}>
             <div>
