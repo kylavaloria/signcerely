@@ -1,3 +1,4 @@
+import { PageDecor } from "@/components/Decor";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -83,6 +84,7 @@ export default async function DocumentPage({
   return (
     <div style={{ minHeight: "100vh" }}>
       <SiteHeader current="documents" user={{ name: user.full_name, wallet: user.wallet_address }} />
+      <PageDecor content={1000} left="people" right="document" leftChip="• signers" rightChip="{ on record }" />
       <main style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 24px 80px", display: "flex", flexDirection: "column", gap: 24 }}>
         <Link href="/dashboard" style={{ fontWeight: 600, fontSize: 14.5 }}>
           ← All documents
