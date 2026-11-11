@@ -3,7 +3,7 @@ import { NewDocShell } from "@/components/NewDocShell";
 import { requireUser } from "@/lib/profile";
 import { UploadStep } from "./UploadStep";
 
-export const metadata: Metadata = { title: "New document · It's Your Sign" };
+export const metadata: Metadata = { title: "New document · Signcerely" };
 
 export default async function NewDocumentPage() {
   await requireUser();

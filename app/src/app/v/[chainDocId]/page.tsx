@@ -8,7 +8,7 @@ import { chainConfigFromEnv } from "@/lib/stellar/contract";
 import { loadRecord } from "@/lib/verify";
 import { VerifyForm } from "../../verify/VerifyForm";
 
-export const metadata: Metadata = { title: "Verification record · It's Your Sign" };
+export const metadata: Metadata = { title: "Verification record · Signcerely" };
 
 /** Shareable record of one document: who signed and when, straight from Stellar. */
 export default async function VerificationRecordPage({ params }: { params: Promise<{ chainDocId: string }> }) {

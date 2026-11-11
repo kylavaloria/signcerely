@@ -41,7 +41,7 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
   function openLink(e: React.FormEvent) {
     e.preventDefault();
     const m = link.trim().match(/([0-9a-f]{64})/i);
-    if (!m) return setLinkError("Paste a verification link like itsyoursign.app/v/… or the 64-character document ID.");
+    if (!m) return setLinkError("Paste a verification link like signcerely.com/v/… or the 64-character document ID.");
     setLinkError(null);
     router.push(`/v/${m[1].toLowerCase()}`);
   }
@@ -107,7 +107,7 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
               Or paste a verification link
             </label>
             <div style={{ display: "flex", gap: 8 }}>
-              <input id="v-link" className="input" type="text" placeholder="itsyoursign.app/v/…" value={link} onChange={(e) => setLink(e.target.value)} aria-invalid={Boolean(linkError)} />
+              <input id="v-link" className="input" type="text" placeholder="signcerely.com/v/…" value={link} onChange={(e) => setLink(e.target.value)} aria-invalid={Boolean(linkError)} />
               <button type="submit" className="btn btn-primary">
                 Check
               </button>
@@ -118,7 +118,7 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
         <p className="note" style={{ gridColumn: "1 / -1" }}>
           <AlertIcon color="#1F3FBF" />
           <span>
-            <strong>Tip:</strong> Use the signed copy you downloaded from It’s Your Sign. A printout, scan, or a file saved again in another app will have a
+            <strong>Tip:</strong> Use the signed copy you downloaded from Signcerely. A printout, scan, or a file saved again in another app will have a
             different fingerprint and won’t match — even if the words look the same.
           </span>
         </p>

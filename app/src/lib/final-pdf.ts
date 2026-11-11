@@ -103,7 +103,7 @@ export async function buildFinalPdf(input: FinalInput): Promise<Uint8Array> {
     page.drawText(safe(opts.f ?? font, t), { x: opts.x ?? m, y, size, font: opts.f ?? font, color: opts.color ?? NAVY });
   };
 
-  text("It's Your Sign", { size: 11, f: bold });
+  text("Signcerely", { size: 11, f: bold });
   y -= 30;
   text("Signature summary", { size: 22, f: bold });
   y -= 22;
@@ -146,6 +146,6 @@ export async function buildFinalPdf(input: FinalInput): Promise<Uint8Array> {
   text(`Check this copy at ${input.verifyUrl} - each signature is recorded on Stellar.`, { size: 8.5, color: INK });
 
   pdf.setTitle(`${input.title} (signed)`);
-  pdf.setProducer("It's Your Sign");
+  pdf.setProducer("Signcerely");
   return pdf.save();
 }

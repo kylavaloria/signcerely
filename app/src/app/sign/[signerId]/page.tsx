@@ -12,7 +12,7 @@ import { markViewed } from "./actions";
 import { InviteKeyCatcher } from "./InviteKeyCatcher";
 import { SigningView, type ViewField, type ViewSigner } from "./SigningView";
 
-export const metadata: Metadata = { title: "Review and sign · It's Your Sign" };
+export const metadata: Metadata = { title: "Review and sign · Signcerely" };
 
 async function signedUrl(bucket: string, path: string, opts?: { download?: string }) {
   const { data } = await db().storage.from(bucket).createSignedUrl(path, 60 * 30, opts);
@@ -35,7 +35,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
         </span>
         <p style={{ fontSize: 17 }}>
           <strong className="h" style={{ fontSize: 21, fontWeight: 700 }}>
-            It’s your sign.
+            Mean it once.
           </strong>{" "}
           {sender?.full_name ?? "Someone"} invited {a.signer.invited_name} to sign this agreement.
         </p>

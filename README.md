@@ -1,6 +1,6 @@
-# It's Your Sign
+# Signcerely
 
-**This is your sign.** Send a PDF, choose who signs and in what order, and get a signed copy anyone can check — with each signature recorded on Stellar.
+**Mean it once. We’ll remember.** Send a PDF, choose who signs and in what order, and get a signed copy anyone can check — with each signature recorded on Stellar.
 
 > Beta on Stellar testnet. Not for production use yet.
 

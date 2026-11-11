@@ -1,6 +1,6 @@
-# It's Your Sign — web app
+# Signcerely — web app
 
-Next.js app for It's Your Sign. See the repo README for how signing works.
+Next.js app for Signcerely. See the repo README for how signing works.
 
 ## Run locally
 

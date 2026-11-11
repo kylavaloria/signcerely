@@ -66,7 +66,7 @@ export const WalletGuide = forwardRef<HTMLDialogElement, Props>(function WalletG
             <p className="note note-yellow">
               <span>
                 <strong>Write the recovery phrase on paper and keep it private.</strong> Anyone with it can use your
-                wallet, and It’s Your Sign can’t recover it for you.
+                wallet, and Signcerely can’t recover it for you.
               </span>
             </p>
           </div>
@@ -76,7 +76,7 @@ export const WalletGuide = forwardRef<HTMLDialogElement, Props>(function WalletG
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <h3 style={{ fontSize: 17 }}>Switch Varial to Test Net</h3>
             <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
-              While It’s Your Sign is in beta, signing happens on a practice network — no real money involved. In
+              While Signcerely is in beta, signing happens on a practice network — no real money involved. In
               Varial, open <strong>Settings → Network</strong> and choose <strong>Test Net</strong>.
             </p>
           </div>

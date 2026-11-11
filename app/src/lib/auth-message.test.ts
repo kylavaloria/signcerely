@@ -17,13 +17,13 @@ const other = Keypair.random();
 const message = buildSignInMessage({
   address: kp.publicKey(),
   nonce: "a1b2c3",
-  origin: "https://itsyoursign.app",
+  origin: "https://signcerely.com",
 });
 
 describe("sign-in message", () => {
   it("names the account, website and code", () => {
     expect(message).toContain(kp.publicKey());
-    expect(message).toContain("https://itsyoursign.app");
+    expect(message).toContain("https://signcerely.com");
     expect(message).toContain("a1b2c3");
   });
 
