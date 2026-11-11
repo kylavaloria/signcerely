@@ -45,7 +45,7 @@ export function ReviewPreview({
       <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: "var(--ink-3)" }}>Preview</p>
 
       {pageCount > 1 && (
-        <nav aria-label="Pages" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <nav aria-label="Pages" style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
           {Array.from({ length: pageCount }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
