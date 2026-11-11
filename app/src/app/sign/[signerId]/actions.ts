@@ -26,6 +26,8 @@ const SIG_BUCKET = "signatures";
 const MAX_SIG_BYTES = 1024 * 1024;
 const sha256 = (b: Uint8Array) => createHash("sha256").update(b).digest("hex");
 
+const WRONG_ACCOUNT = "This invite was sent to someone else. Sign in with the account that uses the invited email.";
+
 type Fail = { ok: false; error: string; needsFunds?: boolean };
 
 export async function unlockInvite(signerId: string, secretHex: string): Promise<{ ok: boolean }> {
@@ -38,6 +40,7 @@ async function readyToSign(signerId: string): Promise<{ a: Access; wallet: strin
   const a = await getAccess(signerId);
   if (!a) return { ok: false, error: "This invite doesn’t exist." };
   if (!a.wallet) redirect(`/sign-in?next=/sign/${signerId}`);
+  if (a.wrongAccount) return { ok: false, error: WRONG_ACCOUNT };
   if (!a.canSign) return { ok: false, error: "Open this page from your invite email to sign." };
   if (a.doc.status !== "pending") return { ok: false, error: "This document is no longer waiting for signatures." };
   if (a.signer.status === "signed") return { ok: false, error: "You’ve already signed this document." };
@@ -264,7 +267,7 @@ export async function submitSign(signerId: string, signedXdr: string): Promise<{
 /** Mark the invite as opened (once). */
 export async function markViewed(signerId: string): Promise<void> {
   const a = await getAccess(signerId);
-  if (!a?.invited || a.signer.status !== "invited") return;
+  if (!a?.invited || a.wrongAccount || a.signer.status !== "invited") return;
   await db().from("document_signers").update({ status: "viewed", viewed_at: new Date().toISOString() }).eq("id", signerId).eq("status", "invited");
   await db().from("document_events").insert({ document_id: a.doc.id, kind: "viewed", signer_id: signerId, actor_wallet: a.wallet });
 }
@@ -275,6 +278,7 @@ async function readyToDecline(signerId: string): Promise<{ a: Access; wallet: st
   const a = await getAccess(signerId);
   if (!a) return { ok: false, error: "This invite doesn’t exist." };
   if (!a.wallet) redirect(`/sign-in?next=/sign/${signerId}`);
+  if (a.wrongAccount) return { ok: false, error: WRONG_ACCOUNT };
   if (!a.canSign) return { ok: false, error: "Open this page from your invite email to respond." };
   if (a.doc.status !== "pending") return { ok: false, error: "This document is no longer waiting for signatures." };
   if (a.signer.status === "signed") return { ok: false, error: "You’ve already signed this document." };

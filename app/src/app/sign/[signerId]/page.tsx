@@ -8,6 +8,7 @@ import { DOCS_BUCKET } from "@/lib/documents";
 import { formatSignedDate } from "@/lib/final-pdf";
 import { getAccess } from "@/lib/invite-access";
 import { getProfile } from "@/lib/profile";
+import { maskEmail } from "@/lib/signer-identity";
 import { db } from "@/lib/supabase";
 import { markViewed } from "./actions";
 import { InviteKeyCatcher } from "./InviteKeyCatcher";
@@ -37,7 +38,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
       ? "You added yourself as a signer on this agreement."
       : a.isSender
         ? `You invited ${a.signer.invited_name} to sign this agreement.`
-        : a.invited
+        : a.invited && !a.wrongAccount
           ? `${senderName} invited you to sign this agreement.`
           : `${senderName} invited ${a.signer.invited_name} to sign this agreement.`;
 
@@ -121,7 +122,9 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
   const completed = a.doc.status === "completed";
   const iSigned = a.signer.status === "signed";
   const earlierPending = a.doc.in_order && (signers ?? []).some((s) => s.slot < a.signer.slot && s.status !== "signed");
-  const blockedReason = !a.invited
+  const blockedReason = a.wrongAccount
+    ? `This invite was sent to ${a.signer.invited_name} (${maskEmail(a.signer.invited_email)}), but you’re signed in as ${profile?.full_name ?? "another account"}. Sign out and sign in with the account that uses that email to sign.`
+    : !a.invited
     ? "You’re viewing this as the sender. Each person signs from their own invite."
     : a.doc.status !== "pending"
       ? "This document is no longer waiting for signatures."
