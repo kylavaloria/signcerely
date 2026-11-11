@@ -745,3 +745,141 @@ summary.disclosure:focus-visible {
   height: 1px;
   background: var(--line);
 }
+
+/* Dashboard search + Sent by filter */
+.doc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.doc-search {
+  flex: 1 1 320px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 14px;
+  border: 1.5px solid var(--field);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--ink-4);
+}
+.doc-search:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-tint);
+}
+.doc-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 15.5px var(--font-body);
+  color: var(--navy);
+}
+.doc-sender {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 1 300px;
+}
+.doc-sender label {
+  font-size: 14.5px;
+  font-weight: 300;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+.doc-sender select {
+  height: 48px;
+  min-width: 180px;
+  flex: 1;
+}
+
+/* Pagination */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding-top: 4px;
+}
+.pager-summary {
+  font-size: 14.5px;
+  color: var(--ink-3);
+}
+.pager-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.pager-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.pager-btn:hover:not(.is-disabled):not(.is-current) {
+  background: var(--blue-tint);
+  color: var(--blue);
+}
+.pager-btn.is-current {
+  background: var(--navy);
+  color: #fff;
+}
+.pager-btn.is-disabled {
+  color: #b9c1d6;
+}
+.pager-gap {
+  min-width: 24px;
+  text-align: center;
+  color: var(--ink-4);
+}
+.pager-go {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  font-size: 14.5px;
+  color: var(--ink-3);
+}
+.pager-go input {
+  width: 64px;
+  height: 40px;
+  border: 1.5px solid var(--field);
+  border-radius: 10px;
+  text-align: center;
+  font: 600 14.5px var(--font-body);
+  color: var(--navy);
+  background: var(--white);
+}
+.pager-go input:focus {
+  outline: 0;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-tint);
+}
+.pager-go button {
+  border: 0;
+  background: none;
+  font: 600 14.5px var(--font-body);
+  color: var(--ink-2);
+  cursor: pointer;
+  height: 40px;
+  padding: 0 6px;
+}
+.pager-go button:hover {
+  color: var(--blue);
+}
+@media (max-width: 640px) {
+  .pager-go {
+    margin-left: 0;
+  }
+}

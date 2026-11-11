@@ -29,12 +29,14 @@ const Arrow = ({ up }: { up?: boolean }) => (
 export function SignersStep({
   documentId,
   title,
+  summary,
   me,
   initial,
   initialInOrder,
 }: {
   documentId: string;
   title: string;
+  summary: string | null;
   me: { name: string; email: string | null };
   initial: { name: string; email: string }[];
   initialInOrder: boolean;
@@ -257,9 +259,15 @@ export function SignersStep({
         </div>
 
         <aside aria-label="Document" style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="card" style={{ padding: 20, boxShadow: "none" }}>
-            <p className="tag">Document</p>
-            <p style={{ fontWeight: 700 }}>{title}</p>
+          <div className="card" style={{ padding: 20, boxShadow: "none", display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <p className="tag">Document</p>
+              <p style={{ fontWeight: 700, overflowWrap: "anywhere" }}>{title}</p>
+            </div>
+            <div style={{ borderTop: "1px solid var(--line-2)", paddingTop: 12 }}>
+              <p style={{ fontSize: 13.5, fontWeight: 300, color: "var(--ink-4)", marginBottom: 2 }}>What signers are agreeing to</p>
+              <p style={{ fontSize: 14.5, color: summary ? "var(--ink-2)" : "var(--ink-4)" }}>{summary || "No description added."}</p>
+            </div>
           </div>
           <div style={{ background: "var(--blue-tint)", borderRadius: 14, padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
             <p style={{ fontWeight: 700 }}>How signing will go</p>
