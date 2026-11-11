@@ -18,8 +18,8 @@ export function InviteKeyCatcher({ signerId, locked }: { signerId: string; locke
     let key = m?.[1] ?? null;
     if (m) history.replaceState(null, "", window.location.pathname + window.location.search);
     try {
-      if (key) sessionStorage.setItem(`iys-invite:${signerId}`, key);
-      else key = sessionStorage.getItem(`iys-invite:${signerId}`);
+      if (key) sessionStorage.setItem(`sc-invite:${signerId}`, key);
+      else key = sessionStorage.getItem(`sc-invite:${signerId}`);
     } catch {
       // storage blocked; the link can be opened again
     }

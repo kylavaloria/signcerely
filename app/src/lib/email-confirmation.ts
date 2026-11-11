@@ -44,13 +44,13 @@ export async function sendEmailConfirmation(input: {
   const first = input.name.split(/\s+/)[0];
   return sendEmail({
     to: input.email,
-    subject: "Confirm your email for It’s Your Sign",
-    text: `Hi ${first},\n\nConfirm this email so we can tell you when it's your turn to sign:\n${url}\n\nThe link works for 24 hours. If you didn't sign up for It's Your Sign, you can ignore this email.`,
+    subject: "Confirm your email for Signcerely",
+    text: `Hi ${first},\n\nConfirm this email so we can tell you when it's your turn to sign:\n${url}\n\nThe link works for 24 hours. If you didn't sign up for Signcerely, you can ignore this email.`,
     html: layout({
       heading: "Confirm your email",
       body: `Hi ${escapeHtml(first)}, confirm this address so we can tell you when it’s your turn to sign and when everyone is done.`,
       button: { label: "Confirm email", url },
-      footer: "This link works for 24 hours. If you didn’t sign up for It’s Your Sign, you can ignore this email.",
+      footer: "This link works for 24 hours. If you didn’t sign up for Signcerely, you can ignore this email.",
     }),
   });
 }

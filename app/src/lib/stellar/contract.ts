@@ -13,7 +13,7 @@ import {
 } from "@stellar/stellar-sdk";
 
 /**
- * Talks to the It's Your Sign Soroban contract (contracts/signing).
+ * Talks to the Signcerely Soroban contract (contracts/signing).
  * No Next.js imports, so the same code runs in the app server and in the
  * testnet integration test.
  */

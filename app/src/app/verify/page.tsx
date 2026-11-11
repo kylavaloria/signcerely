@@ -5,7 +5,7 @@ import { getSession } from "@/lib/session";
 import { chainConfigFromEnv } from "@/lib/stellar/contract";
 import { VerifyForm } from "./VerifyForm";
 
-export const metadata: Metadata = { title: "Check a signed document · It's Your Sign" };
+export const metadata: Metadata = { title: "Check a signed document · Signcerely" };
 
 export default async function VerifyPage() {
   const session = await getSession();

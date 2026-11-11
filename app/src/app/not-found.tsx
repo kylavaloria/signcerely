@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { StatusPage } from "@/components/StatusPage";
 
-export const metadata: Metadata = { title: "Not found · It's Your Sign" };
+export const metadata: Metadata = { title: "Not found · Signcerely" };
 
 export default function NotFound() {
   return (

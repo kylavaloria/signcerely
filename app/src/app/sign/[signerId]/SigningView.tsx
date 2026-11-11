@@ -281,7 +281,7 @@ export function SigningView(p: Props) {
               )}
               <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
                 {adopted
-                  ? "All set. Finish to record your signature."
+                  ? "All set. Finish to record your signature — we’ll remember it."
                   : myFields.length
                     ? "Select the yellow Sign here box to add your signature."
                     : "Your signature will go on the summary page of the signed copy."}
@@ -306,6 +306,9 @@ export function SigningView(p: Props) {
                   {phase === "wallet"
                     ? "Varial shows the transaction. A small fee in test XLM applies."
                     : "You’ll approve in Varial before anything is recorded."}
+                </p>
+                <p className="help" style={{ textAlign: "center", fontWeight: 600, color: "var(--navy)" }}>
+                  Mean it once. We’ll remember.
                 </p>
               </div>
             </>

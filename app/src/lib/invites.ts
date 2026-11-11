@@ -36,13 +36,13 @@ export async function sendInviteEmail(i: InviteInput): Promise<SendResult> {
     to: i.signer.invited_email,
     subject:
       i.kind === "your-turn"
-        ? `It’s your sign: ${i.doc.title}`
+        ? `Your turn to sign: ${i.doc.title}`
         : i.kind === "reminder"
           ? `Reminder: please sign ${i.doc.title}`
           : `${i.senderName} invited you to sign ${i.doc.title}`,
     text: `Hi ${first},\n\n${lead.replace(/<[^>]+>/g, "")}\n${i.doc.summary ? `\n${i.doc.summary}\n` : ""}\nReview and sign: ${link}\n\nThis link is just for you — please don't forward it.`,
     html: layout({
-      heading: i.kind === "your-turn" ? "It’s your sign." : "You’re invited to sign",
+      heading: i.kind === "your-turn" ? "Your turn to sign." : "You’re invited to sign",
       body: `Hi ${escapeHtml(first)}, ${lead}${summary}`,
       button: { label: "Review and sign", url: link },
       footer: "This link is just for you — please don’t forward it. You’ll need a free Varial wallet to sign.",
