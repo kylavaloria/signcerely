@@ -144,6 +144,7 @@ export type ToSign = {
   pageCount: number | null;
   inOrder: boolean;
   senderName: string;
+  senderWallet: string;
   invitedAt: string | null;
   /** Everyone on the document, in signing order. */
   signers: { invited_name: string; status: string; slot: number }[];
@@ -174,6 +175,7 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
       summary: string | null;
       page_count: number | null;
       in_order: boolean;
+      sender_wallet: string;
       profiles: { full_name: string } | null;
     },
   }));
@@ -201,6 +203,7 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
     pageCount: d.page_count,
     inOrder: d.in_order,
     senderName: d.profiles?.full_name ?? "Someone",
+    senderWallet: d.sender_wallet,
     invitedAt: r.invited_at,
     signers: (signersByDoc.get(d.id) ?? []).sort((a, b) => a.slot - b.slot),
   }));

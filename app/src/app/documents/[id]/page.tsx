@@ -141,6 +141,10 @@ export default async function DocumentPage({
           </div>
           <dl className="detail-rows">
             <div>
+              <dt>Sent by</dt>
+              <dd>You ({user.full_name})</dd>
+            </div>
+            <div>
               <dt>Signed</dt>
               <dd>
                 {signed} of {total}
