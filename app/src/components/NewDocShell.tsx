@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { Badge, Chip } from "./Decor";
 import { CheckIcon, Logo } from "./icons";
 
 const STEPS = ["Upload", "Signers", "Signature spots", "Review"] as const;
+const STEP_ART = ["document", "people", "pen", "check"] as const;
+const STEP_CHIP = ["{ upload }", "{ invite }", "{ place }", "{ send }"] as const;
 
 /** Header + progress for the New document wizard. `step` is 1-based. */
 export function NewDocShell({
@@ -29,6 +32,12 @@ export function NewDocShell({
       </header>
       <main className="newdoc-main" style={{ flex: 1, display: "flex", flexDirection: "column", gap: 28 }}>
         <nav aria-label="Progress" className="stepper">
+          <span aria-hidden="true" className="stepper-decor">
+            <Chip tone="glass">{STEP_CHIP[step - 1]}</Chip>
+            <span className="decor-float" style={{ display: "inline-flex" }}>
+              <Badge name={STEP_ART[step - 1]} size={64} pixel={3.5} tone={step % 2 === 0 ? "yellow" : "blue"} />
+            </span>
+          </span>
           <ol style={{ listStyle: "none", padding: 0, display: "flex", alignItems: "center", gap: 12, maxWidth: 780 }}>
             {STEPS.map((label, i) => {
               const n = i + 1;

@@ -17,7 +17,23 @@ const base = (size: number, color: string, strokeWidth: number) => ({
 export function Logo({ size = 34 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="10" fill="#1F3FBF" />
+      <defs>
+        <linearGradient id="sc-logo-g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#6BB3F7" />
+          <stop offset=".55" stopColor="#2F86E8" />
+          <stop offset="1" stopColor="#1A5FC0" />
+        </linearGradient>
+        <linearGradient id="sc-logo-hl" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity=".55" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="sc-logo-y" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFE95C" />
+          <stop offset="1" stopColor="#FFD400" />
+        </linearGradient>
+      </defs>
+      <rect width="40" height="40" rx="11" fill="url(#sc-logo-g)" />
+      <rect x="1.5" y="1.5" width="37" height="18" rx="9.5" fill="url(#sc-logo-hl)" />
       <path
         d="M8 25.5c2.6-5.8 5.6-10 7.6-9.4 2.2.7-1.8 8.4.2 8.9 1.8.4 4.2-4.6 6-4 1.3.4.2 2.6 1.6 2.9"
         fill="none"
@@ -26,14 +42,7 @@ export function Logo({ size = 34 }: { size?: number }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M23.4 23.9l3.4 3.4 7-9.6"
-        fill="none"
-        stroke="#FFD23F"
-        strokeWidth="2.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M23.4 23.9l3.4 3.4 7-9.6" fill="none" stroke="url(#sc-logo-y)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -58,7 +67,7 @@ export const ArrowRight = ({ size = 18, color = "currentColor", strokeWidth = 2.
   </svg>
 );
 
-export const InfoIcon = ({ size = 18, color = "#1F3FBF", strokeWidth = 2 }: P) => (
+export const InfoIcon = ({ size = 18, color = "#1F6FD6", strokeWidth = 2 }: P) => (
   <svg {...base(size, color, strokeWidth)}>
     <circle cx="12" cy="12" r="8.5" />
     <path d="M12 11v5M12 8v.01" />

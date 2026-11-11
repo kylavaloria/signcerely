@@ -69,7 +69,7 @@ export type FieldInput = z.infer<typeof fieldsSchema>[number];
 
 /** Distinct colors per signing slot (on white, AA contrast for the label text). */
 export const SIGNER_COLORS = [
-  { solid: "#1F3FBF", tint: "rgba(31,63,191,.08)" },
+  { solid: "#1F6FD6", tint: "rgba(31,111,214,.08)" },
   { solid: "#0B7A75", tint: "rgba(11,122,117,.08)" },
   { solid: "#8A3FB8", tint: "rgba(138,63,184,.08)" },
   { solid: "#B4531A", tint: "rgba(180,83,26,.08)" },

@@ -1,3 +1,4 @@
+import { Chip, PageDecor, PixelArt } from "@/components/Decor";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -52,6 +53,12 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
           </strong>{" "}
           {inviteLine}
         </p>
+        <span className="decor-inline decor-float" style={{ marginLeft: "auto", display: "inline-flex", ["--tilt" as string]: "-8deg" }}>
+          <PixelArt name="pen" pixel={4} />
+        </span>
+        <span className="decor-inline" style={{ display: "inline-flex", flex: "none" }}>
+          <Chip tone="blue">{"{ sign here }"}</Chip>
+        </span>
       </div>
     </div>
   );
@@ -130,6 +137,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
       <InviteKeyCatcher signerId={signerId} locked={false} />
       {header}
       {!completed && !iSigned && banner}
+      <PageDecor content={1320} left="pen" right="check" />
       <main style={{ maxWidth: 1320, margin: "0 auto", padding: "24px 24px 64px", display: "flex", flexDirection: "column", gap: 20 }}>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12, alignItems: "flex-end" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>

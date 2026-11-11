@@ -61,11 +61,11 @@ export function layout(opts: { heading: string; body: string; button: { label: s
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F5F7FB;padding:32px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border:1px solid #E3E8F2;border-radius:16px">
 <tr><td style="padding:28px 32px 8px;font-size:18px;font-weight:bold">
-<span style="display:inline-block;background:#1F3FBF;color:#FFD23F;border-radius:8px;padding:4px 8px;margin-right:8px">✓</span>Signcerely</td></tr>
+<span style="display:inline-block;background:#1F6FD6;color:#FFDD1F;border-radius:8px;padding:4px 8px;margin-right:8px">✓</span>Signcerely</td></tr>
 <tr><td style="padding:12px 32px 0;font-size:24px;font-weight:bold;line-height:1.25">${esc(opts.heading)}</td></tr>
 <tr><td style="padding:12px 32px 0;font-size:16px;line-height:1.55;color:#33406A">${opts.body}</td></tr>
-<tr><td style="padding:24px 32px"><a href="${esc(opts.button.url)}" style="display:inline-block;background:#1F3FBF;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 22px;border-radius:10px">${esc(opts.button.label)}</a></td></tr>
-<tr><td style="padding:0 32px 28px;font-size:13px;line-height:1.5;color:#4A5578">${opts.footer}<br><br>Button not working? Copy this link:<br><span style="word-break:break-all;color:#1F3FBF">${esc(opts.button.url)}</span></td></tr>
+<tr><td style="padding:24px 32px"><a href="${esc(opts.button.url)}" style="display:inline-block;background:#1F6FD6;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 22px;border-radius:10px">${esc(opts.button.label)}</a></td></tr>
+<tr><td style="padding:0 32px 28px;font-size:13px;line-height:1.5;color:#4A5578">${opts.footer}<br><br>Button not working? Copy this link:<br><span style="word-break:break-all;color:#1F6FD6">${esc(opts.button.url)}</span></td></tr>
 </table></td></tr></table></body></html>`;
 }
 
