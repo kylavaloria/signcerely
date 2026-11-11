@@ -27,7 +27,7 @@ fn setup() -> Setup<'static> {
     let id = env.register(SigningContract, ());
     let client = SigningContractClient::new(&env, &id);
     let w = (0..6).map(|_| Address::generate(&env)).collect();
-    let keys = (0..6u8)
+    let keys = (0..(MAX_SIGNERS as u8 + 1))
         .map(|i| SigningKey::from_bytes(&[100 + i; 32]))
         .collect();
     Setup {
@@ -175,7 +175,7 @@ fn create_without_wallet_approval_fails() {
 }
 
 #[test]
-fn signer_count_must_be_two_to_five() {
+fn signer_count_must_be_within_limits() {
     let s = setup();
     let e = &s.env;
     assert_eq!(
@@ -185,10 +185,10 @@ fn signer_count_must_be_two_to_five() {
     );
     assert_eq!(
         s.client
-            .try_create(&s.sender, &h(e, DOC), &h(e, ORIGINAL), &s.invites(6), &true),
+            .try_create(&s.sender, &h(e, DOC), &h(e, ORIGINAL), &s.invites(MAX_SIGNERS as usize + 1), &true),
         Err(Ok(Error::InvalidSignerCount))
     );
-    s.create(5, true);
+    s.create(MAX_SIGNERS as usize, true);
 }
 
 #[test]

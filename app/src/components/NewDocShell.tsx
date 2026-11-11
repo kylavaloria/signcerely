@@ -17,7 +17,7 @@ export function NewDocShell({
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <header className="site-header">
         <div className="site-header-inner">
-          <Link href="/dashboard" aria-label="Back to documents" className="brand">
+          <Link href="/" aria-label="Signcerely home" className="brand">
             <Logo size={32} />
           </Link>
           <span className="beta hide-xs">Beta</span>

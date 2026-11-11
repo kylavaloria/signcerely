@@ -54,7 +54,7 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      <section className="card" aria-label="Choose what to check" style={{ padding: 24, display: "grid", gridTemplateColumns: showLink ? "repeat(auto-fit, minmax(min(320px, 100%), 1fr))" : "1fr", gap: 24, boxShadow: "none" }}>
+      <section className="card" aria-label="Choose what to check" style={{ padding: "clamp(20px, 4vw, 32px)", display: "flex", flexDirection: "column", gap: 20, boxShadow: "none" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <p style={{ fontWeight: 700 }}>Upload a copy</p>
           <input ref={input} id="v-file" type="file" accept="application/pdf,.pdf" className="visually-hidden" onChange={(e) => check(e.target.files?.[0])} />
@@ -102,9 +102,14 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
           </label>
         </div>
         {showLink && (
+          <div className="or-divider" role="separator">
+            <span>or</span>
+          </div>
+        )}
+        {showLink && (
           <form onSubmit={openLink} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <label htmlFor="v-link" style={{ fontWeight: 700 }}>
-              Or paste a verification link
+              Paste a verification link
             </label>
             <div style={{ display: "flex", gap: 8 }}>
               <input id="v-link" className="input" type="text" placeholder="signcerely.com/v/…" value={link} onChange={(e) => setLink(e.target.value)} aria-invalid={Boolean(linkError)} />
@@ -115,7 +120,7 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
             {linkError && <p className="error-text">{linkError}</p>}
           </form>
         )}
-        <p className="note" style={{ gridColumn: "1 / -1" }}>
+        <p className="note">
           <AlertIcon color="#1F3FBF" />
           <span>
             <strong>Tip:</strong> Use the signed copy you downloaded from Signcerely. A printout, scan, or a file saved again in another app will have a

@@ -14,7 +14,7 @@ export default async function VerifyPage() {
   return (
     <div style={{ minHeight: "100vh" }}>
       <SiteHeader current="verify" user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
-      <main style={{ maxWidth: 920, margin: "0 auto", padding: "56px 24px 96px", display: "flex", flexDirection: "column", gap: 28 }}>
+      <main style={{ maxWidth: 720, margin: "0 auto", padding: "56px 24px 96px", display: "flex", flexDirection: "column", gap: 28 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "center", alignItems: "center" }}>
           <h1 className="h" style={{ fontSize: "clamp(34px, 4vw, 48px)", fontWeight: 700 }}>
             Check a signed document
