@@ -1059,3 +1059,104 @@ dialog.modal::backdrop {
 .or-divider::after {
   background: var(--line);
 }
+
+/* ---------- Decorative artwork (never affects layout or clicks) ---------- */
+.decor-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+.decor-layer > * {
+  position: absolute;
+}
+.decor-host {
+  position: relative;
+}
+.decor-host > :not(.decor-layer) {
+  position: relative;
+  z-index: 1;
+}
+.orb {
+  display: block;
+  border-radius: 50%;
+}
+.orb-blue {
+  background: radial-gradient(circle at 32% 26%, #d6ebff 0%, #7fbcf8 28%, #3d8fe8 62%, #1f6fd6 100%);
+  box-shadow: inset -14px -18px 36px rgba(18, 72, 150, 0.35), inset 10px 12px 24px rgba(255, 255, 255, 0.35), 0 24px 60px rgba(31, 111, 214, 0.28);
+}
+.orb-yellow {
+  background: radial-gradient(circle at 32% 26%, #fffbd6 0%, #ffe95c 35%, #ffd400 75%, #f2c200 100%);
+  box-shadow: inset -8px -10px 20px rgba(190, 140, 0, 0.3), 0 14px 30px rgba(240, 190, 0, 0.3);
+}
+.decor-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font: italic 700 13px var(--font-body);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.decor-chip-blue {
+  background: linear-gradient(180deg, #6bb3f7 0%, #2f86e8 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 6px 14px rgba(31, 111, 214, 0.28);
+}
+.decor-chip-yellow {
+  background: linear-gradient(180deg, #ffe95c 0%, #ffd400 100%);
+  color: #12305c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 14px rgba(240, 190, 0, 0.3);
+}
+.decor-chip-glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid #6bb3f7;
+  color: #1f6fd6;
+}
+@keyframes decor-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--tilt, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--tilt, 0deg));
+  }
+}
+.decor-float {
+  animation: decor-float 6s ease-in-out infinite;
+  transform: rotate(var(--tilt, 0deg));
+}
+.decor-float.slow {
+  animation-duration: 9s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .decor-float {
+    animation: none;
+  }
+}
+/* Decorations need room: hide them where the content takes the full width. */
+@media (max-width: 1239px) {
+  .decor-layer.wide-only {
+    display: none;
+  }
+}
+
+/* Landing steps: pixel icon tile that pops out of the card */
+.step-tile {
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  margin-top: -52px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 10px 22px rgba(31, 111, 214, 0.2);
+}
+.step-tile.blue {
+  background: linear-gradient(180deg, #6bb3f7 0%, #2f86e8 100%);
+}
+.step-tile.yellow {
+  background: linear-gradient(180deg, #ffe95c 0%, #ffd400 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 22px rgba(240, 190, 0, 0.28);
+}

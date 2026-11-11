@@ -1,3 +1,4 @@
+import { Chip, DecorLayer, Orb, PixelArt } from "@/components/Decor";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { SignInCard } from "@/components/SignInCard";
@@ -36,7 +37,16 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+          <div className="decor-host" style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+            <DecorLayer>
+              <Orb size={84} style={{ left: 0, top: -112 }} />
+              <span className="decor-float" style={{ left: 15, top: -100, ["--tilt" as string]: "-8deg" }}>
+                <PixelArt name="shield" pixel={4.5} />
+              </span>
+              <Chip tone="yellow" style={{ left: 100, top: -72 }}>
+                • your wallet
+              </Chip>
+            </DecorLayer>
             <h1 className="h" style={{ fontSize: "clamp(36px, 4vw, 52px)", fontWeight: 700, textWrap: "balance" }}>
               Your wallet is your signature.
             </h1>

@@ -1,22 +1,23 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ArrowRight, CheckIcon, MailIcon, ShieldIcon, SignatureIcon } from "@/components/icons";
+import { Chip, DecorLayer, Orb, PixelArt } from "@/components/Decor";
+import { ArrowRight, CheckIcon, ShieldIcon } from "@/components/icons";
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 
 const steps = [
   {
-    icon: <SignatureIcon />,
+    icon: <PixelArt name="document" pixel={4} />,
     title: "Upload and invite",
     text: "Add a PDF, choose who signs, and decide if they sign one after another or all at once.",
   },
   {
-    icon: <MailIcon />,
+    icon: <PixelArt name="mail" pixel={4.5} />,
     title: "Everyone signs",
     text: "Each person gets an email when it’s their turn, adds their signature, and approves in their wallet.",
   },
   {
-    icon: <ShieldIcon />,
+    icon: <PixelArt name="check" pixel={4.5} />,
     title: "Anyone can check it",
     text: "Download the signed copy. Anyone can confirm who signed and that nothing changed — no account needed.",
   },
@@ -30,7 +31,30 @@ export default async function Home() {
     <div style={{ minHeight: "100vh" }}>
       <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
       <main>
-        <section>
+        <section className="decor-host" style={{ overflow: "hidden" }}>
+          <DecorLayer>
+            <Orb size={300} style={{ right: "max(24px, calc(50% - 560px))", top: 70 }} />
+            <Orb size={110} style={{ right: "max(300px, calc(50% - 250px))", top: 330 }} />
+            <Orb size={46} tone="yellow" style={{ right: "max(60px, calc(50% - 520px))", top: 40 }} />
+            <span className="decor-float" style={{ right: "max(110px, calc(50% - 470px))", top: 120, ["--tilt" as string]: "8deg" }}>
+              <PixelArt name="document" pixel={12} />
+            </span>
+            <span className="decor-float slow" style={{ right: "max(60px, calc(50% - 530px))", top: 300, ["--tilt" as string]: "-10deg" }}>
+              <PixelArt name="check" pixel={8} />
+            </span>
+            <span className="decor-float slow" style={{ right: "max(300px, calc(50% - 250px))", top: 395, ["--tilt" as string]: "-6deg" }}>
+              <PixelArt name="cursor" pixel={6} />
+            </span>
+            <Chip tone="glass" style={{ right: "max(330px, calc(50% - 230px))", top: 118 }}>
+              {"{ sign }"}
+            </Chip>
+            <Chip tone="yellow" style={{ right: "max(40px, calc(50% - 545px))", top: 420 }}>
+              • signed
+            </Chip>
+            <Chip tone="blue" style={{ right: "max(250px, calc(50% - 300px))", top: 460 }}>
+              verified
+            </Chip>
+          </DecorLayer>
           <div style={{ maxWidth: 1080, margin: "0 auto", padding: "80px 24px 72px", display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start" }}>
             <span className="tag" style={{ background: "var(--yellow-tint)", color: "var(--navy)", padding: "6px 12px", borderRadius: 999 }}>
               Signing that anyone can check
@@ -60,12 +84,10 @@ export default async function Home() {
           <h2 id="how" className="h" style={{ fontSize: 34, fontWeight: 700, marginBottom: 28 }}>
             How it works
           </h2>
-          <ol style={{ listStyle: "none", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: 20 }}>
+          <ol style={{ listStyle: "none", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "56px 20px", paddingTop: 36 }}>
             {steps.map((s, i) => (
               <li key={s.title} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12 }}>
-                <span style={{ width: 48, height: 48, borderRadius: 12, background: "var(--blue-tint)", color: "var(--blue)", display: "grid", placeItems: "center" }}>
-                  {s.icon}
-                </span>
+                <span className={`step-tile ${i % 2 === 0 ? "yellow" : "blue"}`}>{s.icon}</span>
                 <p className="tag">Step {i + 1}</p>
                 <h3 className="h" style={{ fontSize: 22, fontWeight: 700 }}>
                   {s.title}
