@@ -2112,3 +2112,65 @@ li[data-active="true"] > .story-num {
     animation: none;
   }
 }
+
+/* Closing banner cursor, anchored to the button so it lands on it at any width. */
+.cta-btn-wrap {
+  position: relative;
+  display: inline-flex;
+  z-index: 2;
+}
+.cta-cursor {
+  position: absolute;
+  left: 86%;
+  top: 62%;
+  z-index: 3;
+  display: inline-flex;
+  rotate: 0deg;
+  pointer-events: none;
+  animation: none;
+}
+.reveal-armed .cta-cursor {
+  translate: -190px 60px;
+}
+@keyframes cursor-click-once {
+  0% {
+    translate: -190px 60px;
+    scale: 1;
+  }
+  60% {
+    translate: 0 0;
+    scale: 1;
+  }
+  72% {
+    translate: 0 0;
+    scale: 0.82;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+.reveal-in .cta-cursor {
+  translate: 0 0;
+  transform-origin: 0 0;
+  animation: cursor-click-once 1.5s ease-in-out 0.7s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-armed .cta-cursor {
+    translate: 0 0;
+  }
+  .reveal-in .cta-cursor {
+    animation: none;
+  }
+}
+@media (max-width: 640px) {
+  .cta-cursor {
+    left: 84%;
+    top: 50%;
+    scale: 0.7;
+    transform-origin: 0 0;
+  }
+  .cta-band {
+    padding-bottom: 40px;
+  }
+}
