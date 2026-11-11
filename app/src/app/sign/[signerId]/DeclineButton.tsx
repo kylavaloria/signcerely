@@ -104,7 +104,7 @@ export function DeclineButton({ signerId, wallet, senderName }: { signerId: stri
           </button>
           <button type="button" className="btn" style={{ background: "var(--red)", color: "#fff" }} onClick={decline} disabled={busy} aria-busy={busy}>
             {busy && <Spinner />}
-            {phase === "wallet" ? "Approve in Varial…" : phase === "recording" ? "Recording…" : phase === "preparing" ? "Preparing…" : "Decline"}
+            {phase === "wallet" ? "Decline in Varial…" : phase === "recording" ? "Recording…" : phase === "preparing" ? "Preparing…" : "Decline"}
           </button>
         </div>
       </dialog>

@@ -4,6 +4,7 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { AlertIcon, ArrowRight, CheckIcon, Spinner } from "@/components/icons";
+import { PageStepper } from "@/components/PageStepper";
 import { PdfPage } from "@/components/PdfPage";
 import { MAX_PDF_BYTES, prettyBytes } from "@/lib/doc-rules";
 import { loadPdf, looksLikePdf, sha256Hex } from "@/lib/pdf";
@@ -197,30 +198,37 @@ export function UploadStep() {
           )}
         </div>
 
-        <section aria-label="Document preview" style={{ background: "#E9EDF5", borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 12, minHeight: 300 }}>
+        <section aria-label="Document preview" style={{ background: "#E9EDF5", borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 12, }}>
           {picked ? (
             <>
               <div style={{ boxShadow: "0 1px 3px rgba(15,27,61,.08),0 12px 32px rgba(15,27,61,.10)" }}>
                 <PdfPage pdf={picked.pdf} pageNumber={page} />
               </div>
               {picked.pdf.numPages > 1 && (
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12 }}>
-                  <button type="button" className="btn btn-secondary" style={{ minHeight: 40 }} onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-                    Previous
-                  </button>
-                  <span style={{ fontWeight: 600, fontSize: 14.5 }} aria-live="polite">
-                    Page {page} of {picked.pdf.numPages}
-                  </span>
-                  <button type="button" className="btn btn-secondary" style={{ minHeight: 40 }} onClick={() => setPage((p) => Math.min(picked.pdf.numPages, p + 1))} disabled={page === picked.pdf.numPages}>
-                    Next
-                  </button>
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <PageStepper page={page} pageCount={picked.pdf.numPages} onChange={setPage} />
                 </div>
               )}
             </>
           ) : (
-            <p className="help" style={{ margin: "auto", textAlign: "center" }}>
-              Your PDF will show here.
-            </p>
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 520,
+                margin: "0 auto",
+                aspectRatio: "8.5 / 13",
+                background: "#fff",
+                border: "1.5px dashed #C3CCE3",
+                borderRadius: 6,
+                display: "grid",
+                placeItems: "center",
+                padding: 24,
+              }}
+            >
+              <p className="help" style={{ textAlign: "center" }}>
+                Your PDF will show here.
+              </p>
+            </div>
           )}
         </section>
       </div>

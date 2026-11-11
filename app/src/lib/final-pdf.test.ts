@@ -64,6 +64,21 @@ describe("buildFinalPdf", () => {
     expect((await PDFDocument.load(out)).getPageCount()).toBe(2);
   });
 
+  it("continues the signature summary on more pages when there are many signers", async () => {
+    const many = Array.from({ length: 20 }, (_, i) => ({ ...signers[0], id: `s${i}`, name: `Signer ${i + 1}` }));
+    const out = await buildFinalPdf({
+      original: await samplePdf(1),
+      title: "Big agreement",
+      originalHash: "ab".repeat(32),
+      documentRef: "cd".repeat(32),
+      verifyUrl: "x",
+      signers: many,
+      fields: [],
+    });
+    // 1 original page + at least 3 summary pages for 20 signers (about 6 fit per page)
+    expect((await PDFDocument.load(out)).getPageCount()).toBeGreaterThanOrEqual(4);
+  });
+
   it("formats dates in Philippine time", () => {
     expect(formatSignedDate(new Date("2026-11-07T20:30:00Z"))).toBe("Nov 8, 2026");
   });

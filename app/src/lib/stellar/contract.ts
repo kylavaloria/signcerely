@@ -37,7 +37,7 @@ const bytes = (hex: string) => xdr.ScVal.scvBytes(Buffer.from(hex, "hex"));
 export const CONTRACT_ERRORS: Record<number, string> = {
   1: "This document was already sent.",
   2: "This document isn’t on the network.",
-  3: "A document needs 2 to 5 signers.",
+  3: "A document needs at least 2 signers, and no more than 20.",
   4: "Two signers ended up with the same invite. Edit the signers and try again.",
   5: "That signing spot doesn’t exist.",
   6: "This spot has already been signed.",

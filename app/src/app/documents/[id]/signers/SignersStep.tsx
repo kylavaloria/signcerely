@@ -92,7 +92,7 @@ export function SignersStep({
               Who needs to sign?
             </h2>
             <p className="muted" style={{ fontSize: 17 }}>
-              Add {MIN_SIGNERS} to {MAX_SIGNERS} people. Each one gets an email invitation to sign.
+              Each person gets an email invitation to sign.
             </p>
           </div>
 
@@ -131,9 +131,6 @@ export function SignersStep({
               <h3 id="sg-h" style={{ fontSize: 16 }}>
                 Signers
               </h3>
-              <span className="help">
-                {rows.length} of {MAX_SIGNERS}
-              </span>
             </div>
 
             {rows.map((r, i) => {

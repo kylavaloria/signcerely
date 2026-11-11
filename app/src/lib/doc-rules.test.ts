@@ -1,18 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { fieldsSchema, signersSchema } from "./doc-rules";
+import { fieldsSchema, MAX_SIGNERS, signersSchema } from "./doc-rules";
 
 const s = (name: string, email: string) => ({ name, email });
 
 describe("signer rules", () => {
-  it("accepts 2–5 people and normalizes email case", () => {
+  it("accepts a valid signer list and normalizes email case", () => {
     const r = signersSchema.parse({ inOrder: true, signers: [s("Ana", "Ana@X.com "), s("Jo", "jo@x.com")] });
     expect(r.signers[0].email).toBe("ana@x.com");
   });
 
   it("rejects too few or too many", () => {
     expect(signersSchema.safeParse({ inOrder: true, signers: [s("A", "a@x.com")] }).success).toBe(false);
-    const six = Array.from({ length: 6 }, (_, i) => s(`P${i}`, `p${i}@x.com`));
-    expect(signersSchema.safeParse({ inOrder: true, signers: six }).success).toBe(false);
+    const many = (n: number) => Array.from({ length: n }, (_, i) => s(`P${i}`, `p${i}@x.com`));
+    expect(signersSchema.safeParse({ inOrder: true, signers: many(MAX_SIGNERS) }).success).toBe(true);
+    expect(signersSchema.safeParse({ inOrder: true, signers: many(MAX_SIGNERS + 1) }).success).toBe(false);
   });
 
   it("points at the duplicate email", () => {
