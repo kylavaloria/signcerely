@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Badge, Chip, DecorLayer, Orb, PixelArt } from "@/components/Decor";
 import { ArrowRight, CheckIcon, Logo, ShieldIcon } from "@/components/icons";
 import { Reveal } from "@/components/Reveal";
+import { ScrollInk } from "@/components/ScrollInk";
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 
@@ -79,7 +80,8 @@ export default async function Home() {
     <div style={{ minHeight: "100vh" }}>
       <div className="scroll-progress" aria-hidden="true" />
       <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
-      <main>
+      <main className="landing-main">
+        <ScrollInk />
         <section className="decor-host hero" style={{ overflow: "hidden" }}>
           <DecorLayer>
             <Orb size={300} style={{ right: "max(24px, calc(50% - 560px))", top: 70 }} />
@@ -109,7 +111,13 @@ export default async function Home() {
               Signing that anyone can check
             </span>
             <h1 className="h enter" style={{ fontSize: "clamp(44px, 7vw, 84px)", fontWeight: 800, maxWidth: 820, ["--d" as string]: "90ms" }}>
-              Mean it once. We’ll remember.
+              Mean it once. We’ll{" "}
+              <span className="ink-word">
+                remember.
+                <svg aria-hidden="true" viewBox="0 0 300 24" preserveAspectRatio="none">
+                  <path d="M4 14 C 40 4, 70 22, 110 12 S 180 4, 215 14 S 270 20, 296 8" pathLength={1} />
+                </svg>
+              </span>
             </h1>
             <p className="enter" style={{ fontSize: 20, color: "var(--ink-2)", maxWidth: 620, ["--d" as string]: "200ms" }}>
               Send an agreement, get everyone’s signature in the right order, and keep a signed copy that proves who
@@ -137,7 +145,7 @@ export default async function Home() {
           </Reveal>
           <ol style={{ listStyle: "none", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "56px 20px", paddingTop: 36 }}>
             {steps.map((s, i) => (
-              <Reveal as="li" from="scale" delay={i * 130} key={s.title} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12 }}>
+              <Reveal as="li" from="pixels" delay={i * 160} key={s.title} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12 }}>
                 <span className={`step-tile ${i % 2 === 0 ? "yellow" : "blue"}`}>{s.icon}</span>
                 <p className="tag">Step {i + 1}</p>
                 <h3 className="h" style={{ fontSize: 22, fontWeight: 700 }}>
@@ -174,7 +182,8 @@ export default async function Home() {
             </div>
 
             {/* Example of what a check shows. Sample names, not real people. */}
-            <Reveal from="right" delay={150}>
+            <Reveal from="pixels" delay={100} className="example-card">
+            <span aria-hidden="true" className="stamp">Verified</span>
             <div aria-label="Example verification result" role="img" className="card" style={{ padding: "clamp(18px, 4vw, 28px)", display: "flex", flexDirection: "column", gap: 14 }}>
               <p className="tag">Example</p>
               <div className="card" style={{ boxShadow: "none", padding: 20, display: "flex", flexDirection: "column", gap: 14, background: "rgba(255,255,255,.9)" }}>
@@ -188,8 +197,8 @@ export default async function Home() {
                   </div>
                 </div>
                 <dl className="detail-rows" style={{ borderTop: "1px solid var(--line-2)", paddingTop: 14 }}>
-                  {sample.map((p) => (
-                    <div key={p.name} style={{ gridTemplateColumns: "1fr auto" }}>
+                  {sample.map((p, i) => (
+                    <div key={p.name} className="seq-row" style={{ gridTemplateColumns: "1fr auto", ["--i" as string]: i }}>
                       <dt style={{ color: "var(--navy)", fontWeight: 600 }}>{p.name}</dt>
                       <dd style={{ color: "var(--ink-3)" }}>{p.date}</dd>
                     </div>
@@ -229,7 +238,7 @@ export default async function Home() {
           <Reveal from="scale" className="cta-band decor-host">
             <DecorLayer>
               <Orb size={150} style={{ right: 210, top: -60, opacity: 0.55 }} />
-              <span className="decor-float" style={{ right: 250, bottom: 18, ["--tilt" as string]: "-8deg" }}>
+              <span className="cta-cursor" style={{ right: 250, bottom: 18 }}>
                 <PixelArt name="cursor" pixel={5} />
               </span>
             </DecorLayer>

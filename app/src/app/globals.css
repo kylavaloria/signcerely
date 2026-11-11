@@ -1370,3 +1370,233 @@ dialog.modal::backdrop {
     display: none !important;
   }
 }
+
+/* ---------- Signature motion: ink line, pixel dissolve, stamp, clicking cursor ---------- */
+.landing-main {
+  position: relative;
+  overflow-x: clip;
+}
+.landing-main > section {
+  position: relative;
+  z-index: 1;
+}
+.scroll-ink {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.scroll-ink path:first-of-type {
+  opacity: 0.34;
+}
+@media (max-width: 700px) {
+  .scroll-ink path:first-of-type {
+    opacity: 0.24;
+  }
+  .stamp {
+    right: 8px;
+  }
+}
+
+/* Hand-drawn underline under the last word of the headline */
+.ink-word {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+.ink-word svg {
+  position: absolute;
+  left: -2%;
+  bottom: -0.1em;
+  width: 104%;
+  height: 0.22em;
+  overflow: visible;
+}
+.ink-word path {
+  fill: none;
+  stroke: #ffdd1f;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ink-draw 0.9s cubic-bezier(0.6, 0, 0.2, 1) 0.95s forwards;
+}
+@keyframes ink-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Pixel dissolve: blocks cover the card, then pop away at random */
+.reveal-pixels {
+  position: relative;
+}
+.reveal-armed.reveal-pixels {
+  opacity: 1;
+  transform: none;
+}
+.pixel-cover {
+  position: absolute;
+  inset: -1px;
+  z-index: 5;
+  display: grid;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pixel-cover i {
+  display: block;
+  transition: opacity 0.22s steps(2), transform 0.3s steps(3);
+}
+.reveal-in > .pixel-cover i {
+  opacity: 0;
+  transform: scale(0.2);
+}
+/* The icon tile springs out once its card has assembled */
+.reveal-armed .step-tile {
+  transform: scale(0) rotate(-25deg);
+}
+.reveal-armed.reveal-in .step-tile {
+  transform: none;
+  transition: transform 0.55s cubic-bezier(0.3, 1.7, 0.5, 1);
+  transition-delay: calc(var(--d, 0ms) + 520ms);
+}
+
+/* Example card: signers tick in one by one, then the stamp lands */
+.example-card {
+  border-radius: 22px;
+}
+.reveal-armed .seq-row {
+  opacity: 0;
+  transform: translateX(-14px);
+}
+.reveal-armed.reveal-in .seq-row {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition-delay: calc(900ms + var(--i, 0) * 260ms);
+}
+.stamp {
+  position: absolute;
+  right: -10px;
+  top: -18px;
+  z-index: 6;
+  padding: 6px 14px;
+  border: 3px solid #1f9d61;
+  border-radius: 10px;
+  color: #146b42;
+  background: rgba(227, 245, 236, 0.92);
+  font: 800 15px var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: rotate(9deg);
+  box-shadow: 0 6px 16px rgba(20, 107, 66, 0.2);
+}
+.reveal-armed .stamp {
+  opacity: 0;
+  transform: rotate(-14deg) scale(2.6);
+}
+.reveal-armed.reveal-in .stamp {
+  opacity: 1;
+  transform: rotate(9deg) scale(1);
+  transition: opacity 0.12s ease-in, transform 0.28s cubic-bezier(0.3, 1.8, 0.5, 1);
+  transition-delay: 1850ms;
+}
+
+/* Hero labels stamp in after the artwork arrives */
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    scale: 2.4;
+    rotate: -14deg;
+  }
+  70% {
+    opacity: 1;
+    scale: 0.92;
+    rotate: 2deg;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+.hero .decor-chip {
+  animation: stamp-in 0.38s ease-out both;
+}
+.hero .decor-chip:nth-of-type(1) {
+  animation-delay: 1.15s;
+}
+.hero .decor-chip:nth-of-type(2) {
+  animation-delay: 1.4s;
+}
+.hero .decor-chip:nth-of-type(3) {
+  animation-delay: 1.65s;
+}
+
+/* Closing banner: the pixel cursor goes to the button and clicks it */
+@keyframes cursor-click {
+  0%,
+  35% {
+    translate: 0 0;
+    scale: 1;
+  }
+  55% {
+    translate: 150px -44px;
+    scale: 1;
+  }
+  60% {
+    translate: 150px -44px;
+    scale: 0.82;
+  }
+  66%,
+  80% {
+    translate: 150px -44px;
+    scale: 1;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@keyframes cta-press {
+  0%,
+  58%,
+  72%,
+  100% {
+    scale: 1;
+    outline: 0 solid rgba(255, 221, 31, 0);
+    outline-offset: 0;
+  }
+  61% {
+    scale: 0.94;
+    outline: 3px solid rgba(255, 221, 31, 0.9);
+    outline-offset: 2px;
+  }
+  70% {
+    scale: 1;
+    outline: 3px solid rgba(255, 221, 31, 0);
+    outline-offset: 16px;
+  }
+}
+.cta-cursor {
+  display: inline-flex;
+  rotate: -8deg;
+  animation: cursor-click 4.2s ease-in-out infinite;
+}
+.cta-band .btn-sign {
+  animation: cta-press 4.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ink-word path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .hero .decor-chip,
+  .cta-cursor,
+  .cta-band .btn-sign {
+    animation: none;
+  }
+}
