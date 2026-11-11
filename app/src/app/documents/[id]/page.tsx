@@ -1,3 +1,4 @@
+import { PageDecor } from "@/components/Decor";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -14,7 +15,7 @@ import { SignerActions } from "./SignerActions";
 export const metadata: Metadata = { title: "Document · Signcerely" };
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
-  pending: { label: "Waiting for signatures", bg: "#E8ECFA", fg: "#1F3FBF" },
+  pending: { label: "Waiting for signatures", bg: "#E8ECFA", fg: "#1F6FD6" },
   completed: { label: "Completed", bg: "#E3F5EC", fg: "#146B42" },
   declined: { label: "Declined", bg: "#FBE9E9", fg: "#A82E2E" },
   cancelled: { label: "Cancelled", bg: "#EEF1F7", fg: "#33406A" },
@@ -83,6 +84,7 @@ export default async function DocumentPage({
   return (
     <div style={{ minHeight: "100vh" }}>
       <SiteHeader current="documents" user={{ name: user.full_name, wallet: user.wallet_address }} />
+      <PageDecor content={1000} left="people" right="document" leftChip="• signers" rightChip="{ on record }" />
       <main style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 24px 80px", display: "flex", flexDirection: "column", gap: 24 }}>
         <Link href="/dashboard" style={{ fontWeight: 600, fontSize: 14.5 }}>
           ← All documents

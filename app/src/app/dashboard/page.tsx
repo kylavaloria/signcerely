@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ArrowRight, PlusIcon, SignatureIcon } from "@/components/icons";
+import { Badge, PageDecor, PixelArt } from "@/components/Decor";
+import { ArrowRight, PlusIcon } from "@/components/icons";
 import { listDrafts, listSent, listToSign, nextStepHref, type DraftSummary, type SentDoc, type ToSign } from "@/lib/documents";
 import { requireUser } from "@/lib/profile";
 import { ActiveTabIntoView } from "./ActiveTabIntoView";
@@ -270,6 +271,7 @@ export default async function DashboardPage({
   return (
     <div style={{ minHeight: "100vh" }}>
       <SiteHeader current="documents" user={{ name: user.full_name, wallet: user.wallet_address }} />
+      <PageDecor content={1200} left="document" right="check" leftChip="• your docs" rightChip="{ signed }" />
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px 80px", display: "flex", flexDirection: "column", gap: 28 }}>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 16 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -280,9 +282,14 @@ export default async function DashboardPage({
               Here’s everything you’ve sent, saved and been asked to sign.
             </p>
           </div>
-          <Link className="btn btn-primary" href="/documents/new">
-            <PlusIcon /> New document
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <span className="decor-inline decor-float" style={{ display: "inline-flex", ["--tilt" as string]: "-8deg" }}>
+              <PixelArt name="pen" pixel={4} />
+            </span>
+            <Link className="btn btn-primary" href="/documents/new">
+              <PlusIcon /> New document
+            </Link>
+          </div>
         </div>
 
         {!user.email_verified_at && user.email && <EmailNotice email={user.email} justSent={justSent} />}
@@ -298,9 +305,7 @@ export default async function DashboardPage({
             aria-labelledby="empty-title"
             style={{ padding: "56px 32px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 16 }}
           >
-            <span style={{ width: 64, height: 64, borderRadius: "50%", background: "var(--yellow-tint)", display: "grid", placeItems: "center", color: "var(--navy)" }}>
-              <SignatureIcon size={30} />
-            </span>
+            <Badge name="document" size={104} pixel={5} />
             <h2 id="empty-title" className="h" style={{ fontSize: 26, fontWeight: 700 }}>
               No documents yet
             </h2>

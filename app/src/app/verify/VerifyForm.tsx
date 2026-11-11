@@ -121,7 +121,7 @@ export function VerifyForm({ testnet, contractId, showLink = true }: { testnet: 
           </form>
         )}
         <p className="note">
-          <AlertIcon color="#1F3FBF" />
+          <AlertIcon color="#1F6FD6" />
           <span>
             <strong>Tip:</strong> Use the signed copy you downloaded from Signcerely. A printout, scan, or a file saved again in another app will have a
             different fingerprint and won’t match — even if the words look the same.
