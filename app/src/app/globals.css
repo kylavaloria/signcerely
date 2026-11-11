@@ -334,17 +334,11 @@ dialog.modal::backdrop {
   /* Page gutter: 24px, or wider so content stays inside 1240px on big screens. */
   --gutter: max(24px, calc((100vw - 1240px) / 2));
   width: 100%;
-  padding: 28px var(--gutter) 0;
+  padding: 28px var(--gutter) 56px;
 }
-/* The action bar runs edge to edge and sits flush with the bottom of the window. */
+/* Step actions sit at the end of the page content, not in a bar. */
 .wizard-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
-  background: #fff;
-  border-top: 1px solid var(--line);
-  margin: auto calc(-1 * var(--gutter)) 0;
-  padding: 14px var(--gutter);
+  margin-top: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -429,9 +423,7 @@ dialog.modal::backdrop {
   .newdoc-main {
     --gutter: 16px;
     padding-top: 20px;
-  }
-  .wizard-footer {
-    padding-block: 12px calc(12px + env(safe-area-inset-bottom));
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
   }
   .wizard-footer .btn {
     flex: 1 1 auto;
