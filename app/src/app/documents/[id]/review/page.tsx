@@ -37,7 +37,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
 
   return (
     <NewDocShell step={4}>
-      <div style={{ width: "100%", maxWidth: 860, margin: "0 auto", display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <h2 className="h" style={{ fontSize: 32, fontWeight: 700 }}>
           Check everything, then send
         </h2>
@@ -46,28 +46,38 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         </p>
       </div>
 
-      <div style={{ width: "100%", maxWidth: 860, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24 }}>
         <div className="card" style={{ boxShadow: "none" }}>
           <div style={{ ...row, borderTop: 0 }}>
-            <div>
+            <div style={{ flex: 1 }}>
               <p style={k}>Document</p>
-              <p style={{ fontWeight: 700, fontSize: 17 }}>{doc.title}</p>
-              <p className="help">
-                {doc.page_count} {doc.page_count === 1 ? "page" : "pages"}
-              </p>
+              <dl className="detail-rows">
+                <div>
+                  <dt>Title</dt>
+                  <dd>{doc.title}</dd>
+                </div>
+                <div>
+                  <dt>Pages</dt>
+                  <dd>{doc.page_count ?? "—"}</dd>
+                </div>
+                {doc.summary && (
+                  <div>
+                    <dt>What signers are agreeing to</dt>
+                    <dd>{doc.summary}</dd>
+                  </div>
+                )}
+              </dl>
             </div>
           </div>
-          {doc.summary && (
-            <div style={row}>
-              <div>
-                <p style={k}>What signers are agreeing to</p>
-                <p style={{ color: "var(--ink-2)", maxWidth: 620 }}>{doc.summary}</p>
-              </div>
-            </div>
-          )}
           <div style={row}>
             <div style={{ flex: 1 }}>
-              <p style={k}>Signers · {doc.in_order ? "one after another" : "all at once"}</p>
+              <p style={k}>Signers</p>
+              <dl className="detail-rows" style={{ marginBottom: 14 }}>
+                <div>
+                  <dt>Signing order</dt>
+                  <dd>{doc.in_order ? "One after another" : "All at once"}</dd>
+                </div>
+              </dl>
               <ol style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 12, marginTop: 6 }}>
                 {signers.map((s) => (
                   <li key={s.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -90,13 +100,26 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             </Link>
           </div>
           <div style={row}>
-            <div>
+            <div style={{ flex: 1 }}>
               <p style={k}>Signature spots</p>
-              <p style={{ color: "var(--ink-2)" }}>
-                {fields.length === 0
-                  ? "None placed — signatures will go on the summary page of the signed copy."
-                  : `${fields.length} ${fields.length === 1 ? "box" : "boxes"} on page ${pages.join(", ")}. The date is added under each signature automatically.`}
-              </p>
+              {fields.length === 0 ? (
+                <p style={{ color: "var(--ink-2)" }}>None placed. Signatures will go on the summary page of the signed copy.</p>
+              ) : (
+                <dl className="detail-rows">
+                  <div>
+                    <dt>Boxes</dt>
+                    <dd>{fields.length}</dd>
+                  </div>
+                  <div>
+                    <dt>{pages.length === 1 ? "Page" : "Pages"}</dt>
+                    <dd>{pages.join(", ")}</dd>
+                  </div>
+                  <div>
+                    <dt>Date</dt>
+                    <dd>Added under each signature automatically</dd>
+                  </div>
+                </dl>
+              )}
             </div>
             <Link style={edit} href={`/documents/${doc.id}/spots`} aria-label="Edit signature spots">
               Edit
@@ -132,6 +155,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
+        <div id="send-error-slot" />
       </div>
 
       <div className="wizard-footer">

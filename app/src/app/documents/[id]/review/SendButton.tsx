@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AlertIcon, ArrowRight, Spinner } from "@/components/icons";
 import { signTx } from "@/lib/wallet";
 import { addTestXlm, prepareSend, submitSend } from "./send-actions";
@@ -17,7 +18,15 @@ const LABEL: Record<Phase, string> = {
   funding: "Adding test XLM…",
 };
 
-export function SendButton({ documentId, wallet, blocked }: { documentId: string; wallet: string; blocked?: string }) {
+export function SendButton({
+  documentId,
+  wallet,
+  blocked,
+}: {
+  documentId: string;
+  wallet: string;
+  blocked?: string;
+}) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +46,9 @@ export function SendButton({ documentId, wallet, blocked }: { documentId: string
       const signed = await signTx(prep.xdr, wallet);
       if ("error" in signed) {
         throw new Error(
-          signed.error.kind === "declined" ? "You declined in Varial. Nothing was sent." : signed.error.message,
+          signed.error.kind === "declined"
+            ? "You declined in Varial. Nothing was sent."
+            : signed.error.message,
         );
       }
       setPhase("recording");
@@ -63,36 +74,59 @@ export function SendButton({ documentId, wallet, blocked }: { documentId: string
     void send();
   }
 
+  // Errors show in the page body (above the action bar), not squeezed next to the button.
+  // `error` is only ever set in the browser, so reading the DOM here is safe.
+  const slot = error ? document.getElementById("send-error-slot") : null;
+  useEffect(() => {
+    if (error) document.getElementById("send-error-slot")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [error]);
+
   const busy = phase !== "idle";
+  const errorNote = error && (
+    <p className="note note-red" role="alert">
+      <AlertIcon />
+      <span>
+        {error}
+        {needsFunds && (
+          <>
+            {" "}
+            <button
+              type="button"
+              onClick={fund}
+              disabled={busy}
+              style={{
+                border: 0,
+                background: "none",
+                padding: 0,
+                font: "inherit",
+                fontWeight: 700,
+                color: "var(--blue)",
+                textDecoration: "underline",
+                cursor: "pointer",
+              }}
+            >
+              Add free test XLM
+            </button>
+          </>
+        )}
+      </span>
+    </p>
+  );
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-      {error && (
-        <p className="note note-red" role="alert" style={{ maxWidth: 520 }}>
-          <AlertIcon />
-          <span>
-            {error}
-            {needsFunds && (
-              <>
-                {" "}
-                <button
-                  type="button"
-                  onClick={fund}
-                  disabled={busy}
-                  style={{ border: 0, background: "none", padding: 0, font: "inherit", fontWeight: 700, color: "var(--blue)", textDecoration: "underline", cursor: "pointer" }}
-                >
-                  Add free test XLM
-                </button>
-              </>
-            )}
-          </span>
-        </p>
-      )}
-      <button type="button" className="btn btn-primary" onClick={send} disabled={busy || Boolean(blocked)} aria-busy={busy} title={blocked}>
+    <>
+      {errorNote && (slot ? createPortal(errorNote, slot) : errorNote)}
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={send}
+        disabled={busy || Boolean(blocked)}
+        aria-busy={busy}
+        title={blocked}
+      >
         {busy ? <Spinner /> : null}
         {LABEL[phase]}
         {!busy && <ArrowRight />}
       </button>
-      {phase === "wallet" && <p className="help">Varial will show the transaction. A small network fee in test XLM applies.</p>}
-    </div>
+    </>
   );
 }

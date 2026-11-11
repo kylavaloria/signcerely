@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/profile";
 import { chainConfigFromEnv } from "@/lib/stellar/contract";
 import { db } from "@/lib/supabase";
 import { CancelDocumentButton } from "./CancelDocumentButton";
+import { CommentToggle } from "./CommentToggle";
 import { SignerActions } from "./SignerActions";
 
 export const metadata: Metadata = { title: "Document · Signcerely" };
@@ -66,16 +67,17 @@ export default async function DocumentPage({
   const testnet = chainConfigFromEnv().networkPassphrase.includes("Test");
   const expert = (path: string) => `https://stellar.expert/explorer/${testnet ? "testnet" : "public"}/${path}`;
   const nameOf = (sid: string | null) => signers?.find((s) => s.id === sid)?.invited_name ?? "";
-  const EVENT: Record<string, string> = {
-    created: "Recorded on Stellar",
-    sent: "Sent for signing",
-    invited: "Invited",
-    viewed: "Opened the document",
-    signed: "Signed",
-    declined: "Declined",
-    cancelled: "Cancelled",
-    completed: "Completed",
-    reminder_sent: "Reminder sent to",
+  const who = (sid: string | null) => <strong>{nameOf(sid)}</strong>;
+  const EVENT: Record<string, (sid: string | null) => React.ReactNode> = {
+    created: () => "Recorded on Stellar",
+    sent: () => "Sent for signing",
+    invited: (sid) => <>{who(sid)} was invited</>,
+    viewed: (sid) => <>{who(sid)} opened the document</>,
+    signed: (sid) => <>{who(sid)} signed</>,
+    declined: (sid) => <>{who(sid)} declined</>,
+    cancelled: () => "You cancelled the document",
+    completed: () => "Completed",
+    reminder_sent: (sid) => <>Reminder sent to {who(sid)}</>,
   };
 
   return (
@@ -115,11 +117,6 @@ export default async function DocumentPage({
             </span>
           </div>
           {doc.summary && <p style={{ color: "var(--ink-2)" }}>{doc.summary}</p>}
-          {doc.status === "pending" && (
-            <div>
-              <CancelDocumentButton documentId={doc.id} wallet={user.wallet_address} signedCount={signed} />
-            </div>
-          )}
           {doc.status === "cancelled" && (
             <p className="note" role="status" style={{ background: "var(--line-2)" }}>
               <span>
@@ -137,17 +134,37 @@ export default async function DocumentPage({
               </a>
             </div>
           )}
-          <p className="help">
-            Sent {fmt(doc.sent_at)} · {doc.page_count} {doc.page_count === 1 ? "page" : "pages"} · {doc.in_order ? "one after another" : "all at once"}
-          </p>
-          <div aria-label={`${signed} of ${total} signed`} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <div aria-hidden="true" style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>
             {(signers ?? []).map((s) => (
               <span key={s.id} style={{ flex: 1, height: 6, borderRadius: 3, background: s.status === "signed" ? "var(--green)" : "#DCE2F0" }} />
             ))}
-            <span style={{ fontSize: 13.5, fontWeight: 600, marginLeft: 8, whiteSpace: "nowrap" }}>
-              {signed} of {total} signed
-            </span>
           </div>
+          <dl className="detail-rows">
+            <div>
+              <dt>Signed</dt>
+              <dd>
+                {signed} of {total}
+              </dd>
+            </div>
+            <div>
+              <dt>Signing order</dt>
+              <dd>{doc.in_order ? "One after another" : "All at once"}</dd>
+            </div>
+            <div>
+              <dt>Pages</dt>
+              <dd>{doc.page_count ?? "—"}</dd>
+            </div>
+            <div>
+              <dt>Sent</dt>
+              <dd>{fmt(doc.sent_at) || "—"}</dd>
+            </div>
+            {doc.completed_at && (
+              <div>
+                <dt>Completed</dt>
+                <dd>{fmt(doc.completed_at)}</dd>
+              </div>
+            )}
+          </dl>
         </section>
 
         <section className="card" aria-labelledby="sg" style={{ boxShadow: "none" }}>
@@ -200,11 +217,8 @@ export default async function DocumentPage({
                 <span className="help" style={{ minWidth: 170 }}>
                   {fmt(e.created_at)}
                 </span>
-                <span>
-                  {EVENT[e.kind] ?? e.kind} {e.signer_id ? <strong>{nameOf(e.signer_id)}</strong> : null}
-                  {(e.kind === "declined" || e.kind === "cancelled") && (e.detail as { reason?: string } | null)?.reason ? (
-                    <span className="muted"> — “{(e.detail as { reason: string }).reason}”</span>
-                  ) : null}
+                <span style={{ flex: 1 }}>
+                  {EVENT[e.kind]?.(e.signer_id) ?? e.kind}
                   {e.tx_hash && (
                     <>
                       {" · "}
@@ -213,6 +227,12 @@ export default async function DocumentPage({
                       </a>
                     </>
                   )}
+                  {(e.kind === "declined" || e.kind === "cancelled") && (e.detail as { reason?: string } | null)?.reason ? (
+                    <>
+                      {" · "}
+                      <CommentToggle comment={(e.detail as { reason: string }).reason} />
+                    </>
+                  ) : null}
                 </span>
               </li>
             ))}
@@ -238,6 +258,8 @@ export default async function DocumentPage({
             </div>
           </div>
         </details>
+
+        {doc.status === "pending" && <CancelDocumentButton documentId={doc.id} wallet={user.wallet_address} signedCount={signed} />}
       </main>
     </div>
   );

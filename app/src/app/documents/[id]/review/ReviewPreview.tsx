@@ -3,6 +3,7 @@
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { useEffect, useState } from "react";
 import { AlertIcon, SignatureIcon, Spinner } from "@/components/icons";
+import { PageStepper } from "@/components/PageStepper";
 import { PdfPage } from "@/components/PdfPage";
 import { SIGNER_COLORS, type FieldInput } from "@/lib/doc-rules";
 import { loadPdf } from "@/lib/pdf";
@@ -38,32 +39,37 @@ export function ReviewPreview({
 
   const signerOf = (id: string) => signers.find((s) => s.id === id);
   const onPage = fields.filter((f) => f.page === page);
-  const countOnPage = (p: number) => fields.filter((f) => f.page === p).length;
+  const boxPages = [...new Set(fields.map((f) => f.page))].sort((a, b) => a - b);
 
   return (
     <div className="card" style={{ boxShadow: "none", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
       <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", color: "var(--ink-3)" }}>Preview</p>
 
       {pageCount > 1 && (
-        <nav aria-label="Pages" style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
-          {Array.from({ length: pageCount }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              type="button"
-              className={p === page ? "btn btn-primary" : "btn btn-secondary"}
-              aria-current={p === page ? "page" : undefined}
-              onClick={() => setPage(p)}
-              style={{ minHeight: 44, padding: "0 14px" }}
-            >
-              Page {p}
-              {countOnPage(p) > 0 ? ` · ${countOnPage(p)}` : ""}
-            </button>
-          ))}
-        </nav>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <PageStepper page={page} pageCount={pageCount} onChange={setPage} />
+          {boxPages.length > 0 && (
+            <p style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, fontSize: 14.5 }}>
+              <span style={{ color: "var(--ink-4)", fontWeight: 300, marginRight: 4 }}>Signature boxes on</span>
+              {boxPages.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPage(p)}
+                  aria-current={p === page ? "page" : undefined}
+                  className={p === page ? "btn btn-primary" : "btn btn-secondary"}
+                  style={{ minHeight: 36, padding: "0 12px", fontSize: 14 }}
+                >
+                  Page {p}
+                </button>
+              ))}
+            </p>
+          )}
+        </div>
       )}
 
       <div style={{ background: "#E3E8F2", borderRadius: 12, padding: "clamp(10px, 3vw, 20px)" }}>
-        <div style={{ maxWidth: 620, margin: "0 auto" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
           {loadError ? (
             <p className="note note-red">
               <AlertIcon />
@@ -111,9 +117,6 @@ export function ReviewPreview({
               </div>
             </div>
           )}
-          <p className="help" style={{ textAlign: "center", marginTop: 10 }} aria-live="polite">
-            Page {page} of {pageCount}
-          </p>
         </div>
       </div>
     </div>

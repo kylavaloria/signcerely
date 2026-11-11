@@ -53,7 +53,7 @@ export function CancelDocumentButton({ documentId, wallet, signedCount }: { docu
 
   return (
     <>
-      <button type="button" className="btn" style={{ background: "#fff", color: "var(--red-ink)", borderColor: "#EBC4C4" }} onClick={() => dialog.current?.showModal()}>
+      <button type="button" className="btn btn-block" style={{ background: "#fff", color: "var(--red-ink)", borderColor: "#EBC4C4" }} onClick={() => dialog.current?.showModal()}>
         Cancel document
       </button>
       <dialog ref={dialog} className="modal" aria-labelledby="cx-t" style={{ width: "min(520px, calc(100vw - 24px))" }}>
@@ -106,7 +106,7 @@ export function CancelDocumentButton({ documentId, wallet, signedCount }: { docu
           </button>
           <button type="button" className="btn" style={{ background: "var(--red)", color: "#fff" }} onClick={cancelDoc} disabled={busy} aria-busy={busy}>
             {busy && <Spinner />}
-            {phase === "wallet" ? "Approve in Varial…" : phase === "recording" ? "Recording…" : phase === "preparing" ? "Preparing…" : "Cancel document"}
+            {phase === "wallet" ? "Cancel in Varial…" : phase === "recording" ? "Recording…" : phase === "preparing" ? "Preparing…" : "Cancel document"}
           </button>
         </div>
       </dialog>
