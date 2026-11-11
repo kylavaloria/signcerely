@@ -169,9 +169,6 @@ export default async function Home() {
           <Reveal from="scale" className="cta-band decor-host">
             <DecorLayer>
               <Orb size={150} style={{ right: 210, top: -60, opacity: 0.55 }} />
-              <span className="cta-cursor" style={{ right: 250, bottom: 18 }}>
-                <PixelArt name="cursor" pixel={5} />
-              </span>
             </DecorLayer>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: "1 1 320px" }}>
               <h2 id="cta" style={{ fontFamily: "var(--font-head)", fontSize: "clamp(28px, 4vw, 38px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.1, color: "#fff", maxWidth: 420 }}>
@@ -179,9 +176,14 @@ export default async function Home() {
               </h2>
               <p style={{ color: "#fff", fontSize: 17 }}>Upload a PDF, add who needs to sign, and send it in a few minutes.</p>
             </div>
-            <Link className="btn btn-sign btn-lg" href={profile ? "/documents/new" : "/sign-in"}>
-              Get started
-            </Link>
+            <span className="cta-btn-wrap">
+              <Link className="btn btn-sign btn-lg" href={profile ? "/documents/new" : "/sign-in"}>
+                Get started
+              </Link>
+              <span aria-hidden="true" className="cta-cursor">
+                <PixelArt name="cursor" pixel={4} />
+              </span>
+            </span>
           </Reveal>
         </section>
       </main>
