@@ -1,4 +1,4 @@
-//! It's Your Sign — on-chain record for multi-party document signing.
+//! Signcerely — on-chain record for multi-party document signing.
 //!
 //! The PDF itself never touches the chain. The contract stores:
 //! - the SHA-256 fingerprint of the original file (when it is sent),
@@ -28,7 +28,7 @@ pub const MIN_SIGNERS: u32 = 2;
 pub const MAX_SIGNERS: u32 = 5;
 
 /// Domain separator for invite proofs. Bump the version if the format changes.
-const PROOF_DOMAIN: &[u8] = b"its-your-sign:invite:v1";
+const PROOF_DOMAIN: &[u8] = b"signcerely:invite:v1";
 
 /// Persistent entries are bumped to ~30 days on every write, and re-bumped
 /// once they fall below ~7 days. Archived entries can be restored, so this

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Build the contract and deploy it to Stellar testnet.
 # Needs the Stellar CLI: https://developers.stellar.org/docs/tools/cli
-# Usage: ./scripts/deploy-testnet.sh [identity-name]   (default: iys-deployer)
+# Usage: ./scripts/deploy-testnet.sh [identity-name]   (default: signcerely-deployer)
 set -euo pipefail
 
-IDENTITY="${1:-iys-deployer}"
+IDENTITY="${1:-signcerely-deployer}"
 NETWORK="testnet"
-WASM="target/wasm32v1-none/release/its_your_sign.wasm"
+WASM="target/wasm32v1-none/release/signcerely.wasm"
 
 if ! stellar keys address "$IDENTITY" >/dev/null 2>&1; then
   echo "Creating and funding identity '$IDENTITY' on $NETWORK..."
@@ -21,7 +21,7 @@ CONTRACT_ID=$(stellar contract deploy \
   --wasm "$WASM" \
   --source-account "$IDENTITY" \
   --network "$NETWORK" \
-  --alias its-your-sign)
+  --alias signcerely)
 
 echo
 echo "Contract ID: $CONTRACT_ID"
