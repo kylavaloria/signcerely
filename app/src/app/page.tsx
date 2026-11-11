@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Badge, Chip, DecorLayer, Orb, PixelArt } from "@/components/Decor";
 import { ArrowRight, CheckIcon, Logo, ShieldIcon } from "@/components/icons";
+import { Reveal } from "@/components/Reveal";
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 
@@ -76,9 +77,10 @@ export default async function Home() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
+      <div className="scroll-progress" aria-hidden="true" />
       <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
       <main>
-        <section className="decor-host" style={{ overflow: "hidden" }}>
+        <section className="decor-host hero" style={{ overflow: "hidden" }}>
           <DecorLayer>
             <Orb size={300} style={{ right: "max(24px, calc(50% - 560px))", top: 70 }} />
             <Orb size={110} style={{ right: "max(300px, calc(50% - 250px))", top: 330 }} />
@@ -103,17 +105,17 @@ export default async function Home() {
             </Chip>
           </DecorLayer>
           <div style={{ maxWidth: 1080, margin: "0 auto", padding: "80px 24px 72px", display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start" }}>
-            <span className="tag" style={{ background: "var(--yellow-tint)", color: "var(--navy)", padding: "6px 12px", borderRadius: 999 }}>
+            <span className="tag enter" style={{ background: "var(--yellow-tint)", color: "var(--navy)", padding: "6px 12px", borderRadius: 999 }}>
               Signing that anyone can check
             </span>
-            <h1 className="h" style={{ fontSize: "clamp(44px, 7vw, 84px)", fontWeight: 800, maxWidth: 820 }}>
+            <h1 className="h enter" style={{ fontSize: "clamp(44px, 7vw, 84px)", fontWeight: 800, maxWidth: 820, ["--d" as string]: "90ms" }}>
               Mean it once. We’ll remember.
             </h1>
-            <p style={{ fontSize: 20, color: "var(--ink-2)", maxWidth: 620 }}>
+            <p className="enter" style={{ fontSize: 20, color: "var(--ink-2)", maxWidth: 620, ["--d" as string]: "200ms" }}>
               Send an agreement, get everyone’s signature in the right order, and keep a signed copy that proves who
               signed and that nothing changed.
             </p>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div className="enter" style={{ display: "flex", gap: 12, flexWrap: "wrap", ["--d" as string]: "310ms" }}>
               <Link className="btn btn-primary btn-lg" href={profile ? "/dashboard" : "/sign-in"}>
                 {profile ? "Go to your documents" : "Get started"} <ArrowRight />
               </Link>
@@ -121,26 +123,28 @@ export default async function Home() {
                 Check a signed document
               </Link>
             </div>
-            <p className="help" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <p className="help enter" style={{ display: "flex", alignItems: "center", gap: 8, ["--d" as string]: "400ms" }}>
               <CheckIcon size={16} color="#1F9D61" /> Free during beta. You only need a free Varial wallet.
             </p>
           </div>
         </section>
 
         <section aria-labelledby="how" style={{ maxWidth: 1080, margin: "0 auto", padding: "64px 24px 96px", scrollMarginTop: 24 }}>
-          <h2 id="how" className="h" style={{ fontSize: 34, fontWeight: 700, marginBottom: 28 }}>
-            How it works
-          </h2>
+          <Reveal>
+            <h2 id="how" className="h" style={{ fontSize: 34, fontWeight: 700, marginBottom: 28 }}>
+              How it works
+            </h2>
+          </Reveal>
           <ol style={{ listStyle: "none", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "56px 20px", paddingTop: 36 }}>
             {steps.map((s, i) => (
-              <li key={s.title} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12 }}>
+              <Reveal as="li" from="scale" delay={i * 130} key={s.title} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12 }}>
                 <span className={`step-tile ${i % 2 === 0 ? "yellow" : "blue"}`}>{s.icon}</span>
                 <p className="tag">Step {i + 1}</p>
                 <h3 className="h" style={{ fontSize: 22, fontWeight: 700 }}>
                   {s.title}
                 </h3>
                 <p style={{ color: "var(--ink-2)" }}>{s.text}</p>
-              </li>
+              </Reveal>
             ))}
           </ol>
         </section>
@@ -148,28 +152,29 @@ export default async function Home() {
         <section aria-labelledby="why" style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px 96px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(400px, 100%), 1fr))", gap: 48, alignItems: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Reveal from="left" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <p className="tag" style={{ color: "var(--blue)" }}>
                   Why it’s different
                 </p>
                 <h2 id="why" className="h" style={{ fontSize: "clamp(30px, 4vw, 40px)", fontWeight: 700, maxWidth: 440 }}>
                   A record no one can quietly rewrite.
                 </h2>
-              </div>
+              </Reveal>
               <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 22 }}>
                 {reasons.map((r, i) => (
-                  <li key={r.title} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                  <Reveal as="li" from="left" delay={120 + i * 120} key={r.title} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
                     <Badge name={r.art} size={52} pixel={2.8} tone={i === 0 ? "yellow" : "blue"} />
                     <div>
                       <h3 style={{ fontSize: 17, marginBottom: 4 }}>{r.title}</h3>
                       <p style={{ color: "var(--ink-2)", fontSize: 15.5 }}>{r.text}</p>
                     </div>
-                  </li>
+                  </Reveal>
                 ))}
               </ul>
             </div>
 
             {/* Example of what a check shows. Sample names, not real people. */}
+            <Reveal from="right" delay={150}>
             <div aria-label="Example verification result" role="img" className="card" style={{ padding: "clamp(18px, 4vw, 28px)", display: "flex", flexDirection: "column", gap: 14 }}>
               <p className="tag">Example</p>
               <div className="card" style={{ boxShadow: "none", padding: 20, display: "flex", flexDirection: "column", gap: 14, background: "rgba(255,255,255,.9)" }}>
@@ -198,14 +203,17 @@ export default async function Home() {
                 </p>
               </div>
             </div>
+            </Reveal>
           </div>
         </section>
 
         <section aria-labelledby="faq" style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px 96px", scrollMarginTop: 24 }}>
-          <h2 id="faq" className="h" style={{ fontSize: "clamp(30px, 4vw, 40px)", fontWeight: 700, marginBottom: 24 }}>
-            Questions, answered
-          </h2>
-          <div className="card" style={{ padding: "4px 24px" }}>
+          <Reveal>
+            <h2 id="faq" className="h" style={{ fontSize: "clamp(30px, 4vw, 40px)", fontWeight: 700, marginBottom: 24 }}>
+              Questions, answered
+            </h2>
+          </Reveal>
+          <Reveal delay={120} className="card" style={{ padding: "4px 24px" }}>
             {faqs.map((f, i) => (
               <details key={f.q} open={i === 0} style={{ borderTop: i ? "1px solid var(--line-2)" : 0 }}>
                 <summary className="disclosure" style={{ fontSize: 16 }}>
@@ -214,11 +222,11 @@ export default async function Home() {
                 <p style={{ color: "var(--ink-2)", paddingBottom: 18, maxWidth: 620 }}>{f.a}</p>
               </details>
             ))}
-          </div>
+          </Reveal>
         </section>
 
         <section aria-labelledby="cta" style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px 96px" }}>
-          <div className="cta-band decor-host">
+          <Reveal from="scale" className="cta-band decor-host">
             <DecorLayer>
               <Orb size={150} style={{ right: 210, top: -60, opacity: 0.55 }} />
               <span className="decor-float" style={{ right: 250, bottom: 18, ["--tilt" as string]: "-8deg" }}>
@@ -234,7 +242,7 @@ export default async function Home() {
             <Link className="btn btn-sign btn-lg" href={profile ? "/documents/new" : "/sign-in"}>
               Get started
             </Link>
-          </div>
+          </Reveal>
         </section>
       </main>
       <footer style={{ borderTop: "1px solid rgba(255,255,255,.9)", background: "rgba(255,255,255,.6)" }}>

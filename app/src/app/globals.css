@@ -1257,3 +1257,116 @@ dialog.modal::backdrop {
   color: var(--blue);
   text-decoration: underline;
 }
+
+/* ---------- Motion: scroll reveals, load-in, parallax, progress ---------- */
+.reveal-armed {
+  opacity: 0;
+  transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--d, 0ms);
+  will-change: opacity, transform;
+}
+.reveal-armed.reveal-up {
+  transform: translateY(44px);
+}
+.reveal-armed.reveal-left {
+  transform: translateX(-56px);
+}
+.reveal-armed.reveal-right {
+  transform: translateX(56px);
+}
+.reveal-armed.reveal-scale {
+  transform: translateY(30px) scale(0.94);
+}
+.reveal-armed.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes enter-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes enter-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.86) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.enter {
+  animation: enter-rise 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+.hero > .decor-layer {
+  animation: enter-pop 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both;
+  transform-origin: 80% 40%;
+}
+
+.scroll-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  @keyframes progress-grow {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .scroll-progress {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    z-index: 60;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, #ffdd1f 0%, #4a9bf0 60%, #1f6fd6 100%);
+    animation: progress-grow linear both;
+    animation-timeline: scroll(root);
+    pointer-events: none;
+  }
+  /* Background orbs drift up a little as the page scrolls. */
+  @keyframes bg-drift {
+    to {
+      transform: translateY(-140px);
+    }
+  }
+  body::before {
+    bottom: -160px;
+    animation: bg-drift linear both;
+    animation-timeline: scroll(root);
+  }
+  /* Hero artwork moves slower than the text while it scrolls away. */
+  @keyframes hero-parallax {
+    to {
+      translate: 0 110px;
+    }
+  }
+  .hero > .decor-layer {
+    animation: enter-pop 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both, hero-parallax linear both;
+    animation-timeline: auto, scroll(root);
+    animation-range: normal, 0px 700px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .hero > .decor-layer,
+  body::before {
+    animation: none !important;
+  }
+  .scroll-progress {
+    display: none !important;
+  }
+}
