@@ -3,41 +3,26 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Badge, Chip, DecorLayer, Orb, PixelArt } from "@/components/Decor";
 import { ArrowRight, CheckIcon, Logo, ShieldIcon } from "@/components/icons";
 import { Reveal } from "@/components/Reveal";
-import { ScrollInk } from "@/components/ScrollInk";
+import { ScrollStory } from "@/components/ScrollStory";
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
-
-const steps = [
-  {
-    icon: <PixelArt name="document" pixel={4} />,
-    title: "Upload and invite",
-    text: "Add a PDF, choose who signs, and decide if they sign one after another or all at once.",
-  },
-  {
-    icon: <PixelArt name="mail" pixel={4.5} />,
-    title: "Everyone signs",
-    text: "Each person gets an email when it’s their turn, adds their signature, and approves in their wallet.",
-  },
-  {
-    icon: <PixelArt name="check" pixel={4.5} />,
-    title: "Anyone can check it",
-    text: "Download the signed copy. Anyone can confirm who signed and that nothing changed — no account needed.",
-  },
-];
 
 const reasons = [
   {
     art: "check" as const,
+    tone: "yellow",
     title: "Every signature is recorded permanently",
     text: "When someone signs, we save who signed and exactly when. That record can’t be edited or deleted, not even by us.",
   },
   {
     art: "magnifier" as const,
+    tone: "blue",
     title: "Anyone can verify",
     text: "Share a link or a copy of the file. Anyone can confirm who signed it and when. No account, no wallet, no cost.",
   },
   {
     art: "shield" as const,
+    tone: "glass",
     title: "No secret edits",
     text: "Signatures are tied to the exact file everyone saw. Change a single comma afterwards and the check will show it’s a different version.",
   },
@@ -66,12 +51,6 @@ const faqs = [
   },
 ];
 
-const sample = [
-  { name: "Lea Santos", date: "Signed Nov 3, 2026" },
-  { name: "Miguel Tan", date: "Signed Nov 4, 2026" },
-  { name: "Ana Reyes", date: "Signed Nov 5, 2026" },
-];
-
 export default async function Home() {
   const session = await getSession();
   const profile = session ? await getProfile(session.wallet) : null;
@@ -81,7 +60,6 @@ export default async function Home() {
       <div className="scroll-progress" aria-hidden="true" />
       <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
       <main className="landing-main">
-        <ScrollInk />
         <section className="decor-host hero" style={{ overflow: "hidden" }}>
           <DecorLayer>
             <Orb size={300} style={{ right: "max(24px, calc(50% - 560px))", top: 70 }} />
@@ -106,7 +84,7 @@ export default async function Home() {
               verified
             </Chip>
           </DecorLayer>
-          <div style={{ maxWidth: 1080, margin: "0 auto", padding: "80px 24px 72px", display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start" }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto", padding: "80px 24px 72px", minHeight: "calc(100svh - 70px)", display: "flex", flexDirection: "column", justifyContent: "center", gap: 24, alignItems: "flex-start" }}>
             <span className="tag enter" style={{ background: "var(--yellow-tint)", color: "var(--navy)", padding: "6px 12px", borderRadius: 999 }}>
               Signing that anyone can check
             </span>
@@ -134,89 +112,42 @@ export default async function Home() {
             <p className="help enter" style={{ display: "flex", alignItems: "center", gap: 8, ["--d" as string]: "400ms" }}>
               <CheckIcon size={16} color="#1F9D61" /> Free during beta. You only need a free Varial wallet.
             </p>
+            <a href="#how" className="scroll-hint enter" style={{ ["--d" as string]: "700ms" }}>
+              Scroll to see how it works <span aria-hidden="true">↓</span>
+            </a>
           </div>
         </section>
 
-        <section aria-labelledby="how" style={{ maxWidth: 1080, margin: "0 auto", padding: "64px 24px 96px", scrollMarginTop: 24 }}>
-          <Reveal>
-            <h2 id="how" className="h" style={{ fontSize: 34, fontWeight: 700, marginBottom: 28 }}>
-              How it works
+        <section aria-label="How it works" id="how" style={{ scrollMarginTop: 0 }}>
+          <ScrollStory />
+        </section>
+
+        <section aria-labelledby="why" style={{ maxWidth: 1080, margin: "0 auto", padding: "96px 24px" }}>
+          <Reveal style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 36 }}>
+            <p className="tag" style={{ color: "var(--blue)" }}>
+              Why it’s different
+            </p>
+            <h2 id="why" className="h" style={{ fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 800, maxWidth: 640 }}>
+              A record no one can quietly rewrite.
             </h2>
           </Reveal>
-          <ol style={{ listStyle: "none", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "56px 20px", paddingTop: 36 }}>
-            {steps.map((s, i) => (
-              <Reveal as="li" from="pixels" delay={i * 160} key={s.title} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12 }}>
-                <span className={`step-tile ${i % 2 === 0 ? "yellow" : "blue"}`}>{s.icon}</span>
-                <p className="tag">Step {i + 1}</p>
-                <h3 className="h" style={{ fontSize: 22, fontWeight: 700 }}>
-                  {s.title}
-                </h3>
-                <p style={{ color: "var(--ink-2)" }}>{s.text}</p>
-              </Reveal>
-            ))}
-          </ol>
-        </section>
-
-        <section aria-labelledby="why" style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px 96px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(400px, 100%), 1fr))", gap: 48, alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-              <Reveal from="left" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <p className="tag" style={{ color: "var(--blue)" }}>
-                  Why it’s different
-                </p>
-                <h2 id="why" className="h" style={{ fontSize: "clamp(30px, 4vw, 40px)", fontWeight: 700, maxWidth: 440 }}>
-                  A record no one can quietly rewrite.
-                </h2>
-              </Reveal>
-              <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 22 }}>
-                {reasons.map((r, i) => (
-                  <Reveal as="li" from="left" delay={120 + i * 120} key={r.title} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-                    <Badge name={r.art} size={52} pixel={2.8} tone={i === 0 ? "yellow" : "blue"} />
-                    <div>
-                      <h3 style={{ fontSize: 17, marginBottom: 4 }}>{r.title}</h3>
-                      <p style={{ color: "var(--ink-2)", fontSize: 15.5 }}>{r.text}</p>
-                    </div>
-                  </Reveal>
-                ))}
-              </ul>
-            </div>
-
-            {/* Example of what a check shows. Sample names, not real people. */}
-            <Reveal from="pixels" delay={100} className="example-card">
-            <span aria-hidden="true" className="stamp">Verified</span>
-            <div aria-label="Example verification result" role="img" className="card" style={{ padding: "clamp(18px, 4vw, 28px)", display: "flex", flexDirection: "column", gap: 14 }}>
-              <p className="tag">Example</p>
-              <div className="card" style={{ boxShadow: "none", padding: 20, display: "flex", flexDirection: "column", gap: 14, background: "rgba(255,255,255,.9)" }}>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                  <span style={{ flex: "none", width: 40, height: 40, borderRadius: "50%", background: "var(--green-tint)", display: "grid", placeItems: "center" }}>
-                    <CheckIcon size={20} color="#1F9D61" />
-                  </span>
-                  <div>
-                    <p style={{ fontWeight: 700, color: "var(--green-ink)" }}>This document matches the signed version</p>
-                    <p className="help">Sponsorship Agreement – Community Hackathon</p>
-                  </div>
+          <ul className="stack">
+            {reasons.map((r, i) => (
+              <li key={r.title} className={`stack-card stack-${r.tone}`} style={{ ["--i" as string]: i }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 520 }}>
+                  <span className="stack-num">0{i + 1}</span>
+                  <h3>{r.title}</h3>
+                  <p>{r.text}</p>
                 </div>
-                <dl className="detail-rows" style={{ borderTop: "1px solid var(--line-2)", paddingTop: 14 }}>
-                  {sample.map((p, i) => (
-                    <div key={p.name} className="seq-row" style={{ gridTemplateColumns: "1fr auto", ["--i" as string]: i }}>
-                      <dt style={{ color: "var(--navy)", fontWeight: 600 }}>{p.name}</dt>
-                      <dd style={{ color: "var(--ink-3)" }}>{p.date}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-              <div className="card" style={{ boxShadow: "none", padding: "14px 20px", display: "flex", gap: 12, alignItems: "center", background: "rgba(255,255,255,.9)" }}>
-                <span style={{ flex: "none", width: 32, height: 32, borderRadius: "50%", background: "#FBE9E9", color: "var(--red-ink)", display: "grid", placeItems: "center", fontWeight: 700 }}>×</span>
-                <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
-                  <strong style={{ color: "var(--navy)" }}>Edited copy?</strong> We’ll tell you it’s different from what was signed.
-                </p>
-              </div>
-            </div>
-            </Reveal>
-          </div>
+                <span aria-hidden="true" className="stack-art decor-float" style={{ ["--tilt" as string]: i % 2 ? "6deg" : "-6deg" }}>
+                  <Badge name={r.art} size={190} pixel={10} tone={r.tone === "yellow" ? "blue" : "yellow"} />
+                </span>
+              </li>
+            ))}
+          </ul>
         </section>
 
-        <section aria-labelledby="faq" style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px 96px", scrollMarginTop: 24 }}>
+        <section aria-labelledby="faq" style={{ maxWidth: 760, margin: "0 auto", padding: "24px 24px 96px", scrollMarginTop: 24 }}>
           <Reveal>
             <h2 id="faq" className="h" style={{ fontSize: "clamp(30px, 4vw, 40px)", fontWeight: 700, marginBottom: 24 }}>
               Questions, answered
