@@ -477,3 +477,118 @@ dialog.modal::backdrop {
     overflow-y: auto;
   }
 }
+
+/* Dashboard: filter tabs + document cards */
+.doc-tabs {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  margin-top: -4px;
+  scrollbar-width: none;
+}
+.doc-tabs::-webkit-scrollbar {
+  display: none;
+}
+.doc-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink-2);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.doc-tab:hover {
+  border-color: var(--field);
+  color: var(--navy);
+}
+.doc-tab.is-active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+.doc-tab-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--line-2);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 700;
+  display: inline-grid;
+  place-items: center;
+}
+.doc-tab.is-active .doc-tab-count {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.doc-tab.has-attention:not(.is-active) .doc-tab-count {
+  background: var(--yellow);
+  color: var(--navy);
+}
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+  gap: 16px;
+}
+.doc-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: none;
+}
+.doc-card-sign {
+  background: var(--yellow-tint);
+  border-color: #f3df95;
+}
+.doc-summary {
+  font-size: 14.5px;
+  color: var(--ink-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.doc-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+.doc-details > div {
+  display: grid;
+  grid-template-columns: minmax(96px, 38%) 1fr;
+  gap: 12px;
+  font-size: 14px;
+}
+.doc-details dt {
+  color: var(--ink-4);
+}
+.doc-details dd {
+  margin: 0;
+  color: var(--navy);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.doc-card-foot {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--line-2);
+  padding-top: 14px;
+  margin-top: auto;
+}
+.doc-card-sign .doc-card-foot {
+  border-top-color: #f3df95;
+}
