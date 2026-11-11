@@ -145,7 +145,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         )}
 
         <div style={{ background: "var(--blue-tint)", borderRadius: 14, padding: "20px 24px", display: "flex", gap: 16 }}>
-          <ShieldIcon size={24} color="#1F3FBF" />
+          <ShieldIcon size={24} color="#1F6FD6" />
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <p style={{ fontWeight: 700 }}>What happens when you send</p>
             <p style={{ fontSize: 15, color: "var(--ink-2)" }}>

@@ -30,7 +30,7 @@ export default async function Home() {
     <div style={{ minHeight: "100vh" }}>
       <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
       <main>
-        <section style={{ background: "#fff", borderBottom: "1px solid var(--line-2)" }}>
+        <section>
           <div style={{ maxWidth: 1080, margin: "0 auto", padding: "80px 24px 72px", display: "flex", flexDirection: "column", gap: 24, alignItems: "flex-start" }}>
             <span className="tag" style={{ background: "var(--yellow-tint)", color: "var(--navy)", padding: "6px 12px", borderRadius: 999 }}>
               Signing that anyone can check
@@ -76,7 +76,7 @@ export default async function Home() {
           </ol>
         </section>
       </main>
-      <footer style={{ borderTop: "1px solid var(--line)", background: "#fff" }}>
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,.9)", background: "rgba(255,255,255,.6)" }}>
         <div style={{ maxWidth: 1080, margin: "0 auto", padding: 24, display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12, fontSize: 13.5, color: "var(--ink-3)" }}>
           <p>© 2026 Signcerely · Beta</p>
           <p style={{ display: "flex", alignItems: "center", gap: 6 }}>

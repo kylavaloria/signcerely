@@ -14,7 +14,7 @@ import { SignerActions } from "./SignerActions";
 export const metadata: Metadata = { title: "Document · Signcerely" };
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
-  pending: { label: "Waiting for signatures", bg: "#E8ECFA", fg: "#1F3FBF" },
+  pending: { label: "Waiting for signatures", bg: "#E8ECFA", fg: "#1F6FD6" },
   completed: { label: "Completed", bg: "#E3F5EC", fg: "#146B42" },
   declined: { label: "Declined", bg: "#FBE9E9", fg: "#A82E2E" },
   cancelled: { label: "Cancelled", bg: "#EEF1F7", fg: "#33406A" },
