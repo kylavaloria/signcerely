@@ -37,7 +37,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
           <strong className="h" style={{ fontSize: 21, fontWeight: 700 }}>
             Your turn to sign.
           </strong>{" "}
-          {sender?.full_name ?? "Someone"} invited {a.signer.invited_name} to sign this agreement. Mean it once — we’ll remember.
+          {sender?.full_name ?? "Someone"} invited {a.signer.invited_name} to sign this agreement.
         </p>
       </div>
     </div>
