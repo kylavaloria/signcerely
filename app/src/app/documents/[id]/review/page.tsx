@@ -4,9 +4,10 @@ import { redirect } from "next/navigation";
 import { NewDocShell } from "@/components/NewDocShell";
 import { AlertIcon, ShieldIcon } from "@/components/icons";
 import { SIGNER_COLORS } from "@/lib/doc-rules";
-import { getDraftFields, getDraftSigners, getOwnedDraft } from "@/lib/documents";
+import { getDraftFields, getDraftSigners, getOwnedDraft, signedPdfUrl } from "@/lib/documents";
 import { requireUser } from "@/lib/profile";
 import { DeleteDraftButton } from "./DeleteDraftButton";
+import { ReviewPreview } from "./ReviewPreview";
 import { SendButton } from "./SendButton";
 
 export const metadata: Metadata = { title: "Review · New document · Signcerely" };
@@ -26,7 +27,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   const user = await requireUser();
   const doc = await getOwnedDraft(id, user.wallet_address);
-  const [signers, fields] = await Promise.all([getDraftSigners(doc.id), getDraftFields(doc.id)]);
+  const [signers, fields, pdfUrl] = await Promise.all([getDraftSigners(doc.id), getDraftFields(doc.id), signedPdfUrl(doc.file_path!)]);
   if (signers.length < 2) redirect(`/documents/${doc.id}/signers`);
 
   const myEmail = user.email?.toLowerCase();
@@ -102,6 +103,13 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             </Link>
           </div>
         </div>
+
+        <ReviewPreview
+          pdfUrl={pdfUrl}
+          pageCount={doc.page_count ?? 1}
+          signers={signers.map((s) => ({ id: s.id, slot: s.slot, name: s.invited_name }))}
+          fields={fields.map((f) => ({ signerId: f.signer_id, page: f.page, x: f.x, y: f.y, width: f.width, height: f.height }))}
+        />
 
         {missing.length > 0 && (
           <p className="note note-red" role="alert">
