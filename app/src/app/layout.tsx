@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Signcerely — Mean it once. We’ll remember.",
+  title: "Signcerely",
   description:
     "Send a PDF, choose who signs and in what order, and get a signed copy anyone can check.",
 };
