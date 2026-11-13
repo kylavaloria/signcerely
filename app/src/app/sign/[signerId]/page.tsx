@@ -123,7 +123,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
   const iSigned = a.signer.status === "signed";
   const earlierPending = a.doc.in_order && (signers ?? []).some((s) => s.slot < a.signer.slot && s.status !== "signed");
   const blockedReason = a.wrongAccount
-    ? `This invite was sent to ${a.signer.invited_name} (${maskEmail(a.signer.invited_email)}), but you’re signed in as ${profile?.full_name ?? "another account"}. Sign out and sign in with the account that uses that email to sign.`
+    ? `This invite is for ${a.signer.invited_name}, so you can’t sign it as ${profile?.full_name ?? "this account"}. If you’re ${a.signer.invited_name}, sign out and sign in with the account that uses ${maskEmail(a.signer.invited_email)}.`
     : !a.invited
     ? "You’re viewing this as the sender. Each person signs from their own invite."
     : a.doc.status !== "pending"
