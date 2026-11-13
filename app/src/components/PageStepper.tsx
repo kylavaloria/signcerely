@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 
 /**
  * "Page [ 3 ] of 11" with a typeable box and up/down arrows.
- * Up goes to the next page number, down to the previous one, like a number field.
+ * Arrows move like scrolling the document: up goes to the previous page, down to the next one.
  */
 export function PageStepper({
   page,
@@ -48,20 +48,20 @@ export function PageStepper({
             if (e.key === "Enter") commit();
             else if (e.key === "ArrowUp") {
               e.preventDefault();
-              go(page + 1);
+              go(page - 1);
             } else if (e.key === "ArrowDown") {
               e.preventDefault();
-              go(page - 1);
+              go(page + 1);
             }
           }}
         />
         <span className="page-stepper-arrows">
-          <button type="button" aria-label="Next page" disabled={page >= pageCount} onClick={() => go(page + 1)}>
+          <button type="button" aria-label="Previous page" disabled={page <= 1} onClick={() => go(page - 1)}>
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
               <path d="M3 7.5 6 4.5l3 3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <button type="button" aria-label="Previous page" disabled={page <= 1} onClick={() => go(page - 1)}>
+          <button type="button" aria-label="Next page" disabled={page >= pageCount} onClick={() => go(page + 1)}>
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
               <path d="M3 4.5 6 7.5l3-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
