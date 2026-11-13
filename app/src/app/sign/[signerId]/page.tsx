@@ -8,7 +8,6 @@ import { DOCS_BUCKET } from "@/lib/documents";
 import { formatSignedDate } from "@/lib/final-pdf";
 import { getAccess } from "@/lib/invite-access";
 import { getProfile } from "@/lib/profile";
-import { maskEmail } from "@/lib/signer-identity";
 import { db } from "@/lib/supabase";
 import { markViewed } from "./actions";
 import { InviteKeyCatcher } from "./InviteKeyCatcher";
@@ -123,7 +122,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
   const iSigned = a.signer.status === "signed";
   const earlierPending = a.doc.in_order && (signers ?? []).some((s) => s.slot < a.signer.slot && s.status !== "signed");
   const blockedReason = a.wrongAccount
-    ? `This invite is for ${a.signer.invited_name}, so you can’t sign it as ${profile?.full_name ?? "this account"}. If you’re ${a.signer.invited_name}, sign out and sign in with the account that uses ${maskEmail(a.signer.invited_email)}.`
+    ? "You can view this document, but only the person it was sent to can sign it."
     : !a.invited
     ? "You’re viewing this as the sender. Each person signs from their own invite."
     : a.doc.status !== "pending"
