@@ -137,14 +137,20 @@ export async function getAccess(signerId: string): Promise<Access | null> {
   return { signer, doc, canSign, invited, wrongAccount, isSender, wallet };
 }
 
-/** Name/email to prefill "Finish your profile" from invites opened in this browser. */
-export async function unlockedInvitePrefill(): Promise<{ name: string; email: string; invitedBy: string | null } | null> {
-  const ids = await unlockedIds();
-  if (!ids.length) return null;
+/**
+ * Name/email to prefill "Finish your profile", only for the invite the person is
+ * signing in to answer (`/sign/<id>`), and only if its link was opened in this browser.
+ * The browser remembers opened invites for 30 days, so without this check a later,
+ * unrelated sign-up on the same browser would show someone else's invite.
+ */
+export async function unlockedInvitePrefill(
+  signerId: string | null,
+): Promise<{ name: string; email: string; invitedBy: string | null } | null> {
+  if (!signerId || !(await unlockedIds()).includes(signerId)) return null;
   const { data } = await db()
     .from("document_signers")
     .select("invited_name, invited_email, documents(profiles(full_name))")
-    .eq("id", ids[0])
+    .eq("id", signerId)
     .maybeSingle();
   if (!data) return null;
   const d = data.documents as unknown as { profiles: { full_name: string } | null } | null;
