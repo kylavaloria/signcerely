@@ -26,7 +26,7 @@ const SIG_BUCKET = "signatures";
 const MAX_SIG_BYTES = 1024 * 1024;
 const sha256 = (b: Uint8Array) => createHash("sha256").update(b).digest("hex");
 
-const WRONG_ACCOUNT = "This invite is for someone else, so you can’t sign it with this account.";
+const WRONG_ACCOUNT = "Only the person this was sent to can sign it.";
 
 type Fail = { ok: false; error: string; needsFunds?: boolean };
 
