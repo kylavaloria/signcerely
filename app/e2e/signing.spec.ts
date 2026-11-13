@@ -99,9 +99,9 @@ test("a signer can decline, and the sender is told why", async ({ browser }) => 
   await sendDocument(alice, { title, signers: [bob, carol], inOrder: false });
   await openInviteAndSignIn(bob, linkIn(await waitForMail(bob.email, /invited you to sign/), "/sign/"));
 
-  await bob.page.getByRole("button", { name: "Decline" }).click();
+  await bob.page.getByRole("button", { name: "Decline", exact: true }).click();
   await bob.page.locator("#dc-reason").fill("The dates are wrong");
-  await bob.page.getByRole("dialog").getByRole("button", { name: "Decline" }).click();
+  await bob.page.getByRole("dialog").getByRole("button", { name: "Decline", exact: true }).click();
   await expect(bob.page.getByText("This document was declined")).toBeVisible({ timeout: 120_000 });
 
   const notice = await waitForMail(alice.email, /declined to sign/);
