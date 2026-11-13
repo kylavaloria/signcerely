@@ -7,13 +7,14 @@ import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import { emailFor, linkIn, newUser, signIn, waitForMail, type User } from "../helpers";
+import { linkIn, newUser, signIn, waitForMail, type User } from "../helpers";
 
 const OUT = process.env.README_SHOTS_DIR ?? "";
 test.skip(!OUT, "README_SHOTS_DIR not set");
 test.setTimeout(600_000);
 
 const shot = async (page: Page, name: string, opts: { full?: boolean; clip?: { x: number; y: number; width: number; height: number } } = {}) => {
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(600);
   await page.screenshot({ path: join(OUT, `${name}.jpg`), type: "jpeg", quality: 86, fullPage: opts.full ?? false, clip: opts.clip, animations: "disabled" });
 };
@@ -72,21 +73,28 @@ async function leasePdf(): Promise<Buffer> {
   return Buffer.from(await doc.save());
 }
 
-async function drawSignature(page: Page, wiggle: number) {
+async function drawSignature(page: Page, seed: number) {
   const pad = page.getByLabel(/Signature drawing area/);
   const b = (await pad.boundingBox())!;
+  const x0 = b.x + 50;
+  const y0 = b.y + b.height * 0.55;
+  const len = b.width * 0.62;
+  const loops = 5 + seed;
   const pts: [number, number][] = [];
-  for (let i = 0; i <= 40; i++) {
-    const t = i / 40;
-    pts.push([b.x + 60 + t * (b.width - 140), b.y + b.height * (0.62 - 0.22 * Math.sin(t * Math.PI * (2.2 + wiggle)) * (1 - t * 0.4))]);
+  for (let i = 0; i <= 160; i++) {
+    const t = i / 160;
+    const r = 13 + 7 * Math.sin(t * 7 + seed);
+    const a = 2 * Math.PI * loops * t;
+    pts.push([x0 + len * t - r * Math.sin(a), y0 - r * Math.cos(a) - 14 * Math.sin(t * Math.PI) + 10 * t]);
   }
   await page.mouse.move(...pts[0]);
   await page.mouse.down();
-  for (const p of pts.slice(1)) await page.mouse.move(p[0], p[1], { steps: 3 });
+  for (const p of pts.slice(1)) await page.mouse.move(p[0], p[1], { steps: 2 });
   await page.mouse.up();
-  await page.mouse.move(b.x + b.width * 0.55, b.y + b.height * 0.75);
+  // underline flourish
+  await page.mouse.move(x0 + len * 0.15, y0 + 34);
   await page.mouse.down();
-  await page.mouse.move(b.x + b.width * 0.85, b.y + b.height * 0.72, { steps: 8 });
+  for (let i = 1; i <= 20; i++) await page.mouse.move(x0 + len * (0.15 + 0.9 * (i / 20)), y0 + 34 - 10 * Math.sin((i / 20) * Math.PI), { steps: 2 });
   await page.mouse.up();
 }
 
@@ -99,9 +107,9 @@ test("README screenshots", async ({ browser }) => {
   await mkdir(OUT, { recursive: true });
   const maria = await newUser(browser, "Maria Santos");
   const juan = await newUser(browser, "Juan Dela Cruz");
-  maria.email = emailFor("maria");
-  juan.email = emailFor("juan");
-  for (const u of [maria, juan]) await u.page.setViewportSize({ width: 1440, height: 900 });
+  maria.email = "maria.santos@example.com";
+  juan.email = "juan.delacruz@example.com";
+  for (const u of [maria, juan]) await u.page.setViewportSize({ width: 1440, height: 1000 });
 
   // Banner (rendered with the real brand fonts).
   const bannerPage = await maria.context.newPage();
@@ -111,14 +119,9 @@ test("README screenshots", async ({ browser }) => {
   await bannerPage.screenshot({ path: join(OUT, "banner.png") });
   await bannerPage.close();
 
-  // Landing page.
-  await maria.page.goto("/");
-  await shot(maria.page, "landing");
-
-  // Sign in and finish the profile.
-  await maria.page.goto("/sign-in");
-  await shot(maria.page, "sign-in");
+  // Sign in, finish the profile and confirm the email.
   await signIn(maria);
+  await maria.page.goto(linkIn(await waitForMail(maria.email, /Confirm your email/), "/confirm-email"));
 
   // 1. Upload.
   const title = "Apartment Lease Agreement";
@@ -159,7 +162,7 @@ test("README screenshots", async ({ browser }) => {
   }
   await expect(maria.page.getByText("Every signer has a box")).toBeVisible();
   await maria.page.mouse.click(5, 5);
-  await shot(maria.page, "step-3-boxes");
+  await shot(maria.page, "step-3-boxes", { full: true });
   await maria.page.getByRole("button", { name: /Continue to review/ }).click();
 
   // 4. Review and send.
@@ -168,12 +171,11 @@ test("README screenshots", async ({ browser }) => {
   await maria.page.getByRole("button", { name: /Send for signing/ }).click();
   await maria.page.waitForURL(/\?sent=1/, { timeout: 120_000 });
   const docUrl = maria.page.url();
-  await shot(maria.page, "sent");
 
   // 5. Maria signs her own spot from the document page.
   await maria.page.getByRole("link", { name: /Sign now/ }).click();
   await maria.page.waitForURL(/\/sign\//);
-  await signAs(maria, 0.2);
+  await signAs(maria, 0);
   await shot(maria.page, "adopt-signature");
   await maria.page.getByRole("button", { name: "Use this signature" }).click();
   await maria.page.getByRole("button", { name: /Sign with Varial/ }).click();
@@ -183,7 +185,7 @@ test("README screenshots", async ({ browser }) => {
   const turn = await waitForMail(juan.email, /Your turn to sign|invited you to sign/);
   const emailPage = await juan.context.newPage();
   await emailPage.setViewportSize({ width: 900, height: 820 });
-  await emailPage.setContent(turn.html, { waitUntil: "networkidle" });
+  await emailPage.setContent(turn.html.replaceAll("http://localhost:3100", "https://signcerely.site"), { waitUntil: "networkidle" });
   await shot(emailPage, "email");
   await emailPage.close();
 
@@ -193,14 +195,17 @@ test("README screenshots", async ({ browser }) => {
   await juan.page.waitForURL(/\/sign-in/);
   await signIn(juan);
   await juan.page.waitForURL(/\/sign\//);
+  const juanSign = juan.page.url();
+  await juan.page.goto(linkIn(await waitForMail(juan.email, /Confirm your email/), "/confirm-email"));
+  await juan.page.goto(juanSign);
   await juan.page.getByRole("button", { name: /^Page 2/ }).first().click().catch(() => {});
-  await shot(juan.page, "step-5-sign");
-  await signAs(juan, 0.6);
+  await shot(juan.page, "step-5-sign", { full: true });
+  await signAs(juan, 1);
   await juan.page.getByRole("button", { name: "Use this signature" }).click();
   await juan.page.getByRole("button", { name: /Sign with Varial/ }).click();
   await expect(juan.page.getByText("Everyone has signed.")).toBeVisible({ timeout: 120_000 });
   await juan.page.getByRole("button", { name: /^Page 2/ }).first().click().catch(() => {});
-  await shot(juan.page, "step-6-complete");
+  await shot(juan.page, "step-6-complete", { full: true });
 
   // 7. Verify the signed copy.
   const [download] = await Promise.all([
@@ -209,7 +214,6 @@ test("README screenshots", async ({ browser }) => {
   ]);
   const signed = await readFile((await download.path())!);
   await juan.page.goto("/verify");
-  await shot(juan.page, "verify");
   await juan.page.locator("#v-file").setInputFiles({ name: "Apartment Lease Agreement (signed).pdf", mimeType: "application/pdf", buffer: signed });
   await expect(juan.page.getByText("This document matches the signed version")).toBeVisible({ timeout: 60_000 });
   await shot(juan.page, "step-7-verify", { full: true });
@@ -219,6 +223,4 @@ test("README screenshots", async ({ browser }) => {
   await shot(maria.page, "document", { full: true });
   await maria.page.goto("/dashboard?view=closed");
   await shot(maria.page, "dashboard");
-  await juan.page.goto("/dashboard?view=closed");
-  await shot(juan.page, "dashboard-signer");
 });
