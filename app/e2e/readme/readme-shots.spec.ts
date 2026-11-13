@@ -176,18 +176,11 @@ test("README screenshots", async ({ browser }) => {
   await maria.page.getByRole("link", { name: /Sign now/ }).click();
   await maria.page.waitForURL(/\/sign\//);
   await signAs(maria, 0);
-  await shot(maria.page, "adopt-signature");
   await maria.page.getByRole("button", { name: "Use this signature" }).click();
   await maria.page.getByRole("button", { name: /Sign with Varial/ }).click();
   await expect(maria.page.getByText("You signed this document.")).toBeVisible({ timeout: 120_000 });
 
-  // Juan's invite email.
   const turn = await waitForMail(juan.email, /Your turn to sign|invited you to sign/);
-  const emailPage = await juan.context.newPage();
-  await emailPage.setViewportSize({ width: 900, height: 820 });
-  await emailPage.setContent(turn.html.replaceAll("http://localhost:3100", "https://signcerely.site"), { waitUntil: "networkidle" });
-  await shot(emailPage, "email");
-  await emailPage.close();
 
   // 6. Juan signs.
   await juan.page.goto(linkIn(turn, "/sign/"));

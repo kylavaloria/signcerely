@@ -5,11 +5,6 @@ name: README screenshots
 # download the "readme-screenshots" artifact and replace the files in docs/readme.
 on:
   workflow_dispatch:
-  push:
-    branches: [docs/readme]  # TEMP
-
-permissions:
-  contents: write  # TEMP
 
 jobs:
   shots:
@@ -116,13 +111,3 @@ jobs:
           path: readme-shots
 
 
-      # TEMP: hand the images over through a scratch branch.
-      - name: Publish to scratch branch
-        if: always() && github.ref == 'refs/heads/docs/readme'
-        run: |
-          mkdir -p readme-shots
-          cp -r app/test-results readme-shots/_failures 2>/dev/null || true
-          cd readme-shots
-          git init -q && git checkout -q -b readme-assets
-          git add -A && git -c user.name=ci -c user.email=ci@localhost commit -q -m shots
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" readme-assets
