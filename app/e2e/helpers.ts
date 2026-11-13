@@ -10,7 +10,9 @@ const PASSPHRASE = Networks.STANDALONE;
 
 /** Unique per run so tests never collide with data from an earlier run. */
 export const runId = Date.now().toString(36);
-export const emailFor = (who: string) => `${who}.${runId}@e2e.test`;
+let seq = 0;
+/** A fresh address every call, so emails from one test never reach another. */
+export const emailFor = (who: string) => `${who}.${runId}.${++seq}@e2e.test`;
 
 export type User = {
   name: string;
