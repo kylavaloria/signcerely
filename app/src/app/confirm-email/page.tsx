@@ -10,6 +10,7 @@ const messages = {
   invalid: "This confirmation link isn’t valid. It may have been replaced by a newer one.",
   expired: "This confirmation link has expired.",
   changed: "Your profile now uses a different email, so this link no longer applies.",
+  taken: "That email is already confirmed on another account, so it can’t be used here.",
 };
 
 export default async function ConfirmEmailPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
@@ -41,7 +42,10 @@ export default async function ConfirmEmailPage({ searchParams }: { searchParams:
               <h1 className="h" style={{ fontSize: 28, fontWeight: 700 }}>
                 We couldn’t confirm your email
               </h1>
-              <p className="muted">{messages[result.reason]} Sign in and send a new link from your dashboard.</p>
+              <p className="muted">
+                {messages[result.reason]}{" "}
+                {result.reason === "taken" ? "Sign in with the wallet you used before." : "Sign in and send a new link from your dashboard."}
+              </p>
             </>
           )}
           <Link className="btn btn-primary" href="/dashboard">
