@@ -269,13 +269,13 @@ export function SigningView(p: Props) {
                   <div style={{ height: "100%", width: `${(done / myFields.length) * 100}%`, background: "var(--green)" }} />
                 </div>
               )}
-              <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
-                {adopted
-                  ? "All set. Sign with Varial to record your signature."
-                  : myFields.length
+              {!adopted && (
+                <p style={{ fontSize: 14.5, color: "var(--ink-2)" }}>
+                  {myFields.length
                     ? "Select the yellow Sign here box to add your signature."
                     : "Your signature will go on the summary page of the signed copy."}
-              </p>
+                </p>
+              )}
               <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid var(--line-2)", paddingTop: 16 }}>
                 {!adopted && (
                   <button type="button" className="btn btn-secondary btn-block" onClick={() => dialog.current?.showModal()}>
