@@ -3,7 +3,16 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Badge, PageDecor, PixelArt } from "@/components/Decor";
 import { ArrowRight, PlusIcon } from "@/components/icons";
-import { listDrafts, listSent, listToSign, nextStepHref, type DraftSummary, type SentDoc, type ToSign } from "@/lib/documents";
+import {
+  listClosedFromOthers,
+  listDrafts,
+  listSent,
+  listToSign,
+  nextStepHref,
+  type DraftSummary,
+  type SentDoc,
+  type ToSign,
+} from "@/lib/documents";
 import { requireUser } from "@/lib/profile";
 import { ActiveTabIntoView } from "./ActiveTabIntoView";
 import { DocFilters } from "./DocFilters";
@@ -180,7 +189,11 @@ function DraftCard({ d }: { d: DraftSummary }) {
   );
 }
 
-function ClosedCard({ d }: { d: SentDoc }) {
+/** A closed document: one I sent, or one someone else sent me (then `from` says who, and View opens my copy). */
+type Closed = SentDoc & { from?: { name: string; wallet: string; signerId: string } };
+
+function ClosedCard({ d }: { d: Closed }) {
+  const href = d.from ? `/sign/${d.from.signerId}` : `/documents/${d.id}`;
   const label = d.status === "completed" ? "Completed" : d.status === "declined" ? "Declined" : "Cancelled";
   const style =
     d.status === "completed"
@@ -195,7 +208,7 @@ function ClosedCard({ d }: { d: SentDoc }) {
       summary={d.summary}
       progress={<Progress signers={d.signers} />}
       details={[
-        ["Sent by", "You"],
+        ["Sent by", d.from ? d.from.name : "You"],
         ["Signed", `${signedCount(d.signers)} of ${d.signers.length}`],
         ["Signers", d.signers.map((s) => s.invited_name).join(", ")],
         ["Pages", d.page_count ?? "—"],
@@ -203,7 +216,7 @@ function ClosedCard({ d }: { d: SentDoc }) {
         [label, day(d.completed_at ?? d.updated_at)],
       ]}
       action={
-        <Link className="btn btn-secondary" style={actionBtn} href={`/documents/${d.id}`}>
+        <Link className="btn btn-secondary" style={actionBtn} href={href}>
           View
         </Link>
       }
@@ -227,14 +240,16 @@ export default async function DashboardPage({
   const { email: emailFlag, deleted, view, q: rawQ, from: rawFrom, page: rawPage } = await searchParams;
   const me = user.wallet_address;
   const verifiedEmail = user.email_verified_at ? user.email : null;
-  const [drafts, sent, toSign] = await Promise.all([
+  const [drafts, sent, toSign, closedFromOthers] = await Promise.all([
     listDrafts(user.wallet_address),
     listSent(user.wallet_address),
     listToSign(user.wallet_address, verifiedEmail),
+    listClosedFromOthers(user.wallet_address, verifiedEmail),
   ]);
   // "Sent by" choices: me, plus everyone who has sent me something to sign.
   const otherSenders = new Map<string, string>();
   for (const t of toSign) if (t.senderWallet !== me) otherSenders.set(t.senderWallet, t.senderName);
+  for (const c of closedFromOthers) otherSenders.set(c.senderWallet, c.senderName);
   const senders = [
     { value: "me", label: "Me" },
     ...[...otherSenders].map(([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label)),
@@ -249,12 +264,20 @@ export default async function DashboardPage({
 
   const signList = toSign.filter((t) => titleOk(t.title) && senderOk(t.senderWallet));
   const waiting = sent.filter((d) => d.status === "pending" && mineOk && titleOk(d.title));
-  const closed = sent.filter((d) => d.status !== "pending" && mineOk && titleOk(d.title));
+  const closedAt = (d: SentDoc) => d.completed_at ?? d.updated_at;
+  const closed: Closed[] = [
+    ...sent.filter((d) => d.status !== "pending" && mineOk),
+    ...closedFromOthers
+      .filter((c) => senderOk(c.senderWallet))
+      .map((c) => ({ ...c, from: { name: c.senderName, wallet: c.senderWallet, signerId: c.signerId } })),
+  ]
+    .filter((d) => titleOk(d.title))
+    .sort((a, b) => closedAt(b).localeCompare(closedAt(a)));
   const draftList = drafts.filter((d) => mineOk && titleOk(d.title));
   const counts: Record<Tab, number> = { sign: signList.length, waiting: waiting.length, drafts: draftList.length, closed: closed.length };
   const justSent = emailFlag === "sent" || emailFlag === "failed" ? emailFlag : null;
   const firstName = user.full_name.split(/\s+/)[0];
-  const empty = drafts.length + sent.length + toSign.length === 0;
+  const empty = drafts.length + sent.length + toSign.length + closedFromOthers.length === 0;
 
   const requested = TABS.find((t) => t.key === view)?.key;
   const tab: Tab = requested ?? TABS.find((t) => counts[t.key] > 0)?.key ?? "sign";
@@ -347,7 +370,7 @@ export default async function DashboardPage({
                     {tab === "sign" && slice(signList).map((t) => <SignCard key={t.signerId} t={t} me={me} />)}
                     {tab === "waiting" && slice(waiting).map((d) => <WaitingCard key={d.id} d={d} />)}
                     {tab === "drafts" && slice(draftList).map((d) => <DraftCard key={d.id} d={d} />)}
-                    {tab === "closed" && slice(closed).map((d) => <ClosedCard key={d.id} d={d} />)}
+                    {tab === "closed" && slice(closed).map((d) => <ClosedCard key={d.from ? `${d.id}:${d.from.signerId}` : d.id} d={d} />)}
                   </div>
                   <Pagination page={page} pageSize={PAGE_SIZE} total={counts[tab]} hrefFor={(n) => hrefWith({ page: String(n) })} keep={keep} />
                 </div>
