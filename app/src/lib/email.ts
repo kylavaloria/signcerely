@@ -12,6 +12,14 @@ type Mail = { to: string; subject: string; html: string; text: string };
 export type SendResult = { ok: true } | { ok: false; reason: string };
 
 export async function sendEmail(mail: Mail): Promise<SendResult> {
+  // End-to-end tests read emails from a folder instead of sending them.
+  if (process.env.E2E_MAIL_DIR) {
+    const { mkdir, writeFile } = await import("node:fs/promises");
+    await mkdir(process.env.E2E_MAIL_DIR, { recursive: true });
+    const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.json`;
+    await writeFile(`${process.env.E2E_MAIL_DIR}/${name}`, JSON.stringify(mail));
+    return { ok: true };
+  }
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   if (!key || !from) {

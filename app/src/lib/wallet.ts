@@ -32,11 +32,27 @@ function toError(e: unknown): WalletError {
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
+ * End-to-end tests can't click through the Varial extension, so they install a
+ * stand-in wallet on `window` that signs with a test key. It is only looked at
+ * when the app was built with NEXT_PUBLIC_E2E=1; production builds never read it.
+ */
+type TestWallet = {
+  address(): Promise<string>;
+  signMessage(message: string): Promise<string>;
+  signTransaction(xdr: string): Promise<string>;
+};
+function testWallet(): TestWallet | null {
+  if (process.env.NEXT_PUBLIC_E2E !== "1" || typeof window === "undefined") return null;
+  return (window as unknown as { __signcerelyTestWallet?: TestWallet }).__signcerelyTestWallet ?? null;
+}
+
+/**
  * Is the wallet extension on this page? The SDK gives the extension only 2s
  * to answer, and an idle extension can take longer to wake up, so try a few
  * times before deciding it isn't installed.
  */
 export async function hasWallet(attempts = 3): Promise<boolean> {
+  if (testWallet()) return true;
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await isConnected();
@@ -50,6 +66,8 @@ export async function hasWallet(attempts = 3): Promise<boolean> {
 }
 
 export async function connectWallet(): Promise<{ address: string } | { error: WalletError }> {
+  const tw = testWallet();
+  if (tw) return { address: await tw.address() };
   if (!(await hasWallet())) {
     return { error: { kind: "not-installed", message: `${WALLET_NAME} isn't installed.` } };
   }
@@ -60,6 +78,7 @@ export async function connectWallet(): Promise<{ address: string } | { error: Wa
 
 /** Is the wallet set to the network this app uses? */
 export async function isOnAppNetwork(): Promise<boolean> {
+  if (testWallet()) return true;
   try {
     const details = await getNetworkDetails();
     return details?.networkPassphrase === networkPassphrase;
@@ -84,6 +103,8 @@ export async function signText(
   address: string,
 ): Promise<{ signature: string } | { error: WalletError }> {
   try {
+    const tw = testWallet();
+    if (tw) return { signature: await tw.signMessage(message) };
     const res = await signMessage(message, { address, networkPassphrase });
     if (res.error) return { error: toError(res.error) };
     if (res.signerAddress && res.signerAddress !== address) {
@@ -108,6 +129,8 @@ export async function signTx(
   address: string,
 ): Promise<{ signedXdr: string } | { error: WalletError }> {
   try {
+    const tw = testWallet();
+    if (tw) return { signedXdr: await tw.signTransaction(txXdr) };
     if (!(await hasWallet())) return { error: { kind: "not-installed", message: `${WALLET_NAME} isn't installed.` } };
     if (!(await isOnAppNetwork())) {
       return {
