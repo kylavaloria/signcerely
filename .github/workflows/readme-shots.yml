@@ -1,0 +1,113 @@
+name: README screenshots
+
+# Re-takes the screenshots used in README.md from a real run of the app
+# (same throwaway setup as the end-to-end tests). Run it from the Actions tab,
+# download the "readme-screenshots" artifact and replace the files in docs/readme.
+on:
+  workflow_dispatch:
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      E2E_PORT: "3100"
+      APP_URL: http://localhost:3100
+      E2E_MAIL_DIR: ${{ github.workspace }}/e2e-mail
+      E2E_FRIENDBOT_URL: http://localhost:8000/friendbot
+    steps:
+      - uses: actions/checkout@v5
+
+      # ---------- Private Stellar network ----------
+      - name: Start local Stellar network
+        run: |
+          docker run -d --name stellar -p 8000:8000 stellar/quickstart:latest --local --enable core,horizon,rpc
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+      - uses: Swatinem/rust-cache@v2
+      - uses: stellar/stellar-cli@v30.0.1
+      - name: Build contract
+        run: stellar contract build
+      - name: Wait for the network
+        run: |
+          for i in $(seq 1 90); do
+            health=$(curl -s -X POST http://localhost:8000/rpc -H 'Content-Type: application/json' \
+              -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' | grep -o '"status":"healthy"' || true)
+            bot=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8000/friendbot?addr=GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN7" || true)
+            if [ -n "$health" ] && [ "$bot" != "000" ] && [ "$bot" != "502" ]; then echo "ready after ${i}0s"; exit 0; fi
+            sleep 10
+          done
+          docker logs stellar | tail -50
+          exit 1
+      - name: Deploy contract
+        id: contract
+        run: |
+          stellar keys generate deployer --network local --fund
+          ID=$(stellar contract deploy --wasm target/wasm32v1-none/release/signcerely.wasm --source-account deployer --network local)
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "Contract: $ID"
+
+      # ---------- Throwaway Supabase ----------
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start Supabase
+        id: supabase
+        run: |
+          supabase start -x studio,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor,realtime,postgres-meta
+          supabase status -o env > sb.env
+          get() { grep -E "^$1=" sb.env | head -1 | cut -d= -f2- | tr -d '"'; }
+          SECRET=$(get SECRET_KEY); [ -n "$SECRET" ] || SECRET=$(get SERVICE_ROLE_KEY)
+          PUBLISHABLE=$(get PUBLISHABLE_KEY); [ -n "$PUBLISHABLE" ] || PUBLISHABLE=$(get ANON_KEY)
+          echo "::add-mask::$SECRET"
+          {
+            echo "url=$(get API_URL)"
+            echo "secret=$SECRET"
+            echo "publishable=$PUBLISHABLE"
+          } >> "$GITHUB_OUTPUT"
+          rm sb.env
+
+      # ---------- App ----------
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+        working-directory: app
+      - run: npx playwright install --with-deps chromium
+        working-directory: app
+      - name: Build the app in test mode
+        working-directory: app
+        env:
+          NEXT_PUBLIC_E2E: "1"
+          NEXT_PUBLIC_STELLAR_NETWORK: local
+          NEXT_PUBLIC_STELLAR_RPC_URL: http://localhost:8000/rpc
+          NEXT_PUBLIC_CONTRACT_ID: ${{ steps.contract.outputs.id }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ steps.supabase.outputs.url }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ steps.supabase.outputs.publishable }}
+        run: npm run build
+      - name: Take README screenshots
+        working-directory: app
+        env:
+          CI: "1"
+          NEXT_PUBLIC_E2E: "1"
+          NEXT_PUBLIC_STELLAR_NETWORK: local
+          NEXT_PUBLIC_STELLAR_RPC_URL: http://localhost:8000/rpc
+          NEXT_PUBLIC_CONTRACT_ID: ${{ steps.contract.outputs.id }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ steps.supabase.outputs.url }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ steps.supabase.outputs.publishable }}
+          SUPABASE_URL: ${{ steps.supabase.outputs.url }}
+          SUPABASE_SECRET_KEY: ${{ steps.supabase.outputs.secret }}
+          SESSION_SECRET: e2e-session-secret-not-used-anywhere-else-0123456789
+          INVITE_ENCRYPTION_KEY: e2e-invite-key-not-used-anywhere-else-0123456789
+          README_SHOTS_DIR: ${{ github.workspace }}/readme-shots
+        run: npx playwright test e2e/readme
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readme-screenshots
+          path: readme-shots
+
+
