@@ -208,3 +208,48 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
     signers: (signersByDoc.get(d.id) ?? []).sort((a, b) => a.slot - b.slot),
   }));
 }
+
+export type ClosedFromOthers = SentDoc & {
+  signerId: string;
+  senderName: string;
+  senderWallet: string;
+};
+
+/**
+ * Finished, declined or cancelled documents that someone else sent this person:
+ * slots linked to their wallet, or invites to their confirmed email.
+ */
+export async function listClosedFromOthers(wallet: string, verifiedEmail: string | null): Promise<ClosedFromOthers[]> {
+  let q = db()
+    .from("document_signers")
+    .select(
+      "id, documents!inner(id, title, summary, page_count, updated_at, status, in_order, sent_at, completed_at, sender_wallet, profiles(full_name), document_signers(invited_name, status, slot))",
+    )
+    .in("documents.status", ["completed", "declined", "cancelled"])
+    .neq("documents.sender_wallet", wallet);
+  q = verifiedEmail
+    ? q.or(`wallet_address.eq.${wallet},invited_email.ilike."${verifiedEmail.replace(/["\\%_]/g, "")}"`)
+    : q.eq("wallet_address", wallet);
+  const { data, error } = await q;
+  if (error) throw dbError(error);
+  const seen = new Set<string>();
+  const out: ClosedFromOthers[] = [];
+  for (const r of data ?? []) {
+    const d = r.documents as unknown as Omit<SentDoc, "signers"> & {
+      sender_wallet: string;
+      profiles: { full_name: string } | null;
+      document_signers: SentDoc["signers"];
+    };
+    if (seen.has(d.id)) continue;
+    seen.add(d.id);
+    const { sender_wallet, profiles, document_signers, ...doc } = d;
+    out.push({
+      ...doc,
+      signers: [...(document_signers ?? [])].sort((a, b) => a.slot - b.slot),
+      signerId: r.id,
+      senderName: profiles?.full_name ?? "Someone",
+      senderWallet: sender_wallet,
+    });
+  }
+  return out;
+}
