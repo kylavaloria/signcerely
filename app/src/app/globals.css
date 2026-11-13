@@ -2177,3 +2177,24 @@ li[data-active="true"] > .story-num {
     padding-bottom: 40px;
   }
 }
+
+/* Text-style button (e.g. "Use a different wallet") */
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-button:hover {
+  color: var(--blue-hover);
+}
+.link-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
