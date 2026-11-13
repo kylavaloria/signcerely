@@ -320,6 +320,7 @@ export function SpotsEditor({
                 <PdfPage pdf={pdf} pageNumber={page} />
                 <div
                   ref={surface}
+                  data-testid="spots-surface"
                   onPointerDown={onSurfacePointerDown}
                   style={{ position: "absolute", inset: 0, cursor: "crosshair", touchAction: "none" }}
                 >
