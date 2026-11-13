@@ -4,8 +4,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Badge, PageDecor, PixelArt } from "@/components/Decor";
 import { ArrowRight, PlusIcon } from "@/components/icons";
 import {
-  listClosedFromOthers,
   listDrafts,
+  listFromOthers,
   listSent,
   listToSign,
   nextStepHref,
@@ -136,11 +136,12 @@ function SignCard({ t, me }: { t: ToSign; me: string }) {
   );
 }
 
-function WaitingCard({ d }: { d: SentDoc }) {
+function WaitingCard({ d }: { d: Listed }) {
+  const href = d.from ? `/sign/${d.from.signerId}` : `/documents/${d.id}`;
   return (
     <Card
       title={
-        <Link href={`/documents/${d.id}`} style={{ color: "var(--navy)", textDecoration: "none" }}>
+        <Link href={href} style={{ color: "var(--navy)", textDecoration: "none" }}>
           {d.title}
         </Link>
       }
@@ -148,7 +149,7 @@ function WaitingCard({ d }: { d: SentDoc }) {
       summary={d.summary}
       progress={<Progress signers={d.signers} />}
       details={[
-        ["Sent by", "You"],
+        ["Sent by", d.from ? d.from.name : "You"],
         ["Signed", `${signedCount(d.signers)} of ${d.signers.length}`],
         ["Next up", nextUp(d.signers, d.in_order)],
         ["Signers", d.signers.map((s) => s.invited_name).join(", ")],
@@ -157,7 +158,7 @@ function WaitingCard({ d }: { d: SentDoc }) {
         ["Sent", day(d.sent_at)],
       ]}
       action={
-        <Link className="btn btn-secondary" style={actionBtn} href={`/documents/${d.id}`}>
+        <Link className="btn btn-secondary" style={actionBtn} href={href}>
           View
         </Link>
       }
@@ -189,10 +190,10 @@ function DraftCard({ d }: { d: DraftSummary }) {
   );
 }
 
-/** A closed document: one I sent, or one someone else sent me (then `from` says who, and View opens my copy). */
-type Closed = SentDoc & { from?: { name: string; wallet: string; signerId: string } };
+/** A document I sent, or one someone else sent me (then `from` says who, and View opens my copy). */
+type Listed = SentDoc & { from?: { name: string; wallet: string; signerId: string } };
 
-function ClosedCard({ d }: { d: Closed }) {
+function ClosedCard({ d }: { d: Listed }) {
   const href = d.from ? `/sign/${d.from.signerId}` : `/documents/${d.id}`;
   const label = d.status === "completed" ? "Completed" : d.status === "declined" ? "Declined" : "Cancelled";
   const style =
@@ -226,7 +227,7 @@ function ClosedCard({ d }: { d: Closed }) {
 
 const EMPTY_TAB: Record<Tab, string> = {
   sign: "Nothing is waiting for your signature.",
-  waiting: "No one owes you a signature right now.",
+  waiting: "Nothing is waiting on other people right now.",
   drafts: "No drafts. Anything you start and save shows up here.",
   closed: "Finished, declined and cancelled documents will show up here.",
 };
@@ -240,16 +241,16 @@ export default async function DashboardPage({
   const { email: emailFlag, deleted, view, q: rawQ, from: rawFrom, page: rawPage } = await searchParams;
   const me = user.wallet_address;
   const verifiedEmail = user.email_verified_at ? user.email : null;
-  const [drafts, sent, toSign, closedFromOthers] = await Promise.all([
+  const [drafts, sent, toSign, fromOthers] = await Promise.all([
     listDrafts(user.wallet_address),
     listSent(user.wallet_address),
     listToSign(user.wallet_address, verifiedEmail),
-    listClosedFromOthers(user.wallet_address, verifiedEmail),
+    listFromOthers(user.wallet_address, verifiedEmail),
   ]);
   // "Sent by" choices: me, plus everyone who has sent me something to sign.
   const otherSenders = new Map<string, string>();
   for (const t of toSign) if (t.senderWallet !== me) otherSenders.set(t.senderWallet, t.senderName);
-  for (const c of closedFromOthers) otherSenders.set(c.senderWallet, c.senderName);
+  for (const c of fromOthers) otherSenders.set(c.senderWallet, c.senderName);
   const senders = [
     { value: "me", label: "Me" },
     ...[...otherSenders].map(([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label)),
@@ -263,13 +264,20 @@ export default async function DashboardPage({
   const senderOk = (wallet: string) => from === "" || (from === "me" ? wallet === me : wallet === from);
 
   const signList = toSign.filter((t) => titleOk(t.title) && senderOk(t.senderWallet));
-  const waiting = sent.filter((d) => d.status === "pending" && mineOk && titleOk(d.title));
+  const asListed = (c: (typeof fromOthers)[number]): Listed => ({ ...c, from: { name: c.senderName, wallet: c.senderWallet, signerId: c.signerId } });
+  // Other people's documents still in progress where it isn't my move (already signed, or not my turn yet).
+  // The ones waiting on me are in "Waiting for your signature".
+  const signIds = new Set(toSign.map((t) => t.documentId));
+  const waiting: Listed[] = [
+    ...sent.filter((d) => d.status === "pending" && mineOk),
+    ...fromOthers.filter((c) => c.status === "pending" && !signIds.has(c.id) && senderOk(c.senderWallet)).map(asListed),
+  ]
+    .filter((d) => titleOk(d.title))
+    .sort((a, b) => (b.sent_at ?? "").localeCompare(a.sent_at ?? ""));
   const closedAt = (d: SentDoc) => d.completed_at ?? d.updated_at;
-  const closed: Closed[] = [
+  const closed: Listed[] = [
     ...sent.filter((d) => d.status !== "pending" && mineOk),
-    ...closedFromOthers
-      .filter((c) => senderOk(c.senderWallet))
-      .map((c) => ({ ...c, from: { name: c.senderName, wallet: c.senderWallet, signerId: c.signerId } })),
+    ...fromOthers.filter((c) => c.status !== "pending" && senderOk(c.senderWallet)).map(asListed),
   ]
     .filter((d) => titleOk(d.title))
     .sort((a, b) => closedAt(b).localeCompare(closedAt(a)));
@@ -277,7 +285,7 @@ export default async function DashboardPage({
   const counts: Record<Tab, number> = { sign: signList.length, waiting: waiting.length, drafts: draftList.length, closed: closed.length };
   const justSent = emailFlag === "sent" || emailFlag === "failed" ? emailFlag : null;
   const firstName = user.full_name.split(/\s+/)[0];
-  const empty = drafts.length + sent.length + toSign.length + closedFromOthers.length === 0;
+  const empty = drafts.length + sent.length + toSign.length + fromOthers.length === 0;
 
   const requested = TABS.find((t) => t.key === view)?.key;
   const tab: Tab = requested ?? TABS.find((t) => counts[t.key] > 0)?.key ?? "sign";
@@ -368,7 +376,7 @@ export default async function DashboardPage({
                 <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                   <div className="doc-grid">
                     {tab === "sign" && slice(signList).map((t) => <SignCard key={t.signerId} t={t} me={me} />)}
-                    {tab === "waiting" && slice(waiting).map((d) => <WaitingCard key={d.id} d={d} />)}
+                    {tab === "waiting" && slice(waiting).map((d) => <WaitingCard key={d.from ? `${d.id}:${d.from.signerId}` : d.id} d={d} />)}
                     {tab === "drafts" && slice(draftList).map((d) => <DraftCard key={d.id} d={d} />)}
                     {tab === "closed" && slice(closed).map((d) => <ClosedCard key={d.from ? `${d.id}:${d.from.signerId}` : d.id} d={d} />)}
                   </div>
