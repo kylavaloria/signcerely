@@ -58,7 +58,7 @@ export async function sendEmailConfirmation(input: {
 /** Use a confirmation token once. Returns the confirmed email, or why it failed. */
 export async function confirmEmailToken(
   token: string,
-): Promise<{ ok: true; email: string } | { ok: false; reason: "invalid" | "expired" | "changed" }> {
+): Promise<{ ok: true; email: string } | { ok: false; reason: "invalid" | "expired" | "changed" | "taken" }> {
   if (!/^[0-9a-f]{64}$/.test(token)) return { ok: false, reason: "invalid" };
   const hash = sha256(token);
 
@@ -85,12 +85,14 @@ export async function confirmEmailToken(
   await db().from("email_verifications").update({ used_at: new Date().toISOString() }).eq("token_hash", hash);
 
   // Only confirm if the profile still uses this email.
-  const { data: updated } = await db()
+  const { data: updated, error } = await db()
     .from("profiles")
     .update({ email_verified_at: new Date().toISOString() })
     .eq("wallet_address", row.wallet_address)
     .eq("email", row.email)
     .select("email");
+  // Someone else confirmed this address first (unique index on confirmed emails).
+  if (error?.code === "23505") return { ok: false, reason: "taken" };
   if (!updated || updated.length === 0) return { ok: false, reason: "changed" };
   return { ok: true, email: row.email };
 }
