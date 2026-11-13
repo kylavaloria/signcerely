@@ -17,7 +17,7 @@ const schema = z.object({
 });
 
 const EMAIL_TAKEN =
-  "That email is already confirmed on another account. Sign in with the wallet you used before, or use a different email.";
+  "That email is already confirmed on another account. Sign in with the wallet you used before.";
 
 export type ProfileFormState = {
   errors?: { fullName?: string; email?: string; form?: string };
