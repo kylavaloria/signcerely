@@ -63,21 +63,38 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
     </div>
   );
 
-  // Not unlocked yet: show only who invited whom, and try the link's key.
-  if (!a.invited && !a.isSender) {
+  // The document itself (title, summary, pages, file) is only for the person it was sent to and
+  // the sender. Everyone else, signed in or not, sees who invited whom and what to do next.
+  if (!a.canSign && !a.isSender) {
+    const signedInElsewhere = Boolean(a.wallet) && a.invited;
     return (
       <div style={{ minHeight: "100vh" }}>
         {header}
         {banner}
         <main style={{ maxWidth: 900, margin: "0 auto", padding: "32px 24px 80px", display: "flex", flexDirection: "column", gap: 16 }}>
-          <h1 className="h" style={{ fontSize: 30, fontWeight: 700 }}>
-            {a.doc.title}
-          </h1>
-          <InviteKeyCatcher signerId={signerId} locked />
-          {!a.wallet && (
-            <p className="help">
-              Already have an account? <Link href={`/sign-in?next=/sign/${signerId}`}>Sign in</Link>
+          <InviteKeyCatcher signerId={signerId} locked={!a.invited} />
+          {a.invited && !a.wallet ? (
+            <section className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 14, width: "100%", maxWidth: 560, margin: "0 auto", boxShadow: "none" }}>
+              <h2 className="h" style={{ fontSize: 24, fontWeight: 700 }}>
+                Sign in to sign
+              </h2>
+              <p className="muted">
+                Your Varial wallet is your signature. Connect it, then you’ll come right back here. New to Varial? We’ll walk you through it.
+              </p>
+              <Link className="btn btn-primary btn-lg" href={`/sign-in?next=/sign/${signerId}`}>
+                Continue with Varial
+              </Link>
+            </section>
+          ) : signedInElsewhere ? (
+            <p className="note" role="status" style={{ background: "#fff", border: "1px solid var(--line)" }}>
+              <span>This document was sent to someone else, so it isn’t available to this account.</span>
             </p>
+          ) : (
+            !a.wallet && (
+              <p className="help">
+                Already have an account? <Link href={`/sign-in?next=/sign/${signerId}`}>Sign in</Link>
+              </p>
+            )
           )}
         </main>
       </div>
@@ -195,35 +212,21 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
           </p>
         )}
 
-        {!a.wallet && !completed && !iSigned ? (
-          <section className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 14, maxWidth: 560, boxShadow: "none" }}>
-            <h2 className="h" style={{ fontSize: 24, fontWeight: 700 }}>
-              Sign in to sign
-            </h2>
-            <p className="muted">
-              Your Varial wallet is your signature. Connect it, then you’ll come right back here. New to Varial? We’ll walk you through it.
-            </p>
-            <Link className="btn btn-primary btn-lg" href={`/sign-in?next=/sign/${signerId}`}>
-              Continue with Varial
-            </Link>
-          </section>
-        ) : (
-          <SigningView
-            signerId={signerId}
-            wallet={a.wallet}
-            canSign={a.canSign && !iSigned && !completed}
-            blockedReason={iSigned || completed ? "Nothing left for you to do here." : blockedReason}
-            pdfUrl={pdfUrl}
-            pageCount={a.doc.page_count}
-            fields={completed ? [] : viewFields}
-            signers={viewSigners}
-            myName={profile?.full_name ?? a.signer.invited_name}
-            today={formatSignedDate(new Date())}
-            savedSignatureUrl={saved}
-            canDecline={a.canSign && a.invited && a.doc.status === "pending" && !iSigned}
-            senderName={sender?.full_name ?? "The sender"}
-          />
-        )}
+        <SigningView
+          signerId={signerId}
+          wallet={a.wallet}
+          canSign={a.canSign && !iSigned && !completed}
+          blockedReason={iSigned || completed ? "Nothing left for you to do here." : blockedReason}
+          pdfUrl={pdfUrl}
+          pageCount={a.doc.page_count}
+          fields={completed ? [] : viewFields}
+          signers={viewSigners}
+          myName={profile?.full_name ?? a.signer.invited_name}
+          today={formatSignedDate(new Date())}
+          savedSignatureUrl={saved}
+          canDecline={a.canSign && a.invited && a.doc.status === "pending" && !iSigned}
+          senderName={sender?.full_name ?? "The sender"}
+        />
       </main>
     </div>
   );
