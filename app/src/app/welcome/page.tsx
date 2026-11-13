@@ -17,7 +17,9 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
   if (!session) redirect("/sign-in");
   if (await getProfile(session.wallet)) redirect(next ?? "/dashboard");
 
-  const invite = (await getInvitePrefill(session.wallet)) ?? (await unlockedInvitePrefill());
+  // Only prefill from the invite they came here to answer, not any invite this browser remembers.
+  const fromInvite = next?.match(/^\/sign\/([0-9a-f-]{36})(?:[/?#]|$)/i)?.[1] ?? null;
+  const invite = (await getInvitePrefill(session.wallet)) ?? (await unlockedInvitePrefill(fromInvite));
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
