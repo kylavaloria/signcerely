@@ -16,6 +16,9 @@ const schema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address.")),
 });
 
+const EMAIL_TAKEN =
+  "That email is already confirmed on another account. Sign in with the wallet you used before, or use a different email.";
+
 export type ProfileFormState = {
   errors?: { fullName?: string; email?: string; form?: string };
   values?: { fullName: string; email: string };
@@ -33,6 +36,18 @@ export async function saveProfile(_prev: ProfileFormState, formData: FormData): 
   if (!parsed.success) {
     const f = parsed.error.flatten().fieldErrors;
     return { errors: { fullName: f.fullName?.[0], email: f.email?.[0] }, values: raw };
+  }
+
+  // One confirmed email, one account. (Unconfirmed repeats are allowed; see the migration.)
+  const { data: taken } = await db()
+    .from("profiles")
+    .select("wallet_address")
+    .not("email_verified_at", "is", null)
+    .ilike("email", parsed.data.email.replace(/[\\%_]/g, (c) => `\\${c}`))
+    .neq("wallet_address", session.wallet)
+    .limit(1);
+  if (taken && taken.length > 0) {
+    return { errors: { email: EMAIL_TAKEN }, values: raw };
   }
 
   const { error } = await db()
