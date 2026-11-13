@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
-import { CloseIcon, ShieldIcon } from "@/components/icons";
+import { CloseIcon } from "@/components/icons";
 import { canvasToBase64Png, signatureFromFile, trimCanvas } from "@/lib/signature-image";
 
 export type Adopted = { pngBase64: string; dataUrl: string; kind: "drawn" | "uploaded"; saveToProfile: boolean };
@@ -274,11 +274,6 @@ export const AdoptSignature = forwardRef<HTMLDialogElement, Props>(function Adop
           <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} style={{ width: 20, height: 20, accentColor: "var(--blue)" }} />
           Save this signature to my profile for next time
         </label>
-
-        <p className="note" style={{ background: "var(--blue-tint)" }}>
-          <ShieldIcon size={18} color="#1F6FD6" />
-          <span>This image shows where you signed. Your approval in Varial is what makes it count — anyone can copy a picture, but not that.</span>
-        </p>
 
         {error && (
           <p className="error-text" role="alert">
