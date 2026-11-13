@@ -25,7 +25,7 @@ export function chainConfigFromEnv(): ChainConfig {
   return {
     rpcUrl: process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org",
     contractId: process.env.NEXT_PUBLIC_CONTRACT_ID ?? "",
-    networkPassphrase: network === "mainnet" ? Networks.PUBLIC : Networks.TESTNET,
+    networkPassphrase: network === "mainnet" ? Networks.PUBLIC : network === "local" ? Networks.STANDALONE : Networks.TESTNET,
   };
 }
 

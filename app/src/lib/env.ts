@@ -2,13 +2,14 @@ import { Networks } from "@stellar/stellar-sdk";
 
 /** Values safe to use in the browser. */
 export const publicEnv = {
-  network: (process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet") as "testnet" | "mainnet",
+  // "local" is a private network used only by the end-to-end tests.
+  network: (process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet") as "testnet" | "mainnet" | "local",
   rpcUrl: process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org",
   contractId: process.env.NEXT_PUBLIC_CONTRACT_ID ?? "",
 };
 
 export const networkPassphrase =
-  publicEnv.network === "mainnet" ? Networks.PUBLIC : Networks.TESTNET;
+  publicEnv.network === "mainnet" ? Networks.PUBLIC : publicEnv.network === "local" ? Networks.STANDALONE : Networks.TESTNET;
 
 /** Read a required server-side variable, failing loudly if it's missing. */
 export function serverEnv(name: "SUPABASE_URL" | "SUPABASE_SECRET_KEY" | "SESSION_SECRET"): string {
