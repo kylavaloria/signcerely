@@ -164,7 +164,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
               {a.doc.title}
             </h1>
             <p className="help">
-              Sent by {sender?.full_name ?? "someone"} · {a.doc.page_count} {a.doc.page_count === 1 ? "page" : "pages"}
+              Sent by {sender?.full_name ?? "someone"}
             </p>
             {a.doc.summary && <p style={{ color: "var(--ink-2)", maxWidth: 720 }}>{a.doc.summary}</p>}
           </div>
