@@ -18,7 +18,7 @@ export function SignerActions({ signerId, canResend }: { signerId: string; canRe
     if (!r.ok) return setMsg({ text: r.error, bad: true });
     try {
       await navigator.clipboard.writeText(r.link);
-      setMsg({ text: "Link copied. Send it only to this person — it lets them sign." });
+      setMsg({ text: "Link copied. Send it only to this person." });
     } catch {
       window.prompt("Copy this invite link:", r.link);
     }
