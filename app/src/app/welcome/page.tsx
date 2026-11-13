@@ -8,6 +8,7 @@ import { unlockedInvitePrefill } from "@/lib/invite-access";
 import { getInvitePrefill, getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 import { ProfileForm } from "./ProfileForm";
+import { SwitchWallet } from "./SwitchWallet";
 
 export const metadata: Metadata = { title: "Finish your profile · Signcerely" };
 
@@ -45,6 +46,9 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
               <span className="mono" style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 400 }}>
                 · {shortAddress(session.wallet)}
               </span>
+            </span>
+            <span style={{ marginLeft: "auto", flex: "none" }}>
+              <SwitchWallet next={next} />
             </span>
           </p>
 
