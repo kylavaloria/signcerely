@@ -9,6 +9,8 @@ export const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // README screenshots run only when asked for (README_SHOTS_DIR).
+  testIgnore: process.env.README_SHOTS_DIR ? [] : ["**/readme/**"],
   timeout: 180_000,
   expect: { timeout: 30_000 },
   fullyParallel: false,
