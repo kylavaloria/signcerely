@@ -79,9 +79,21 @@ export function UserMenu({ name, wallet }: { name: string; wallet: string }) {
         <div
           role="menu"
           className="card"
-          style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", minWidth: 220, padding: 8, zIndex: 10 }}
+          style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", minWidth: 220, padding: 8, zIndex: 30, background: "#fff" }}
         >
-          <p className="mono" style={{ fontSize: 12, color: "var(--ink-3)", padding: "6px 10px", wordBreak: "break-all" }}>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "var(--ink-3)",
+              padding: "6px 10px 0",
+            }}
+          >
+            Wallet address
+          </p>
+          <p className="mono" style={{ fontSize: 12, color: "var(--navy)", padding: "2px 10px 8px", wordBreak: "break-all" }}>
             {wallet}
           </p>
           <button
