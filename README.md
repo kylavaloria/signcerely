@@ -246,7 +246,7 @@ invitee's wallet.
 </details>
 
 **Deployment:** see the contract ID in `.env.example` and on
-[Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCW43NAQXSVLH4WG3NWVDLMQTX2VB2P6KBHOVS6QADN3ABYIYQPR4AE6).
+[Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDS3E7DNMFRC6XOJXK3F5ID32Y36RGR3PAXKZOR3NC3AYSERIO2XQ4ZV).
 Each user pays their own small network fee in XLM.
 
 <br />
