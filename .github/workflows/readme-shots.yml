@@ -7,6 +7,9 @@ name: README screenshots
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   shots:
     runs-on: ubuntu-latest
@@ -112,4 +115,13 @@ jobs:
           name: readme-screenshots
           path: readme-shots
 
-
+      # The raw clip recordings also go to a throwaway branch, so they can be
+      # fetched with git and cut with scripts/make-clips.py.
+      - name: Push clip recordings to tmp/website-clips
+        if: always() && hashFiles('readme-shots/clips/timeline.json') != ''
+        run: |
+          cd readme-shots/clips
+          git init -q -b tmp/website-clips
+          git add .
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Clip recordings"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tmp/website-clips
