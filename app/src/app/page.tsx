@@ -122,7 +122,7 @@ export default async function Home() {
           </DecorLayer>
           <div style={{ maxWidth: 1080, margin: "0 auto", padding: "80px 24px 72px", minHeight: "calc(100svh - 70px)", display: "flex", flexDirection: "column", justifyContent: "center", gap: 24, alignItems: "flex-start" }}>
             <span className="tag enter" style={{ background: "var(--yellow-tint)", color: "var(--navy)", padding: "6px 12px", borderRadius: 999 }}>
-              Signing that anyone can check
+              Sign PDFs online, with proof anyone can check
             </span>
             <h1 className="h enter" style={{ fontSize: "clamp(44px, 7vw, 84px)", fontWeight: 800, maxWidth: 820, ["--d" as string]: "90ms" }}>
               Mean it once. We’ll{" "}
@@ -156,6 +156,11 @@ export default async function Home() {
 
         <section aria-label="How it works" id="how" style={{ scrollMarginTop: 0 }}>
           <ScrollStory />
+          <p className="more-link">
+            <Link href="/how-it-works">
+              See every step, with screen recordings <ArrowRight />
+            </Link>
+          </p>
         </section>
 
         <section aria-labelledby="why" style={{ maxWidth: 1080, margin: "0 auto", padding: "96px 24px" }}>
@@ -181,6 +186,11 @@ export default async function Home() {
               </li>
             ))}
           </ul>
+          <p className="more-link">
+            <Link href="/verify-a-signed-pdf">
+              How to check if a signed PDF was changed <ArrowRight />
+            </Link>
+          </p>
         </section>
 
         <section aria-labelledby="faq" style={{ maxWidth: 760, margin: "0 auto", padding: "24px 24px 96px", scrollMarginTop: 24 }}>
@@ -199,6 +209,11 @@ export default async function Home() {
               </details>
             ))}
           </Reveal>
+          <p className="more-link">
+            <Link href="/faq">
+              See all questions <ArrowRight />
+            </Link>
+          </p>
         </section>
 
         <section aria-labelledby="cta" style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px 96px" }}>
