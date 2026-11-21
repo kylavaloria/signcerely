@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Badge, Chip, DecorLayer, Orb, PixelArt } from "@/components/Decor";
-import { ArrowRight, CheckIcon, Logo, ShieldIcon } from "@/components/icons";
+import { ArrowRight, CheckIcon } from "@/components/icons";
 import { Reveal } from "@/components/Reveal";
 import { ScrollStory } from "@/components/ScrollStory";
 import { getProfile } from "@/lib/profile";
@@ -222,36 +223,7 @@ export default async function Home() {
           </Reveal>
         </section>
       </main>
-      <footer style={{ borderTop: "1px solid rgba(255,255,255,.9)", background: "rgba(255,255,255,.6)" }}>
-        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 24px 24px", display: "flex", flexDirection: "column", gap: 28 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 28 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 700, fontSize: 17 }}>
-                <Logo size={30} /> Signcerely
-              </span>
-              <p style={{ color: "var(--blue)", fontSize: 14.5 }}>Mean it once. We’ll remember.</p>
-            </div>
-            <nav aria-label="Product" className="footer-col">
-              <p className="tag">Product</p>
-              <a href="#how">How it works</a>
-              <Link href="/verify">Verify a document</Link>
-              <a href="#faq">FAQ</a>
-            </nav>
-            <nav aria-label="Help" className="footer-col">
-              <p className="tag">Help</p>
-              <a href="https://varialwallet.com" target="_blank" rel="noopener noreferrer">
-                Get Varial
-              </a>
-            </nav>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12, fontSize: 13.5, color: "var(--ink-3)", borderTop: "1px solid var(--line-2)", paddingTop: 18 }}>
-            <p>© 2026 Signcerely. All rights reserved.</p>
-            <p style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <ShieldIcon size={13} /> Secured by Stellar
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
