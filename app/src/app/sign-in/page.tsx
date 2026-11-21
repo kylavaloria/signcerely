@@ -8,7 +8,7 @@ import { safeNext } from "@/lib/format";
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Sign in · Signcerely" };
+export const metadata: Metadata = { title: "Sign in · Signcerely", alternates: { canonical: "/sign-in" } };
 
 const points = [
   { icon: <LockIcon />, text: "Only you can approve a signature in your Varial wallet. We never see your secret key." },

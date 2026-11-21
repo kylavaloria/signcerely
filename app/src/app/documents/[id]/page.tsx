@@ -11,8 +11,9 @@ import { db } from "@/lib/supabase";
 import { CancelDocumentButton } from "./CancelDocumentButton";
 import { CommentToggle } from "./CommentToggle";
 import { SignerActions } from "./SignerActions";
+import { noIndex } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Document · Signcerely" };
+export const metadata: Metadata = { title: "Document · Signcerely", robots: noIndex };
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   pending: { label: "Waiting for signatures", bg: "#E8ECFA", fg: "#1F6FD6" },

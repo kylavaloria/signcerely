@@ -6,7 +6,18 @@ import { getSession } from "@/lib/session";
 import { chainConfigFromEnv } from "@/lib/stellar/contract";
 import { VerifyForm } from "./VerifyForm";
 
-export const metadata: Metadata = { title: "Verify a document · Signcerely" };
+const VERIFY_TITLE = "Check if a signed PDF is real · Signcerely";
+const VERIFY_DESCRIPTION =
+  "Upload a signed PDF to see who signed it, when, and whether it has been changed. Free, no account needed, and your file never leaves your device.";
+
+export const metadata: Metadata = {
+  title: VERIFY_TITLE,
+  description: VERIFY_DESCRIPTION,
+  alternates: { canonical: "/verify" },
+  // Setting openGraph/twitter here replaces the site-wide ones, so the preview image is listed again.
+  openGraph: { title: VERIFY_TITLE, description: VERIFY_DESCRIPTION, url: "/verify", images: ["/opengraph-image.png"] },
+  twitter: { card: "summary_large_image", title: VERIFY_TITLE, description: VERIFY_DESCRIPTION, images: ["/twitter-image.png"] },
+};
 
 export default async function VerifyPage() {
   const session = await getSession();

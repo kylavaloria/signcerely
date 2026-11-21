@@ -1,0 +1,12 @@
+import type { Metadata } from "next";
+
+/** Public address of the site, for canonical links, the sitemap and link previews. */
+export const SITE_URL = (process.env.APP_URL || "https://signcerely.site").replace(/\/$/, "");
+
+export const SITE_TITLE = "Signcerely – Sign PDFs online and prove who signed";
+
+export const SITE_DESCRIPTION =
+  "Send a PDF, choose who signs and in what order, and get a signed copy anyone can check. No account needed to verify.";
+
+/** For private pages (invites, documents, account steps): keep them out of search results. */
+export const noIndex: Metadata["robots"] = { index: false, follow: false };
