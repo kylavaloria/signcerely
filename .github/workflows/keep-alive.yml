@@ -1,0 +1,19 @@
+name: Keep database awake
+
+# The Supabase free plan pauses a project after about a week without activity,
+# which breaks sign-in on the live site. This calls the site's health check,
+# which makes one small database read, every three days.
+on:
+  schedule:
+    - cron: "17 3 */3 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call the health check
+        run: curl -fsS --retry 3 --retry-delay 20 --max-time 30 https://signcerely.site/api/health
