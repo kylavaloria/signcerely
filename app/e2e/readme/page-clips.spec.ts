@@ -63,6 +63,12 @@ const CURSOR = () => {
   else addEventListener("DOMContentLoaded", add);
 };
 
+/** Click "Page 2" in the page list, if this screen has one. */
+async function page2(p: Page) {
+  const b = p.getByRole("button", { name: /^Page 2/ }).first();
+  if (await b.isVisible()) await click(p, b);
+}
+
 /** Glide the cursor to an element, then click it. */
 async function click(p: Page, target: Locator) {
   await target.scrollIntoViewIfNeeded();
@@ -110,6 +116,9 @@ test("website clips", async ({ browser }) => {
   for (const u of [maria, juan]) await u.context.addInitScript(CURSOR);
   const m = maria.page;
   const j = juan.page;
+  // Load a page right away: a video only starts with its first painted frame,
+  // and the clip times are measured from when the page was opened.
+  await Promise.all([m.goto("/"), j.goto("/")]);
 
   await signIn(maria);
   await m.goto(linkIn(await waitForMail(maria.email, /Confirm your email/), "/confirm-email"));
@@ -210,7 +219,7 @@ test("website clips", async ({ browser }) => {
   // 5. Juan signs.
   begin(juan, "step-5-sign");
   await pause(j, 900);
-  await click(j, j.getByRole("button", { name: /^Page 2/ }).first()).catch(() => {});
+  await page2(j);
   await pause(j, 900);
   await click(j, j.getByRole("button", { name: "Sign here" }).first());
   await pause(j, 600);
@@ -226,7 +235,7 @@ test("website clips", async ({ browser }) => {
   // 6. Everyone gets the signed copy.
   begin(juan, "step-6-signed-copy");
   await pause(j, 600);
-  await click(j, j.getByRole("button", { name: /^Page 2/ }).first()).catch(() => {});
+  await page2(j);
   await pause(j, 1200);
   await scrollTo(j, "bottom", 1800);
   await pause(j, 900);
