@@ -10,3 +10,18 @@ export const SITE_DESCRIPTION =
 
 /** For private pages (invites, documents, account steps): keep them out of search results. */
 export const noIndex: Metadata["robots"] = { index: false, follow: false };
+
+/**
+ * Metadata for a public page: title, description, canonical link and a link
+ * preview. Setting openGraph/twitter replaces the site-wide ones, so the
+ * preview image is listed again.
+ */
+export function pageMeta(path: string, title: string, description: string): Metadata {
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: { title, description, url: path, images: ["/opengraph-image.png"] },
+    twitter: { card: "summary_large_image", title, description, images: ["/twitter-image.png"] },
+  };
+}

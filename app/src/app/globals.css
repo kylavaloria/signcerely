@@ -2198,3 +2198,115 @@ li[data-active="true"] > .story-num {
   opacity: 0.6;
   cursor: default;
 }
+
+/* ---------- guide pages ---------- */
+.prose {
+  color: var(--ink-2);
+  font-size: 17px;
+  line-height: 1.7;
+}
+.prose .lead {
+  font-size: 19px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+.prose h2 {
+  font-family: var(--font-head);
+  font-size: clamp(26px, 3.4vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--navy);
+  margin: 48px 0 12px;
+}
+.prose h3 {
+  font-family: var(--font-head);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+  margin: 28px 0 8px;
+}
+.prose p + p,
+.prose ul + p,
+.prose ol + p,
+.prose .clip + p,
+.prose h3 + p {
+  margin-top: 14px;
+}
+.prose h3 + p {
+  margin-top: 0;
+}
+.prose ul,
+.prose ol {
+  margin: 12px 0 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.prose strong {
+  color: var(--navy);
+}
+.prose .note {
+  margin-top: 18px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.prose .step {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 4px 16px;
+  margin-top: 44px;
+}
+.prose .step-num {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--blue);
+  color: #fff;
+  font: 800 18px var(--font-head);
+  display: grid;
+  place-items: center;
+}
+.prose .step h2 {
+  margin: 4px 0 6px;
+}
+.prose .step > :not(.step-num, h2) {
+  grid-column: 1 / -1;
+}
+.clip {
+  margin: 20px 0 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #eef4fd;
+  box-shadow: 0 1px 2px rgba(15, 27, 61, 0.04), 0 16px 40px rgba(31, 111, 214, 0.14);
+}
+.clip video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.prose-cta {
+  margin-top: 64px;
+  padding: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: none;
+}
+.faq-list details {
+  border-top: 1px solid var(--line-2);
+}
+.faq-list details:first-child {
+  border-top: 0;
+}
+.faq-list summary {
+  font-size: 17px;
+}
+.faq-list details > div {
+  padding-bottom: 18px;
+}

@@ -24,6 +24,7 @@ export function SiteHeader({ current, user }: Props) {
               Documents
             </Link>
           )}
+          {!user && <Link href="/how-it-works">How it works</Link>}
           <Link href="/verify" aria-current={current === "verify" ? "page" : undefined}>
             Verify a document
           </Link>

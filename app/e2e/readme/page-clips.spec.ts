@@ -105,8 +105,8 @@ test("website clips", async ({ browser }) => {
   const video = { dir: OUT, size: SIZE };
   const maria = await newUser(browser, "Maria Santos", { context: { viewport: SIZE, recordVideo: video } });
   const juan = await newUser(browser, "Juan Dela Cruz", { context: { viewport: SIZE, recordVideo: video } });
-  maria.email = "maria.santos@example.com";
-  juan.email = "juan.delacruz@example.com";
+  maria.email = "maria@example.com";
+  juan.email = "juan@example.com";
   for (const u of [maria, juan]) await u.context.addInitScript(CURSOR);
   const m = maria.page;
   const j = juan.page;
