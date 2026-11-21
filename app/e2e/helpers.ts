@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { hash, Keypair, Networks, TransactionBuilder } from "@stellar/stellar-sdk";
-import { expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { expect, type Browser, type BrowserContext, type BrowserContextOptions, type Page } from "@playwright/test";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 
 const MAIL_DIR = process.env.E2E_MAIL_DIR ?? "";
@@ -20,6 +20,8 @@ export type User = {
   keypair: Keypair;
   context: BrowserContext;
   page: Page;
+  /** When the page was opened (ms), so recorded videos can be cut by time. */
+  startedAt: number;
 };
 
 async function fund(address: string) {
@@ -35,10 +37,10 @@ async function fund(address: string) {
  * A person with their own browser and a funded Stellar key. The app talks to
  * a stand-in for Varial (only active in E2E builds) that signs with this key.
  */
-export async function newUser(browser: Browser, name: string, opts: { fund?: boolean } = {}): Promise<User> {
+export async function newUser(browser: Browser, name: string, opts: { fund?: boolean; context?: BrowserContextOptions } = {}): Promise<User> {
   const keypair = Keypair.random();
   if (opts.fund !== false) await fund(keypair.publicKey());
-  const context = await browser.newContext({ acceptDownloads: true });
+  const context = await browser.newContext({ acceptDownloads: true, ...opts.context });
   await context.exposeBinding("__e2eWallet", async (_source, op: string, arg: string) => {
     if (op === "address") return keypair.publicKey();
     if (op === "signMessage") {
@@ -61,7 +63,8 @@ export async function newUser(browser: Browser, name: string, opts: { fund?: boo
     };
   });
   const page = await context.newPage();
-  return { name, email: emailFor(name.toLowerCase().split(" ")[0]), keypair, context, page };
+  const startedAt = Date.now();
+  return { name, email: emailFor(name.toLowerCase().split(" ")[0]), keypair, context, page, startedAt };
 }
 
 /** Sign in from the sign-in page; finish the profile if it's the first time. */

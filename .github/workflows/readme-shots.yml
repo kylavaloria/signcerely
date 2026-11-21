@@ -1,10 +1,14 @@
 name: README screenshots
 
-# Re-takes the screenshots used in README.md from a real run of the app
+# Re-takes the screenshots used in README.md, and the clips on the website's
+# guide pages (in readme-shots/clips), from a real run of the app
 # (same throwaway setup as the end-to-end tests). Run it from the Actions tab,
 # download the "readme-screenshots" artifact and replace the files in docs/readme.
 on:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   shots:
@@ -106,8 +110,18 @@ jobs:
         run: npx playwright test e2e/readme
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: readme-screenshots
           path: readme-shots
 
-
+      # The raw clip recordings also go to a throwaway branch, so they can be
+      # fetched with git and cut with scripts/make-clips.py.
+      - name: Push clip recordings to tmp/website-clips
+        if: always() && hashFiles('readme-shots/clips/timeline.json') != ''
+        run: |
+          cd readme-shots/clips
+          git init -q -b tmp/website-clips
+          git add .
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Clip recordings"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tmp/website-clips
