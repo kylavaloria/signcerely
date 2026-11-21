@@ -3,8 +3,9 @@ import { NewDocShell } from "@/components/NewDocShell";
 import { getDraftSigners, getOwnedDraft } from "@/lib/documents";
 import { requireUser } from "@/lib/profile";
 import { SignersStep } from "./SignersStep";
+import { noIndex } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Signers · New document · Signcerely" };
+export const metadata: Metadata = { title: "Signers · New document · Signcerely", robots: noIndex };
 
 export default async function SignersPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

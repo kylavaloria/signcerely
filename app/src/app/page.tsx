@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Badge, Chip, DecorLayer, Orb, PixelArt } from "@/components/Decor";
@@ -6,6 +7,35 @@ import { Reveal } from "@/components/Reveal";
 import { ScrollStory } from "@/components/ScrollStory";
 import { getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
+import { SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
+
+/** schema.org data so search engines understand what Signcerely is. */
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Signcerely",
+      url: `${SITE_URL}/`,
+      logo: `${SITE_URL}/apple-icon.png`,
+      sameAs: ["https://github.com/kylavaloria/signcerely"],
+    },
+    {
+      "@type": "WebApplication",
+      name: "Signcerely",
+      url: `${SITE_URL}/`,
+      description: SITE_DESCRIPTION,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Any",
+      browserRequirements: "Requires a modern web browser",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
+};
 
 const reasons = [
   {
@@ -57,6 +87,11 @@ export default async function Home() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
+      <script
+        type="application/ld+json"
+        // Static object built above, no user input.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+      />
       <div className="scroll-progress" aria-hidden="true" />
       <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />
       <main className="landing-main">

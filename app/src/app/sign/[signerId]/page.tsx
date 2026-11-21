@@ -12,8 +12,9 @@ import { db } from "@/lib/supabase";
 import { markViewed } from "./actions";
 import { InviteKeyCatcher } from "./InviteKeyCatcher";
 import { SigningView, type ViewField, type ViewSigner } from "./SigningView";
+import { noIndex } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Review and sign · Signcerely" };
+export const metadata: Metadata = { title: "Review and sign · Signcerely", robots: noIndex };
 
 async function signedUrl(bucket: string, path: string, opts?: { download?: string }) {
   const { data } = await db().storage.from(bucket).createSignedUrl(path, 60 * 30, opts);
