@@ -18,6 +18,10 @@
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-ffdd1f?style=flat-square" />
 </p>
 
+### 🎬 Watch the 1-minute pitch
+
+https://github.com/user-attachments/assets/72065a49-d7d2-43a6-ab29-c9c2296fe0ea
+
 <br />
 
 <table>
