@@ -37,7 +37,15 @@ export function SiteFooter() {
           </nav>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12, fontSize: 13.5, color: "var(--ink-3)", borderTop: "1px solid var(--line-2)", paddingTop: 18 }}>
-          <p>© 2026 Signcerely. All rights reserved.</p>
+          <p style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px" }}>
+            <span>© 2026 Signcerely. All rights reserved.</span>
+            <Link href="/privacy" style={{ color: "inherit" }}>
+              Privacy
+            </Link>
+            <Link href="/terms" style={{ color: "inherit" }}>
+              Terms
+            </Link>
+          </p>
           <p style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <ShieldIcon size={13} /> Secured by Stellar
           </p>
