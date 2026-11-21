@@ -18,7 +18,7 @@
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-ffdd1f?style=flat-square" />
 </p>
 
-### 🎬 Watch the 1-minute pitch
+### ⭐ Watch the 1-minute pitch
 
 https://github.com/user-attachments/assets/72065a49-d7d2-43a6-ab29-c9c2296fe0ea
 
@@ -28,7 +28,7 @@ https://github.com/user-attachments/assets/72065a49-d7d2-43a6-ab29-c9c2296fe0ea
 <tr>
 <td width="50%" valign="top">
 
-### 🧩 The problem
+### ⚠️ The problem
 
 Agreements between freelancers, landlords, small businesses and friends are signed
 over email attachments, chat screenshots, or e-signature tools that charge per
@@ -41,7 +41,7 @@ PDF can be edited after the fact with nobody able to tell.
 </td>
 <td width="50%" valign="top">
 
-### 🎯 The objective
+### 💡 The objective
 
 Make signing an agreement as simple as sending an email, while leaving a
 permanent, public proof on Stellar that anyone can check for free.
@@ -59,7 +59,7 @@ permanent, public proof on Stellar that anyone can check for free.
 
 <a id="how-it-works"></a>
 
-## ✍️ How it works
+## 📘 How it works
 
 The PDF never goes on-chain. Stellar keeps a small, permanent record: the
 fingerprint of the original file, who signed which spot and when, and the
@@ -190,7 +190,7 @@ browser and the file never leaves the device.
 
 <br />
 
-## 🧱 Tech stack
+## 💎 Tech stack
 
 <table>
 <tr><td><b>Web app</b></td><td>Next.js 16 (App Router), React 19, TypeScript</td></tr>
@@ -205,7 +205,7 @@ browser and the file never leaves the device.
 
 <br />
 
-## 🗂️ Repo layout
+## 📁 Repo layout
 
 | Path | What it is |
 |---|---|
@@ -220,7 +220,7 @@ browser and the file never leaves the device.
 
 <a id="smart-contract"></a>
 
-## ⛓️ Smart contract
+## 🔷 Smart contract
 
 | Function | Who calls it | Notes |
 |---|---|---|
@@ -257,7 +257,7 @@ Each user pays their own small network fee in XLM.
 
 <a id="run-it-locally"></a>
 
-## 💻 Run it locally
+## ⚡ Run it locally
 
 **Web app** (Node 22):
 
@@ -283,7 +283,7 @@ No local setup? Open **Actions → Deploy to testnet → Run workflow**.
 
 <br />
 
-## 🧪 Testing
+## 🔹 Testing
 
 | Command | What it checks |
 |---|---|
@@ -296,7 +296,7 @@ The screenshots in this README come from a real run of the app: **Actions → RE
 
 <br />
 
-## ⚠️ Limitations
+## 🚧 Limitations
 
 - The fingerprint of the final signed copy is supplied by the last signer's app. A wrong value can't fake anyone's signature, but the real signed copy would then not match on Verify.
 - Names are typed by the sender and confirmed by each signer; they aren't checked against an ID.
@@ -304,6 +304,6 @@ The screenshots in this README come from a real run of the app: **Actions → RE
 
 <br />
 
-## 📄 License
+## 📒 License
 
 MIT
