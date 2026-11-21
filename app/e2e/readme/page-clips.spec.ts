@@ -223,7 +223,7 @@ test("website clips", async ({ browser }) => {
   await pause(j, 900);
   await click(j, j.getByRole("button", { name: "Sign here" }).first());
   await pause(j, 600);
-  await drawSignature(j, 1);
+  await fast(juan, () => drawSignature(j, 1));
   await pause(j, 700);
   await click(j, j.getByRole("button", { name: "Use this signature" }));
   await pause(j, 900);

@@ -15,7 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-SPEEDUP = 6.0  # how much faster network waits play
+SPEEDUP = 6.0  # how much faster waits (and the signature drawing) play
 PAD = 0.25  # seconds kept before and after each clip
 OUT = Path(__file__).resolve().parent.parent / "app" / "public" / "clips"
 
