@@ -1,6 +1,7 @@
 name: README screenshots
 
-# Re-takes the screenshots used in README.md from a real run of the app
+# Re-takes the screenshots used in README.md, and the clips on the website's
+# guide pages (in readme-shots/clips), from a real run of the app
 # (same throwaway setup as the end-to-end tests). Run it from the Actions tab,
 # download the "readme-screenshots" artifact and replace the files in docs/readme.
 on:
@@ -106,6 +107,7 @@ jobs:
         run: npx playwright test e2e/readme
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: readme-screenshots
           path: readme-shots
