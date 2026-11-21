@@ -13,6 +13,7 @@ export async function ContentPage({
   intro,
   left = "document",
   right = "check",
+  cta = true,
   children,
 }: {
   eyebrow: string;
@@ -20,6 +21,8 @@ export async function ContentPage({
   intro: React.ReactNode;
   left?: ArtName;
   right?: ArtName;
+  /** Show the "Ready to send your first document?" box after the article. */
+  cta?: boolean;
   children: React.ReactNode;
 }) {
   const session = await getSession();
@@ -41,22 +44,24 @@ export async function ContentPage({
           </header>
           {children}
         </article>
-        <aside className="card prose-cta" aria-label="Get started">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: "1 1 280px" }}>
-            <p className="h" style={{ fontSize: 24, fontWeight: 700 }}>
-              Ready to send your first document?
-            </p>
-            <p style={{ color: "var(--ink-2)" }}>Upload a PDF, add who needs to sign, and send it in a few minutes.</p>
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <Link className="btn btn-primary" href={profile ? "/documents/new" : "/sign-in"}>
-              Get started
-            </Link>
-            <Link className="btn btn-secondary" href="/verify">
-              Check a document
-            </Link>
-          </div>
-        </aside>
+        {cta && (
+          <aside className="card prose-cta" aria-label="Get started">
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: "1 1 280px" }}>
+              <p className="h" style={{ fontSize: 24, fontWeight: 700 }}>
+                Ready to send your first document?
+              </p>
+              <p style={{ color: "var(--ink-2)" }}>Upload a PDF, add who needs to sign, and send it in a few minutes.</p>
+            </div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <Link className="btn btn-primary" href={profile ? "/documents/new" : "/sign-in"}>
+                Get started
+              </Link>
+              <Link className="btn btn-secondary" href="/verify">
+                Check a document
+              </Link>
+            </div>
+          </aside>
+        )}
       </main>
       <SiteFooter />
     </div>

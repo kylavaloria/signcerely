@@ -25,3 +25,9 @@ export function pageMeta(path: string, title: string, description: string): Meta
     twitter: { card: "summary_large_image", title, description, images: ["/twitter-image.png"] },
   };
 }
+
+/** Where people send privacy requests and questions about the Terms. */
+export const CONTACT_EMAIL = "concerns@signcerely.site";
+
+/** "Last updated" date shown on the Privacy Policy and Terms. */
+export const LEGAL_UPDATED = "November 22, 2026";

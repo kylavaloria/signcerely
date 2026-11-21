@@ -13,5 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/sign-a-lease-online`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/multiple-signers-in-order`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/sign-in`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.2 },
   ];
 }
