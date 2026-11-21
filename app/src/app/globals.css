@@ -26,9 +26,9 @@
   --glass-border: rgba(255, 255, 255, 0.95);
   --glass-shadow: 0 1px 2px rgba(31, 111, 214, 0.06), 0 14px 40px rgba(31, 111, 214, 0.14);
 
-  --font-head: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --font-head: var(--font-bricolage), "Bricolage Grotesque", var(--font-jakarta), system-ui, sans-serif;
+  --font-body: var(--font-jakarta), "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, Menlo, monospace;
 }
 
 *,
