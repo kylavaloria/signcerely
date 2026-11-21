@@ -18,8 +18,9 @@ import { ActiveTabIntoView } from "./ActiveTabIntoView";
 import { DocFilters } from "./DocFilters";
 import { EmailNotice } from "./EmailNotice";
 import { Pagination } from "./Pagination";
+import { noIndex } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Documents · Signcerely" };
+export const metadata: Metadata = { title: "Documents · Signcerely", robots: noIndex };
 
 type Signer = { invited_name: string; status: string; slot: number };
 type Tab = "sign" | "waiting" | "drafts" | "closed";

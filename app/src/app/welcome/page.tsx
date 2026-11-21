@@ -9,8 +9,9 @@ import { getInvitePrefill, getProfile } from "@/lib/profile";
 import { getSession } from "@/lib/session";
 import { ProfileForm } from "./ProfileForm";
 import { SwitchWallet } from "./SwitchWallet";
+import { noIndex } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Finish your profile · Signcerely" };
+export const metadata: Metadata = { title: "Finish your profile · Signcerely", robots: noIndex };
 
 export default async function WelcomePage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const next = safeNext((await searchParams).next);

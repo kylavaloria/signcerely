@@ -4,8 +4,9 @@ import { NewDocShell } from "@/components/NewDocShell";
 import { getDraftFields, getDraftSigners, getOwnedDraft, signedPdfUrl } from "@/lib/documents";
 import { requireUser } from "@/lib/profile";
 import { SpotsEditor } from "./SpotsEditor";
+import { noIndex } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Signature spots · New document · Signcerely" };
+export const metadata: Metadata = { title: "Signature spots · New document · Signcerely", robots: noIndex };
 
 export default async function SpotsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

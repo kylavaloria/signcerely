@@ -9,8 +9,9 @@ import { requireUser } from "@/lib/profile";
 import { DeleteDraftButton } from "./DeleteDraftButton";
 import { ReviewPreview } from "./ReviewPreview";
 import { SendButton } from "./SendButton";
+import { noIndex } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Review · New document · Signcerely" };
+export const metadata: Metadata = { title: "Review · New document · Signcerely", robots: noIndex };
 
 const row: React.CSSProperties = {
   display: "flex",
