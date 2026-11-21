@@ -184,7 +184,7 @@ export function DecorLayer({ children, wideOnly = true }: { children: React.Reac
   );
 }
 
-type ArtName = keyof typeof ART;
+export type ArtName = keyof typeof ART;
 
 /**
  * Decorations for the empty page margins beside the content. They sit near
