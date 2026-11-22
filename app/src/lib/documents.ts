@@ -136,6 +136,9 @@ export async function listSent(wallet: string): Promise<SentDoc[]> {
   })) as SentDoc[];
 }
 
+/** A confirmed email as stored in the indexed lowercase columns, safe inside a PostgREST or() filter. */
+const emailKey = (email: string) => email.toLowerCase().replace(/["\\]/g, "");
+
 export type ToSign = {
   signerId: string;
   documentId: string;
@@ -163,7 +166,7 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
     .in("status", ["invited", "viewed"])
     .eq("documents.status", "pending");
   q = verifiedEmail
-    ? q.or(`wallet_address.eq.${wallet},invited_email.ilike."${verifiedEmail.replace(/["\\%_]/g, "")}"`)
+    ? q.or(`wallet_address.eq.${wallet},invited_email_lower.eq."${emailKey(verifiedEmail)}"`)
     : q.eq("wallet_address", wallet);
   const { data, error } = await q.order("invited_at", { ascending: false });
   if (error) throw dbError(error);
@@ -215,7 +218,7 @@ export async function listFromOthers(wallet: string, verifiedEmail: string | nul
     .in("documents.status", ["pending", "completed", "declined", "cancelled"])
     .neq("documents.sender_wallet", wallet);
   q = verifiedEmail
-    ? q.or(`wallet_address.eq.${wallet},invited_email.ilike."${verifiedEmail.replace(/["\\%_]/g, "")}"`)
+    ? q.or(`wallet_address.eq.${wallet},invited_email_lower.eq."${emailKey(verifiedEmail)}"`)
     : q.eq("wallet_address", wallet);
   const { data, error } = await q;
   if (error) throw dbError(error);
