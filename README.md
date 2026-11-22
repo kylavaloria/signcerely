@@ -193,6 +193,86 @@ browser and the file never leaves the device.
 
 <br />
 
+## 💠 Architecture
+
+### System
+
+The browser talks to the Next.js server, except for PDF uploads and downloads, which go straight to private storage through short-lived links the server creates. Only the server holds the database key and talks to the contract.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#eef4fd","primaryTextColor":"#12305c","primaryBorderColor":"#1f6fd6","lineColor":"#2f7ae5","textColor":"#2f7ae5","edgeLabelBackground":"#ffdd1f","clusterBkg":"#f7faff","clusterBorder":"#1f6fd6","titleColor":"#12305c","actorBkg":"#1f6fd6","actorBorder":"#12305c","actorTextColor":"#ffffff","actorLineColor":"#2f7ae5","signalColor":"#2f7ae5","signalTextColor":"#2f7ae5","noteBkgColor":"#ffdd1f","noteBorderColor":"#c9a800","noteTextColor":"#12305c","sequenceNumberColor":"#ffffff"}}}%%
+flowchart LR
+  subgraph browser["Browser"]
+    direction TB
+    ui["Signcerely web app<br/>PDF fingerprints are made here"]
+    wallet["Varial wallet"]
+  end
+
+  server["Next.js server<br/>Vercel · Singapore"]
+
+  subgraph supabase["Supabase · private"]
+    direction TB
+    db[("Postgres<br/>documents, signers, events")]
+    files[("Storage<br/>PDFs, signature images")]
+  end
+
+  chain["Soroban signing contract<br/>Stellar testnet"]
+  mail["Resend<br/>emails"]
+
+  wallet -. approves transactions .- ui
+  ui -->|server actions| server
+  ui -.->|PDF files, short-lived links| files
+  server -->|server-only key| supabase
+  server -->|build, check, submit, read| chain
+  server -->|invites, your turn, completed| mail
+
+  classDef blue fill:#1f6fd6,stroke:#12305c,color:#ffffff
+  classDef yellow fill:#ffdd1f,stroke:#c9a800,color:#12305c
+  classDef soft fill:#eef4fd,stroke:#1f6fd6,color:#12305c
+  class server,chain blue
+  class wallet yellow
+  class ui,db,files,mail soft
+  style browser stroke-dasharray:4 4
+  style supabase stroke-dasharray:4 4
+```
+
+### Signing flow
+
+From sending a document to anyone checking the signed copy.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#eef4fd","primaryTextColor":"#12305c","primaryBorderColor":"#1f6fd6","lineColor":"#2f7ae5","textColor":"#2f7ae5","edgeLabelBackground":"#ffdd1f","clusterBkg":"#f7faff","clusterBorder":"#1f6fd6","titleColor":"#12305c","actorBkg":"#1f6fd6","actorBorder":"#12305c","actorTextColor":"#ffffff","actorLineColor":"#2f7ae5","signalColor":"#2f7ae5","signalTextColor":"#2f7ae5","noteBkgColor":"#ffdd1f","noteBorderColor":"#c9a800","noteTextColor":"#12305c","sequenceNumberColor":"#ffffff"}}}%%
+sequenceDiagram
+  autonumber
+  participant Sender
+  participant App as Signcerely
+  participant Chain as Signing contract
+  participant Signer
+  participant Anyone
+
+  Sender->>App: Upload PDF, choose signers and order
+  App->>Sender: Transaction to approve
+  Sender->>App: Approved in wallet
+  App->>Chain: create(PDF fingerprint, invite keys, order)
+  App->>Signer: Invite email with a one-time link
+
+  Signer->>App: Opens link, signs in, draws signature
+  App->>Signer: Transaction to approve
+  Signer->>App: Approved in wallet + invite proof
+  App->>Chain: sign(spot, proof, signature fingerprint)
+  Note over App,Chain: Contract checks the proof, the wallet,<br/>and that it's this signer's turn
+  App->>Signer: Next signer is emailed (repeat)
+
+  Note over App,Chain: Last signer: the app stamps the final PDF<br/>and its fingerprint goes on-chain too
+  App->>Sender: Signed copy for everyone
+
+  Anyone->>App: Drop a PDF on /verify (fingerprint only)
+  App->>Chain: find_by_hash(fingerprint)
+  Chain-->>Anyone: Who signed, in what order, and when
+```
+
+<br />
+
 ## 💎 Tech stack
 
 <table>
