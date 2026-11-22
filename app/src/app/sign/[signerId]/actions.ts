@@ -265,13 +265,6 @@ export async function submitSign(signerId: string, signedXdr: string): Promise<{
 }
 
 /** Mark the invite as opened (once). */
-export async function markViewed(signerId: string): Promise<void> {
-  const a = await getAccess(signerId);
-  if (!a?.invited || a.wrongAccount || a.signer.status !== "invited") return;
-  await db().from("document_signers").update({ status: "viewed", viewed_at: new Date().toISOString() }).eq("id", signerId).eq("status", "invited");
-  await db().from("document_events").insert({ document_id: a.doc.id, kind: "viewed", signer_id: signerId, actor_wallet: a.wallet });
-}
-
 // ---------- decline ----------
 
 async function readyToDecline(signerId: string): Promise<{ a: Access; wallet: string } | Fail> {

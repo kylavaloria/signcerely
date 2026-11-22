@@ -14,7 +14,10 @@
   <img alt="Stellar Soroban" src="https://img.shields.io/badge/Stellar-Soroban-1f6fd6?style=flat-square" />
   <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16-12305c?style=flat-square" />
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres-1f9d61?style=flat-square" />
-  <a href="https://github.com/kylavaloria/it-s-your-sign/actions/workflows/e2e.yml"><img alt="End-to-end tests" src="https://github.com/kylavaloria/it-s-your-sign/actions/workflows/e2e.yml/badge.svg" /></a>
+  <a href="https://github.com/kylavaloria/signcerely/actions/workflows/app.yml?query=branch%3Amain"><img alt="App checks" src="https://github.com/kylavaloria/signcerely/actions/workflows/app.yml/badge.svg?branch=main" /></a>
+  <a href="https://github.com/kylavaloria/signcerely/actions/workflows/contract.yml?query=branch%3Amain"><img alt="Contract tests" src="https://github.com/kylavaloria/signcerely/actions/workflows/contract.yml/badge.svg?branch=main" /></a>
+  <a href="https://github.com/kylavaloria/signcerely/actions/workflows/e2e.yml?query=branch%3Amain"><img alt="End-to-end tests" src="https://github.com/kylavaloria/signcerely/actions/workflows/e2e.yml/badge.svg?branch=main" /></a>
+  <a href="https://github.com/kylavaloria/signcerely/actions/workflows/testnet-integration.yml?query=branch%3Amain"><img alt="Testnet integration" src="https://github.com/kylavaloria/signcerely/actions/workflows/testnet-integration.yml/badge.svg?branch=main" /></a>
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-ffdd1f?style=flat-square" />
 </p>
 
@@ -293,6 +296,20 @@ No local setup? Open **Actions → Deploy to testnet → Run workflow**.
 
 Every pull request runs lint, type checks, unit, contract and end-to-end tests in CI.
 The screenshots in this README come from a real run of the app: **Actions → README screenshots**.
+
+### Test results
+
+<!-- test-results:start -->
+| Suite | What it covers | Latest result on `main` | Run |
+|---|---|---|---|
+| **Unit tests** (Vitest) | Sign-in messages, invite keys, who may sign, document rules, file names, the signed copy, error messages, contract calls | ✅ [49 passed](https://github.com/kylavaloria/signcerely/actions/runs/44940811587) | Nov 21, 2026 |
+| **Contract tests** (Rust) | Signing order, approvals, invite proofs, one wallet per spot, decline, cancel, final fingerprint, events | ✅ [15 passed](https://github.com/kylavaloria/signcerely/actions/runs/43047635787) | Nov 11, 2026 |
+| **End-to-end** (Playwright) | A real browser against a local Supabase and a private Stellar network: signing in order through to verify, only the invited person can sign, decline with a reason, one confirmed email per account | ✅ [4 passed](https://github.com/kylavaloria/signcerely/actions/runs/44940811677) | Nov 21, 2026 |
+| **Testnet integration** (Vitest) | The real signing flow against the deployed testnet contract | ✅ [4 passed](https://github.com/kylavaloria/signcerely/actions/runs/43352037263) | Nov 13, 2026 |
+| **Lint, types and build** (ESLint, TypeScript, Next.js) | The whole web app | ✅ [no errors](https://github.com/kylavaloria/signcerely/actions/runs/44940811587) | Nov 21, 2026 |
+
+_Updated automatically after every test run on `main`. Click a result to open that run._
+<!-- test-results:end -->
 
 <br />
 

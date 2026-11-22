@@ -43,7 +43,7 @@ export async function saveProfile(_prev: ProfileFormState, formData: FormData): 
     .from("profiles")
     .select("wallet_address")
     .not("email_verified_at", "is", null)
-    .ilike("email", parsed.data.email.replace(/[\\%_]/g, (c) => `\\${c}`))
+    .eq("email_lower", parsed.data.email.toLowerCase())
     .neq("wallet_address", session.wallet)
     .limit(1);
   if (taken && taken.length > 0) {
