@@ -548,6 +548,8 @@ summary.disclosure:focus-visible {
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+  font-family: inherit;
+  cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .doc-tab:hover {
@@ -830,6 +832,13 @@ summary.disclosure:focus-visible {
   font-weight: 600;
   color: var(--ink-2);
   text-decoration: none;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+.pager-btn:disabled {
+  cursor: default;
 }
 .pager-btn:hover:not(.is-disabled):not(.is-current) {
   background: var(--blue-tint);

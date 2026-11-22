@@ -1,0 +1,47 @@
+name: Test results
+
+# Keeps the "Test results" table in README.md current: after any test workflow
+# finishes on main, it reads the latest run of each one and rewrites the table
+# (scripts/update-test-results.mjs). Commits only when something changed.
+on:
+  workflow_run:
+    workflows: ["App", "Contract", "End-to-end", "Testnet integration"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: test-results
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Rewrite the table
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/update-test-results.mjs
+      - name: Commit if changed
+        run: |
+          git diff --quiet README.md && { echo "No change"; exit 0; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "README: update test results"
+          for i in 1 2 3; do
+            git pull --rebase -q origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
