@@ -304,7 +304,7 @@ The screenshots in this README come from a real run of the app: **Actions → RE
 |---|---|---|---|
 | **Unit tests** (Vitest) | Sign-in messages, invite keys, who may sign, document rules, file names, the signed copy, error messages, contract calls | ✅ [passed](https://github.com/kylavaloria/signcerely/actions/runs/45036073682) | Nov 22, 2026 |
 | **Contract tests** (Rust) | Signing order, approvals, invite proofs, one wallet per spot, decline, cancel, final fingerprint, events | ✅ [15 passed](https://github.com/kylavaloria/signcerely/actions/runs/43047635787) | Nov 11, 2026 |
-| **End-to-end** (Playwright) | A real browser against a local Supabase and a private Stellar network: signing in order through to verify, only the invited person can sign, decline with a reason, one confirmed email per account | ✅ [4 passed](https://github.com/kylavaloria/signcerely/actions/runs/44994963929) | Nov 22, 2026 |
+| **End-to-end** (Playwright) | A real browser against a local Supabase and a private Stellar network: signing in order through to verify, only the invited person can sign, decline with a reason, one confirmed email per account | ✅ [4 passed](https://github.com/kylavaloria/signcerely/actions/runs/45036073674) | Nov 22, 2026 |
 | **Testnet integration** (Vitest) | The real signing flow against the deployed testnet contract | ✅ [passed](https://github.com/kylavaloria/signcerely/actions/runs/45036073685) | Nov 22, 2026 |
 | **Lint, types and build** (ESLint, TypeScript, Next.js) | The whole web app | ✅ [no errors](https://github.com/kylavaloria/signcerely/actions/runs/45036073682) | Nov 22, 2026 |
 
