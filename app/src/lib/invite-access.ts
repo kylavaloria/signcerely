@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { serverEnv } from "./env";
 import { publicKeyFromSecret } from "./invite-keys";
-import { getProfile } from "./profile";
+import { getProfile, type Profile } from "./profile";
 import { getSession } from "./session";
 import { decideAccess } from "./signer-identity";
 import { db } from "./supabase";
@@ -106,6 +106,8 @@ export type Access = {
   wrongAccount: boolean;
   isSender: boolean;
   wallet: string | null;
+  /** The signed-in person's profile, if any (loaded here so pages don't fetch it again). */
+  profile: Profile | null;
 };
 
 const SIGNER_COLS =
@@ -115,14 +117,20 @@ const DOC_COLS =
 
 export async function getAccess(signerId: string): Promise<Access | null> {
   if (!/^[0-9a-f-]{36}$/i.test(signerId)) return null;
-  const { data: signer } = await db().from("document_signers").select(SIGNER_COLS).eq("id", signerId).maybeSingle();
-  if (!signer) return null;
-  const { data: doc } = await db().from("documents").select(DOC_COLS).eq("id", signer.document_id).maybeSingle();
-  if (!doc || doc.status === "draft") return null;
-
   const session = await getSession();
   const wallet = session?.wallet ?? null;
-  const profile = wallet ? await getProfile(wallet) : null;
+  // One round trip: the slot with its document, the visitor's profile and their unlocked invites together.
+  const [{ data: row }, profile, unlocked] = await Promise.all([
+    db().from("document_signers").select(`${SIGNER_COLS}, documents!inner(${DOC_COLS})`).eq("id", signerId).maybeSingle(),
+    wallet ? getProfile(wallet) : Promise.resolve(null),
+    unlockedIds(),
+  ]);
+  if (!row) return null;
+  const { documents, ...signerCols } = row as unknown as SignerRow & { documents: DocRow };
+  const signer = signerCols as SignerRow;
+  const doc = documents;
+  if (!doc || doc.status === "draft") return null;
+
   const isSender = Boolean(wallet && doc.sender_wallet === wallet);
   const { invited, canSign, wrongAccount } = decideAccess({
     wallet,
@@ -131,10 +139,22 @@ export async function getAccess(signerId: string): Promise<Access | null> {
     profileEmail: profile?.email ?? null,
     emailConfirmed: Boolean(profile?.email_verified_at),
     isSender,
-    byLink: (await unlockedIds()).includes(signer.id),
+    byLink: unlocked.includes(signer.id),
   });
-  if (!invited && !isSender) return { signer, doc, canSign: false, invited: false, wrongAccount: false, isSender: false, wallet };
-  return { signer, doc, canSign, invited, wrongAccount, isSender, wallet };
+  if (!invited && !isSender) return { signer, doc, canSign: false, invited: false, wrongAccount: false, isSender: false, wallet, profile };
+  return { signer, doc, canSign, invited, wrongAccount, isSender, wallet, profile };
+}
+
+/** First time the invited person opens their signing page: mark the slot "viewed" and log it once. */
+export async function recordView(a: Access): Promise<void> {
+  if (!a.invited || a.wrongAccount || a.signer.status !== "invited") return;
+  const { data } = await db()
+    .from("document_signers")
+    .update({ status: "viewed", viewed_at: new Date().toISOString() })
+    .eq("id", a.signer.id)
+    .eq("status", "invited")
+    .select("id");
+  if (data?.length) await db().from("document_events").insert({ document_id: a.doc.id, kind: "viewed", signer_id: a.signer.id, actor_wallet: a.wallet });
 }
 
 /**

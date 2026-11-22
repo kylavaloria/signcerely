@@ -43,25 +43,34 @@ const at = (secs: unknown) => (secs == null ? null : formatSignedDate(new Date(N
 export async function loadRecord(chainDocId: string): Promise<VerifiedRecord | null> {
   if (!/^[0-9a-f]{64}$/.test(chainDocId)) return null;
   const c = chainConfigFromEnv();
-  let chainDoc: Record<string, unknown>;
-  try {
-    chainDoc = await getChainDocument(c, chainDocId);
-  } catch (e) {
+  // The on-chain document, its signatures and our off-chain names are independent: fetch them together.
+  const [chain, sigs, { data: docRow }] = await Promise.all([
+    getChainDocument(c, chainDocId).then(
+      (d) => ({ ok: true as const, d }),
+      (e: unknown) => ({ ok: false as const, e }),
+    ),
+    getChainSignatures(c, chainDocId).catch(() => [] as Awaited<ReturnType<typeof getChainSignatures>>),
+    db()
+      .from("documents")
+      .select("id, title, create_tx_hash, profiles(full_name), document_signers(slot, invited_name, status, sign_tx_hash, wallet_address)")
+      .eq("chain_doc_id", chainDocId)
+      .maybeSingle(),
+  ]);
+  if (!chain.ok) {
+    const e = chain.e;
     // Contract error #2 = no such document. Anything else is the network being
     // unreachable, which must not be shown as "not found".
     if (/Error\(Contract, #2\)/.test(e instanceof Error ? e.message : String(e))) return null;
     throw new Error("Couldn’t reach the Stellar network to load this record.", { cause: e });
   }
-  const sigs = await getChainSignatures(c, chainDocId).catch(() => []);
-
-  const { data: doc } = await db()
-    .from("documents")
-    .select("id, title, create_tx_hash, profiles(full_name)")
-    .eq("chain_doc_id", chainDocId)
-    .maybeSingle();
-  const { data: rows } = doc
-    ? await db().from("document_signers").select("slot, invited_name, status, sign_tx_hash, wallet_address").eq("document_id", doc.id)
-    : { data: [] };
+  const chainDoc = chain.d;
+  const { document_signers: rows, ...doc } = (docRow ?? { document_signers: [] }) as {
+    id?: string;
+    title?: string;
+    create_tx_hash?: string | null;
+    profiles?: unknown;
+    document_signers: { slot: number; invited_name: string; status: string; sign_tx_hash: string | null; wallet_address: string | null }[];
+  };
   const wallets = sigs.filter(Boolean).map((s) => s!.signer);
   const { data: names } = wallets.length
     ? await db().from("profiles").select("wallet_address, full_name").in("wallet_address", wallets)

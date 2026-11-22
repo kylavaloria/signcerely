@@ -6,10 +6,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { AlertIcon, CheckIcon, SignatureIcon } from "@/components/icons";
 import { DOCS_BUCKET } from "@/lib/documents";
 import { formatSignedDate } from "@/lib/final-pdf";
-import { getAccess } from "@/lib/invite-access";
+import { getAccess, recordView } from "@/lib/invite-access";
 import { getProfile } from "@/lib/profile";
 import { db } from "@/lib/supabase";
-import { markViewed } from "./actions";
 import { InviteKeyCatcher } from "./InviteKeyCatcher";
 import { SigningView, type ViewField, type ViewSigner } from "./SigningView";
 import { noIndex } from "@/lib/site";
@@ -25,9 +24,9 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
   const { signerId } = await params;
   const a = await getAccess(signerId);
   if (!a) notFound();
-  const profile = a.wallet ? await getProfile(a.wallet) : null;
+  const profile = a.profile;
   const header = <SiteHeader user={profile ? { name: profile.full_name, wallet: profile.wallet_address } : null} />;
-  const sender = await getProfile(a.doc.sender_wallet);
+  const sender = a.isSender ? profile : await getProfile(a.doc.sender_wallet);
 
   const senderName = sender?.full_name ?? "Someone";
   const signerIsSender =
@@ -102,30 +101,32 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
     );
   }
 
-  if (a.invited && a.signer.status === "invited") await markViewed(signerId);
-
-  const [{ data: signers }, { data: fields }] = await Promise.all([
+  const completed = a.doc.status === "completed";
+  // Everything below depends only on the document, so it's fetched together in one round trip.
+  const [, { data: signers }, { data: fields }, pdfUrl, saved] = await Promise.all([
+    recordView(a),
     db()
       .from("document_signers")
       .select("id, slot, invited_name, wallet_address, status, signed_at, signature_image_path")
       .eq("document_id", a.doc.id)
       .order("slot"),
     db().from("signature_fields").select("id, signer_id, page, x, y, width, height").eq("document_id", a.doc.id),
+    signedUrl(DOCS_BUCKET, completed && a.doc.final_file_path ? a.doc.final_file_path : a.doc.file_path),
+    profile?.signature_path ? signedUrl("signatures", profile.signature_path) : Promise.resolve(null),
   ]);
   const wallets = (signers ?? []).map((s) => s.wallet_address).filter(Boolean) as string[];
-  const { data: names } = wallets.length
-    ? await db().from("profiles").select("wallet_address, full_name").in("wallet_address", wallets)
-    : { data: [] };
-  const viewSigners: ViewSigner[] = await Promise.all(
-    (signers ?? []).map(async (s) => ({
-      id: s.id,
-      slot: s.slot,
-      name: names?.find((n) => n.wallet_address === s.wallet_address)?.full_name ?? s.invited_name,
-      status: s.status,
-      signedLabel: s.signed_at ? `Signed ${formatSignedDate(new Date(s.signed_at))}` : null,
-      imageUrl: s.status === "signed" && s.signature_image_path ? await signedUrl("signatures", s.signature_image_path) : null,
-    })),
-  );
+  const [{ data: names }, images] = await Promise.all([
+    wallets.length ? db().from("profiles").select("wallet_address, full_name").in("wallet_address", wallets) : Promise.resolve({ data: [] }),
+    Promise.all((signers ?? []).map((s) => (s.status === "signed" && s.signature_image_path ? signedUrl("signatures", s.signature_image_path) : null))),
+  ]);
+  const viewSigners: ViewSigner[] = (signers ?? []).map((s, i) => ({
+    id: s.id,
+    slot: s.slot,
+    name: names?.find((n) => n.wallet_address === s.wallet_address)?.full_name ?? s.invited_name,
+    status: s.status,
+    signedLabel: s.signed_at ? `Signed ${formatSignedDate(new Date(s.signed_at))}` : null,
+    imageUrl: images[i],
+  }));
   const viewFields: ViewField[] = (fields ?? []).map((f) => ({
     id: f.id,
     signerId: f.signer_id,
@@ -136,7 +137,6 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
     height: Number(f.height),
   }));
 
-  const completed = a.doc.status === "completed";
   const iSigned = a.signer.status === "signed";
   const earlierPending = a.doc.in_order && (signers ?? []).some((s) => s.slot < a.signer.slot && s.status !== "signed");
   const blockedReason = a.wrongAccount
@@ -149,8 +149,6 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
         ? "It isn’t your turn yet. We’ll email you when the people before you have signed."
         : null;
 
-  const pdfUrl = (await signedUrl(DOCS_BUCKET, completed && a.doc.final_file_path ? a.doc.final_file_path : a.doc.file_path))!;
-  const saved = profile?.signature_path ? await signedUrl("signatures", profile.signature_path) : null;
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -218,7 +216,7 @@ export default async function SignPage({ params }: { params: Promise<{ signerId:
           wallet={a.wallet}
           canSign={a.canSign && !iSigned && !completed}
           blockedReason={iSigned || completed ? "Nothing left for you to do here." : blockedReason}
-          pdfUrl={pdfUrl}
+          pdfUrl={pdfUrl!}
           pageCount={a.doc.page_count}
           fields={completed ? [] : viewFields}
           signers={viewSigners}

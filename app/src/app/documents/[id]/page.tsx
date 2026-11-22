@@ -5,7 +5,8 @@ import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
 import { AlertIcon, CheckIcon, ExternalIcon } from "@/components/icons";
 import { SIGNER_COLORS } from "@/lib/doc-rules";
-import { requireUser } from "@/lib/profile";
+import { getProfile } from "@/lib/profile";
+import { getSession } from "@/lib/session";
 import { chainConfigFromEnv } from "@/lib/stellar/contract";
 import { db } from "@/lib/supabase";
 import { CancelDocumentButton } from "./CancelDocumentButton";
@@ -43,26 +44,31 @@ export default async function DocumentPage({
 }) {
   const { id } = await params;
   const { sent, emailFailed } = await searchParams;
-  const user = await requireUser();
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const session = await getSession();
+  if (!session) redirect("/sign-in");
 
-  const { data: doc } = await db()
-    .from("documents")
-    .select("id, title, summary, status, in_order, page_count, original_hash, chain_doc_id, create_tx_hash, sent_at, completed_at, sender_wallet")
-    .eq("id", id)
-    .eq("sender_wallet", user.wallet_address)
-    .maybeSingle();
-  if (!doc) notFound();
-  if (doc.status === "draft") redirect(`/documents/${doc.id}/review`);
-
-  const [{ data: signers }, { data: events }] = await Promise.all([
+  // One round trip: the profile, the document (only if this wallet sent it), its signers and its timeline.
+  // Signers and events are only shown after the ownership check below.
+  const [user, { data: doc }, { data: signers }, { data: events }] = await Promise.all([
+    getProfile(session.wallet),
+    db()
+      .from("documents")
+      .select("id, title, summary, status, in_order, page_count, original_hash, chain_doc_id, create_tx_hash, sent_at, completed_at, sender_wallet")
+      .eq("id", id)
+      .eq("sender_wallet", session.wallet)
+      .maybeSingle(),
     db()
       .from("document_signers")
       .select("id, slot, invited_name, invited_email, status, signed_at, sign_tx_hash")
-      .eq("document_id", doc.id)
+      .eq("document_id", id)
       .order("slot"),
-    db().from("document_events").select("kind, created_at, tx_hash, signer_id, detail").eq("document_id", doc.id).order("created_at"),
+    db().from("document_events").select("kind, created_at, tx_hash, signer_id, detail").eq("document_id", id).order("created_at"),
   ]);
+  if (!user) redirect("/welcome");
+  if (!doc) notFound();
+  if (doc.status === "draft") redirect(`/documents/${doc.id}/review`);
+
   const signed = (signers ?? []).filter((s) => s.status === "signed").length;
   const total = signers?.length ?? 0;
   const st = STATUS[doc.status] ?? STATUS.pending;
