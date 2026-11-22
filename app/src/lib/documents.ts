@@ -158,7 +158,7 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
   let q = db()
     .from("document_signers")
     .select(
-      "id, invited_at, invited_email, wallet_address, status, documents!inner(id, title, summary, page_count, in_order, status, sender_wallet, profiles(full_name))",
+      "id, invited_at, invited_email, wallet_address, status, documents!inner(id, title, summary, page_count, in_order, status, sender_wallet, profiles(full_name), document_signers(invited_name, status, slot))",
     )
     .in("status", ["invited", "viewed"])
     .eq("documents.status", "pending");
@@ -167,9 +167,9 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
     : q.eq("wallet_address", wallet);
   const { data, error } = await q.order("invited_at", { ascending: false });
   if (error) throw dbError(error);
-  const rows = (data ?? []).map((r) => ({
-    r,
-    d: r.documents as unknown as {
+  // Everyone on each document comes back in the same query, so this is a single round trip.
+  return (data ?? []).map((r) => {
+    const d = r.documents as unknown as {
       id: string;
       title: string;
       summary: string | null;
@@ -177,36 +177,21 @@ export async function listToSign(wallet: string, verifiedEmail: string | null): 
       in_order: boolean;
       sender_wallet: string;
       profiles: { full_name: string } | null;
-    },
-  }));
-
-  const signersByDoc = new Map<string, ToSign["signers"]>();
-  const ids = [...new Set(rows.map(({ d }) => d.id))];
-  if (ids.length) {
-    const { data: all, error: e2 } = await db()
-      .from("document_signers")
-      .select("document_id, invited_name, status, slot")
-      .in("document_id", ids);
-    if (e2) throw dbError(e2);
-    for (const s of all ?? []) {
-      const list = signersByDoc.get(s.document_id) ?? [];
-      list.push({ invited_name: s.invited_name, status: s.status, slot: s.slot });
-      signersByDoc.set(s.document_id, list);
-    }
-  }
-
-  return rows.map(({ r, d }) => ({
-    signerId: r.id,
-    documentId: d.id,
-    title: d.title,
-    summary: d.summary,
-    pageCount: d.page_count,
-    inOrder: d.in_order,
-    senderName: d.profiles?.full_name ?? "Someone",
-    senderWallet: d.sender_wallet,
-    invitedAt: r.invited_at,
-    signers: (signersByDoc.get(d.id) ?? []).sort((a, b) => a.slot - b.slot),
-  }));
+      document_signers: ToSign["signers"] | null;
+    };
+    return {
+      signerId: r.id,
+      documentId: d.id,
+      title: d.title,
+      summary: d.summary,
+      pageCount: d.page_count,
+      inOrder: d.in_order,
+      senderName: d.profiles?.full_name ?? "Someone",
+      senderWallet: d.sender_wallet,
+      invitedAt: r.invited_at,
+      signers: [...(d.document_signers ?? [])].sort((a, b) => a.slot - b.slot),
+    };
+  });
 }
 
 export type FromOthers = SentDoc & {
