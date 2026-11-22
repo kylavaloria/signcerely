@@ -23,8 +23,20 @@ Node 22 for the web app, and Rust stable with the
 1. Create a branch from `main` with a short, descriptive name, such as
    `fix/invite-email-typo` or `feat/download-button`.
 2. Keep each pull request to one topic. Smaller pull requests are reviewed faster.
-3. Write commit messages as short, plain sentences that say what changed,
-   for example `Show the signer's name on the verify page`.
+3. Write commit messages in the [Conventional Commits](https://www.conventionalcommits.org)
+   format: `type(scope): what changed`, in lowercase and the imperative mood.
+   The scope is optional. For example:
+
+   | Type | Use it for | Example |
+   |---|---|---|
+   | `feat` | a new feature | `feat(verify): show the signer's name` |
+   | `fix` | a bug fix | `fix(dashboard): keep the search when changing tabs` |
+   | `docs` | documentation only | `docs(readme): add a table of contents` |
+   | `test` | adding or fixing tests | `test(contract): reject signing out of turn` |
+   | `refactor` | a code change that adds no feature and fixes no bug | `refactor: split the signing page` |
+   | `perf` | a speed improvement | `perf(db): index email lookups` |
+   | `ci` | CI and GitHub Actions | `ci: run contract tests on pull requests` |
+   | `chore` | anything else (config, dependencies) | `chore: update the Stellar SDK` |
 4. Open a pull request into `main` and describe what changed and how you tested it.
 
 ## Checks to run
