@@ -78,7 +78,7 @@ Drop in a PDF, give it a title and a one-line summary of what people are
 agreeing to. Signers will see exactly this file.
 
 </td>
-<td><img src="docs/readme/step-1-upload.jpg" alt="Uploading a PDF" /></td>
+<td><img src="docs/readme/step-1-upload.gif" alt="Uploading a PDF" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -89,7 +89,7 @@ Add the signers' names and emails, then pick **one after another** (each person
 is invited when it's their turn) or **all at once**.
 
 </td>
-<td><img src="docs/readme/step-2-signers.jpg" alt="Adding signers and signing order" /></td>
+<td><img src="docs/readme/step-2-signers.gif" alt="Adding signers and signing order" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -100,7 +100,7 @@ Click the page to put each person's box where their signature goes. The date is
 added under every signature automatically.
 
 </td>
-<td><img src="docs/readme/step-3-boxes.jpg" alt="Placing signature boxes on the page" /></td>
+<td><img src="docs/readme/step-3-boxes.gif" alt="Placing signature boxes on the page" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -111,7 +111,7 @@ Check everything, then approve once in your wallet. The original's fingerprint
 is recorded on Stellar and the file is locked, so everyone signs the same version.
 
 </td>
-<td><img src="docs/readme/step-4-review.jpg" alt="Review before sending" /></td>
+<td><img src="docs/readme/step-4-send.gif" alt="Review before sending" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -122,7 +122,7 @@ Each person gets an email when it's their turn, draws or uploads their
 signature, and approves it in their Varial wallet.
 
 </td>
-<td><img src="docs/readme/step-5-sign.jpg" alt="Signing a document" /></td>
+<td><img src="docs/readme/step-5-sign.gif" alt="Signing a document" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -133,7 +133,7 @@ When the last person signs, the final PDF (every signature, date and a summary
 page) is created, its fingerprint is recorded, and everyone is emailed.
 
 </td>
-<td><img src="docs/readme/step-6-complete.jpg" alt="Completed document" /></td>
+<td><img src="docs/readme/step-6-signed-copy.gif" alt="Completed document" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -144,7 +144,7 @@ Upload a copy on the Verify page. It's checked against Stellar right in the
 browser and the file never leaves the device.
 
 </td>
-<td><img src="docs/readme/step-7-verify.jpg" alt="Verifying a signed copy" /></td>
+<td><img src="docs/readme/step-7-verify.gif" alt="Verifying a signed copy" /></td>
 </tr>
 </table>
 
