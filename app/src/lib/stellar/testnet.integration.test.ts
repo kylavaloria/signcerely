@@ -31,7 +31,7 @@ import {
 const run = process.env.INTEGRATION === "1";
 const c = {
   ...chainConfigFromEnv(),
-  contractId: process.env.NEXT_PUBLIC_CONTRACT_ID || "CBBZVOGZ7CSEQUW46OUMT3X7K22Q2GZYTRGOKJDTJIZTUGU36I24L3ZR",
+  contractId: process.env.NEXT_PUBLIC_CONTRACT_ID || "CDS3E7DNMFRC6XOJXK3F5ID32Y36RGR3PAXKZOR3NC3AYSERIO2XQ4ZV",
 };
 
 function proof(secretHex: string, publicHex: string, msg: Buffer): string {
