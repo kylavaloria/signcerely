@@ -60,6 +60,38 @@ permanent, public proof on Stellar that anyone can check for free.
 
 <br />
 
+## 📂 Contents
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+- [📘 How it works](#-how-it-works)
+- [✨ Features](#-features)
+- [🔒 Security and privacy](#-security-and-privacy)
+- [💠 Architecture](#-architecture)
+  - [System](#system)
+  - [Signing flow](#signing-flow)
+- [💎 Tech stack](#-tech-stack)
+- [📁 Repo layout](#-repo-layout)
+
+</td>
+<td width="50%" valign="top">
+
+- [🔷 Smart contract](#-smart-contract)
+- [⚡ Run it locally](#-run-it-locally)
+- [🔹 Testing](#-testing)
+  - [Test results](#test-results)
+- [🚧 Limitations](#-limitations)
+- [📒 License](#-license)
+- [Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md)
+
+</td>
+</tr>
+</table>
+
+<br />
+
 <a id="how-it-works"></a>
 
 ## 📘 How it works
@@ -403,4 +435,4 @@ _Updated automatically after every test run on `main`. Click a result to open th
 
 ## 📒 License
 
-MIT
+[MIT](LICENSE). Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md). Found a security problem? See [SECURITY.md](SECURITY.md).
