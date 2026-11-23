@@ -72,6 +72,26 @@ impl Setup<'_> {
         BytesN::from_array(&self.env, &key.sign(&bytes).to_bytes())
     }
 
+    /// Same as `proof`, for any document id.
+    fn proof_for(&self, doc: u8, key: &SigningKey, slot: u32, wallet: &Address) -> BytesN<64> {
+        let msg = self
+            .client
+            .invite_message(&h(&self.env, doc), &slot, wallet);
+        let bytes: std::vec::Vec<u8> = msg.iter().collect();
+        BytesN::from_array(&self.env, &key.sign(&bytes).to_bytes())
+    }
+
+    /// Create another document with its own id and original fingerprint.
+    fn create_doc(&self, doc: u8, original: u8, n: usize, in_order: bool) {
+        self.client.create(
+            &self.sender,
+            &h(&self.env, doc),
+            &h(&self.env, original),
+            &self.invites(n),
+            &in_order,
+        );
+    }
+
     fn try_decline(&self, slot: u32) -> Result<(), Error> {
         let wallet = &self.w[slot as usize];
         let proof = self.proof(&self.keys[slot as usize], slot, wallet);
@@ -527,4 +547,55 @@ fn cancelling_a_missing_document_fails() {
         s.client.try_cancel(&s.sender, &h(&s.env, 77)),
         Err(Ok(Error::NotFound))
     );
+}
+
+// ---- Invite proofs ----
+
+#[test]
+fn a_proof_with_one_changed_byte_is_rejected() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    let mut bytes = s.proof(&s.keys[0], 0, &s.w[0]).to_array();
+    bytes[10] ^= 0x01;
+    let tampered = BytesN::from_array(e, &bytes);
+    assert!(s
+        .client
+        .try_sign(&s.w[0], &h(e, DOC), &0, &tampered, &h(e, IMG), &None)
+        .is_err());
+    assert_eq!(s.client.get_document(&h(e, DOC)).signed_count, 0);
+    s.sign(0, None);
+}
+
+#[test]
+fn a_proof_made_for_another_document_is_rejected() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    s.create_doc(2, 12, 2, false);
+    // Same invite key, slot and wallet, but signed for document 2.
+    let other = s.proof_for(2, &s.keys[0], 0, &s.w[0]);
+    assert!(s
+        .client
+        .try_sign(&s.w[0], &h(e, DOC), &0, &other, &h(e, IMG), &None)
+        .is_err());
+    assert_eq!(s.client.get_document(&h(e, DOC)).signed_count, 0);
+}
+
+#[test]
+fn a_proof_made_for_another_deployment_is_rejected() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    // A second copy of the contract at a different address.
+    let other_id = e.register(SigningContract, ());
+    let other = SigningContractClient::new(e, &other_id);
+    let msg = other.invite_message(&h(e, DOC), &0, &s.w[0]);
+    let bytes: std::vec::Vec<u8> = msg.iter().collect();
+    let proof = BytesN::from_array(e, &s.keys[0].sign(&bytes).to_bytes());
+    assert!(s
+        .client
+        .try_sign(&s.w[0], &h(e, DOC), &0, &proof, &h(e, IMG), &None)
+        .is_err());
+    assert_eq!(s.client.get_document(&h(e, DOC)).signed_count, 0);
 }
