@@ -197,10 +197,10 @@ browser and the file never leaves the device.
 </tr>
 </table>
 
-| | |
+| Feature | What it does |
 |---|---|
-| **Your signature, your way** | Draw it or upload a photo, and save it for next time |
-| **Email at every turn** | Invites, "your turn", reminders, declines, cancellations and "everyone has signed" |
+| **Signature input** | Draw it or upload a photo, and save it for next time |
+| **Email notifications** | Invites, "your turn", reminders, declines, cancellations and "everyone has signed" |
 | **Signing order** | One after another, or all at once |
 | **Signers** | 2 to 20 per document; you can include yourself |
 | **Signature boxes** | Placed on any page, or skipped so signatures go on the summary page |
