@@ -371,6 +371,8 @@ No local setup? Open **Actions → Deploy to testnet → Run workflow**.
 | `cargo test` | Contract tests |
 | `cd app && npm run test:e2e` | End-to-end tests (Playwright) |
 
+Every test case is listed with an ID in [docs/TEST_CASES.md](docs/TEST_CASES.md).
+
 ### End-to-end tests
 
 A real browser ([Playwright](https://playwright.dev)) clicks through the built app exactly as a person would: sign in, upload, add signers, place boxes, send, sign, decline and verify. Everything runs on throwaway infrastructure, never the live services:
@@ -442,6 +444,7 @@ flowchart TB
 | [Contract](.github/workflows/contract.yml) | Pull requests, merges | Contract tests, then the WASM build with the Stellar CLI |
 | [End-to-end](.github/workflows/e2e.yml) | Pull requests, merges, manual | Full browser tests on throwaway infrastructure (see [End-to-end tests](#end-to-end-tests)) |
 | [Testnet integration](.github/workflows/testnet-integration.yml) | Merges to `main`, manual | Runs the signing flow against the deployed contract on Stellar testnet |
+| [Test cases](.github/workflows/test-cases.yml) | Pull requests, merges that change tests | Fails if [docs/TEST_CASES.md](docs/TEST_CASES.md) doesn't match the tests in the code |
 | [Test results](.github/workflows/test-results.yml) | After the checks on `main`, manual | Reads the Vitest, cargo and Playwright results and rewrites the results table in this README |
 | [Deploy to testnet](.github/workflows/deploy-testnet.yml) | Manual | Runs the contract tests, creates and funds a fresh deployer account, builds and deploys the contract, and saves the deployment record |
 | [README screenshots](.github/workflows/readme-shots.yml) | Manual | Starts the same throwaway stack as end-to-end and records the README screenshots and the website's How it works clips from a real run |

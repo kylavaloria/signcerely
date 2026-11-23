@@ -58,6 +58,12 @@ npm run build
 cargo test
 ```
 
+After adding, renaming or removing a test, update the test case list (CI checks it):
+
+```bash
+node scripts/list-test-cases.mjs
+```
+
 The end-to-end tests (`npm run test:e2e`) need Docker, the Supabase CLI and the
 Stellar CLI. See [app/e2e/README.md](app/e2e/README.md). CI runs them on every pull request, so
 running them locally is optional.
