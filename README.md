@@ -4,10 +4,6 @@
 
 <p align="center">
   <a href="https://signcerely.site"><b>signcerely.site</b></a>
-  &nbsp;·&nbsp; <a href="#how-it-works">How it works</a>
-  &nbsp;·&nbsp; <a href="#features">Features</a>
-  &nbsp;·&nbsp; <a href="#run-it-locally">Run it locally</a>
-  &nbsp;·&nbsp; <a href="#smart-contract">Smart contract</a>
 </p>
 
 <p align="center">
@@ -299,7 +295,7 @@ sequenceDiagram
 | `contracts/signing/` | Soroban smart contract |
 | `supabase/` | Database migrations and local config |
 | `scripts/` | Contract deploy script |
-| `.github/workflows/` | CI: app checks, contract tests, end-to-end, testnet deploy |
+| `.github/workflows/` | CI/CD workflows (see [CI/CD](#-cicd)) |
 
 <br />
 
@@ -443,10 +439,10 @@ flowchart TB
 
 | Workflow | When it runs | What it checks or does |
 |---|---|---|
-| [App](.github/workflows/app.yml) | Pull requests, merges | Lint, type check and unit tests for the invite-key crypto, signed-PDF stamping, signer identity and access rules, then a production build |
-| [Contract](.github/workflows/contract.yml) | Pull requests, merges | Contract tests for signing order, copied proofs, one wallet per spot, final-fingerprint rules, decline, cancel and events, then the WASM build with the Stellar CLI |
+| [App](.github/workflows/app.yml) | Pull requests, merges | Lint, type check, unit tests, then a production build |
+| [Contract](.github/workflows/contract.yml) | Pull requests, merges | Contract tests, then the WASM build with the Stellar CLI |
 | [End-to-end](.github/workflows/e2e.yml) | Pull requests, merges, manual | Full browser tests on throwaway infrastructure (see [End-to-end tests](#end-to-end-tests)) |
-| [Testnet integration](.github/workflows/testnet-integration.yml) | Merges to `main`, manual | Runs against the deployed contract on Stellar testnet: create, sign in order, complete and find the final copy by fingerprint; reject a proof made for another wallet; decline; cancel |
+| [Testnet integration](.github/workflows/testnet-integration.yml) | Merges to `main`, manual | Runs the signing flow against the deployed contract on Stellar testnet |
 | [Test results](.github/workflows/test-results.yml) | After the checks on `main`, manual | Reads the Vitest, cargo and Playwright results and rewrites the results table in this README |
 | [Deploy to testnet](.github/workflows/deploy-testnet.yml) | Manual | Runs the contract tests, creates and funds a fresh deployer account, builds and deploys the contract, and saves the deployment record |
 | [README screenshots](.github/workflows/readme-shots.yml) | Manual | Starts the same throwaway stack as end-to-end and records the README screenshots and the website's How it works clips from a real run |
