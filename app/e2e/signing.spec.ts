@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
-import { linkIn, mailsTo, newUser, openInviteAndSignIn, runId, sendDocument, signDocument, signIn, waitForMail } from "./helpers";
+import { linkIn, mailsTo, makePdf, newUser, openInviteAndSignIn, runId, sendDocument, signDocument, signIn, waitForMail } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -126,4 +126,49 @@ test("one confirmed email belongs to one account", async ({ browser }) => {
   await signIn(second, { profileEmail: shared, expectProfileError: true });
   await expect(second.page.getByText("That email is already confirmed on another account.")).toBeVisible();
   await expect(second.page).toHaveURL(/\/welcome/);
+});
+
+test("the sender can cancel after a signature, and everyone invited is told", async ({ browser }) => {
+  const alice = await newUser(browser, "Alice Canceller");
+  const bob = await newUser(browser, "Bob Early");
+  const carol = await newUser(browser, "Carol Later");
+  const title = `Quote ${runId} cancelled`;
+
+  await signIn(alice);
+  const id = await sendDocument(alice, { title, signers: [bob, carol], inOrder: false });
+
+  // Bob signs before Alice changes her mind.
+  await openInviteAndSignIn(bob, linkIn(await waitForMail(bob.email, /invited you to sign/), "/sign/"));
+  await signDocument(bob);
+  await expect(bob.page.getByText("You signed this document.")).toBeVisible({ timeout: 120_000 });
+
+  await alice.page.goto(`/documents/${id}`);
+  await alice.page.getByRole("button", { name: "Cancel document" }).click();
+  await alice.page.locator("#cx-reason").fill("Sending a new version");
+  await alice.page.getByRole("dialog").getByRole("button", { name: "Cancel document" }).click();
+  await expect(alice.page.getByText("Cancelled", { exact: true }).first()).toBeVisible({ timeout: 120_000 });
+  await expect(alice.page.getByRole("button", { name: "Cancel document" })).toHaveCount(0);
+
+  // Both invitees get the note.
+  for (const u of [bob, carol]) {
+    const notice = await waitForMail(u.email, /cancelled/);
+    expect(notice.text).toContain("Sending a new version");
+  }
+
+  // Carol can still open her invite, but there's nothing left to sign.
+  await openInviteAndSignIn(carol, linkIn(await waitForMail(carol.email, /invited you to sign/), "/sign/"));
+  await expect(carol.page.getByText("cancelled this document")).toBeVisible();
+  await expect(carol.page.getByRole("button", { name: "Sign here" })).toHaveCount(0);
+
+  await alice.page.goto("/dashboard?view=closed");
+  await expect(alice.page.locator("article", { hasText: title }).getByText("Cancelled", { exact: true }).first()).toBeVisible();
+});
+
+test("a file that was never signed doesn't verify", async ({ browser }) => {
+  const visitor = await newUser(browser, "Visitor", { fund: false });
+  await visitor.page.goto("/verify");
+  await visitor.page
+    .locator("#v-file")
+    .setInputFiles({ name: "unsigned.pdf", mimeType: "application/pdf", buffer: await makePdf(`Never signed ${runId}`) });
+  await expect(visitor.page.getByText("This file doesn’t match any signed document")).toBeVisible({ timeout: 60_000 });
 });
