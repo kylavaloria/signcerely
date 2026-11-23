@@ -4,8 +4,8 @@ extern crate std;
 use super::*;
 use ed25519_dalek::{Signer as _, SigningKey};
 use soroban_sdk::{
-    testutils::{Address as _, Events as _, Ledger as _},
-    Address, BytesN, Env, Vec,
+    testutils::{storage::Persistent as _, Address as _, Events as _, Ledger as _},
+    xdr, Address, BytesN, Env, Vec,
 };
 
 const T0: u64 = 1_762_560_000;
@@ -70,6 +70,39 @@ impl Setup<'_> {
             .invite_message(&h(&self.env, DOC), &slot, wallet);
         let bytes: std::vec::Vec<u8> = msg.iter().collect();
         BytesN::from_array(&self.env, &key.sign(&bytes).to_bytes())
+    }
+
+    /// Same as `proof`, for any document id.
+    fn proof_for(&self, doc: u8, key: &SigningKey, slot: u32, wallet: &Address) -> BytesN<64> {
+        let msg = self
+            .client
+            .invite_message(&h(&self.env, doc), &slot, wallet);
+        let bytes: std::vec::Vec<u8> = msg.iter().collect();
+        BytesN::from_array(&self.env, &key.sign(&bytes).to_bytes())
+    }
+
+    /// Create another document with its own id and original fingerprint.
+    fn create_doc(&self, doc: u8, original: u8, n: usize, in_order: bool) {
+        self.client.create(
+            &self.sender,
+            &h(&self.env, doc),
+            &h(&self.env, original),
+            &self.invites(n),
+            &in_order,
+        );
+    }
+
+    fn try_decline(&self, slot: u32) -> Result<(), Error> {
+        let wallet = &self.w[slot as usize];
+        let proof = self.proof(&self.keys[slot as usize], slot, wallet);
+        match self
+            .client
+            .try_decline(wallet, &h(&self.env, DOC), &slot, &proof)
+        {
+            Ok(_) => Ok(()),
+            Err(Ok(e)) => Err(e),
+            Err(Err(_)) => panic!("host error"),
+        }
     }
 
     fn sign(&self, slot: u32, final_hash: Option<u8>) {
@@ -137,7 +170,10 @@ fn full_flow_in_order_completes_and_is_findable() {
     assert_eq!(second.signer, s.w[1]);
     assert_eq!(second.signed_at, T0 + 600);
 
-    assert_eq!(s.client.find_by_hash(&h(e, FINAL)), HashMatch::Final(h(e, DOC)));
+    assert_eq!(
+        s.client.find_by_hash(&h(e, FINAL)),
+        HashMatch::Final(h(e, DOC))
+    );
     assert_eq!(
         s.client.find_by_hash(&h(e, ORIGINAL)),
         HashMatch::Original(h(e, DOC))
@@ -184,8 +220,13 @@ fn signer_count_must_be_within_limits() {
         Err(Ok(Error::InvalidSignerCount))
     );
     assert_eq!(
-        s.client
-            .try_create(&s.sender, &h(e, DOC), &h(e, ORIGINAL), &s.invites(MAX_SIGNERS as usize + 1), &true),
+        s.client.try_create(
+            &s.sender,
+            &h(e, DOC),
+            &h(e, ORIGINAL),
+            &s.invites(MAX_SIGNERS as usize + 1),
+            &true
+        ),
         Err(Ok(Error::InvalidSignerCount))
     );
     s.create(MAX_SIGNERS as usize, true);
@@ -273,7 +314,12 @@ fn a_copied_proof_is_useless_to_another_wallet() {
     assert!(res.is_err());
     s.sign(0, None);
     assert_eq!(
-        s.client.get_signatures(&h(e, DOC)).get(0).unwrap().unwrap().signer,
+        s.client
+            .get_signatures(&h(e, DOC))
+            .get(0)
+            .unwrap()
+            .unwrap()
+            .signer,
         s.w[0]
     );
 }
@@ -376,4 +422,287 @@ fn every_step_emits_an_event() {
     s.sign(1, Some(FINAL));
     // signed + completed
     assert_eq!(e.events().all().events().len(), 2);
+}
+
+/// The second topic of each event from the last call, e.g. "declined".
+fn event_names(e: &Env) -> std::vec::Vec<std::string::String> {
+    e.events()
+        .all()
+        .events()
+        .iter()
+        .map(|ev| match &ev.body {
+            xdr::ContractEventBody::V0(b) => match &b.topics[1] {
+                xdr::ScVal::Symbol(sym) => std::string::String::from_utf8(sym.0.to_vec()).unwrap(),
+                _ => std::string::String::new(),
+            },
+        })
+        .collect()
+}
+
+// ---- Decline ----
+
+#[test]
+fn declining_an_already_signed_slot_fails() {
+    let s = setup();
+    s.create(3, false);
+    s.sign(0, None);
+    assert_eq!(s.try_decline(0), Err(Error::AlreadySigned));
+    assert_eq!(
+        s.client.get_document(&h(&s.env, DOC)).status,
+        Status::Pending
+    );
+}
+
+#[test]
+fn declining_a_finished_document_fails() {
+    // Completed
+    let s = setup();
+    s.create(2, true);
+    s.sign(0, None);
+    s.sign(1, Some(FINAL));
+    assert_eq!(s.try_decline(1), Err(Error::NotPending));
+
+    // Cancelled
+    let s = setup();
+    s.create(2, true);
+    s.client.cancel(&s.sender, &h(&s.env, DOC));
+    assert_eq!(s.try_decline(0), Err(Error::NotPending));
+
+    // Already declined
+    let s = setup();
+    s.create(2, false);
+    s.try_decline(0).unwrap();
+    assert_eq!(s.try_decline(1), Err(Error::NotPending));
+}
+
+#[test]
+fn declining_a_missing_slot_or_document_fails() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    let proof = s.proof(&s.keys[0], 7, &s.w[0]);
+    assert_eq!(
+        s.client.try_decline(&s.w[0], &h(e, DOC), &7, &proof),
+        Err(Ok(Error::NoSuchSlot))
+    );
+    assert_eq!(
+        s.client.try_decline(&s.w[0], &h(e, 77), &0, &proof),
+        Err(Ok(Error::NotFound))
+    );
+}
+
+#[test]
+fn a_copied_decline_proof_is_useless_to_another_wallet() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    let attacker = Address::generate(e);
+    let stolen = s.proof(&s.keys[1], 1, &s.w[1]);
+    assert!(s
+        .client
+        .try_decline(&attacker, &h(e, DOC), &1, &stolen)
+        .is_err());
+    assert_eq!(s.client.get_document(&h(e, DOC)).status, Status::Pending);
+}
+
+#[test]
+fn declining_needs_the_invitee_to_approve_in_their_wallet() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    s.try_decline(1).unwrap();
+    let auths = e.auths();
+    assert_eq!(auths.len(), 1);
+    assert_eq!(auths[0].0, s.w[1]);
+}
+
+// ---- Cancel ----
+
+#[test]
+fn cancelling_a_finished_document_fails() {
+    // Completed
+    let s = setup();
+    s.create(2, true);
+    s.sign(0, None);
+    s.sign(1, Some(FINAL));
+    assert_eq!(
+        s.client.try_cancel(&s.sender, &h(&s.env, DOC)),
+        Err(Ok(Error::NotPending))
+    );
+
+    // Declined
+    let s = setup();
+    s.create(2, false);
+    s.try_decline(0).unwrap();
+    assert_eq!(
+        s.client.try_cancel(&s.sender, &h(&s.env, DOC)),
+        Err(Ok(Error::NotPending))
+    );
+}
+
+#[test]
+fn the_sender_can_cancel_after_some_signatures_and_no_one_signs_after() {
+    let s = setup();
+    let e = &s.env;
+    s.create(3, true);
+    s.sign(0, None);
+    s.client.cancel(&s.sender, &h(e, DOC));
+    assert_eq!(s.client.get_document(&h(e, DOC)).status, Status::Cancelled);
+    assert_eq!(s.try_sign(1, None), Err(Error::NotPending));
+    // The signature made before cancelling is kept.
+    let sigs = s.client.get_signatures(&h(e, DOC));
+    assert_eq!(sigs.get(0).unwrap().unwrap().signer, s.w[0]);
+    assert!(sigs.get(1).unwrap().is_none());
+}
+
+#[test]
+fn cancelling_a_missing_document_fails() {
+    let s = setup();
+    assert_eq!(
+        s.client.try_cancel(&s.sender, &h(&s.env, 77)),
+        Err(Ok(Error::NotFound))
+    );
+}
+
+// ---- Invite proofs ----
+
+#[test]
+fn a_proof_with_one_changed_byte_is_rejected() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    let mut bytes = s.proof(&s.keys[0], 0, &s.w[0]).to_array();
+    bytes[10] ^= 0x01;
+    let tampered = BytesN::from_array(e, &bytes);
+    assert!(s
+        .client
+        .try_sign(&s.w[0], &h(e, DOC), &0, &tampered, &h(e, IMG), &None)
+        .is_err());
+    assert_eq!(s.client.get_document(&h(e, DOC)).signed_count, 0);
+    s.sign(0, None);
+}
+
+#[test]
+fn a_proof_made_for_another_document_is_rejected() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    s.create_doc(2, 12, 2, false);
+    // Same invite key, slot and wallet, but signed for document 2.
+    let other = s.proof_for(2, &s.keys[0], 0, &s.w[0]);
+    assert!(s
+        .client
+        .try_sign(&s.w[0], &h(e, DOC), &0, &other, &h(e, IMG), &None)
+        .is_err());
+    assert_eq!(s.client.get_document(&h(e, DOC)).signed_count, 0);
+}
+
+#[test]
+fn a_proof_made_for_another_deployment_is_rejected() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    // A second copy of the contract at a different address.
+    let other_id = e.register(SigningContract, ());
+    let other = SigningContractClient::new(e, &other_id);
+    let msg = other.invite_message(&h(e, DOC), &0, &s.w[0]);
+    let bytes: std::vec::Vec<u8> = msg.iter().collect();
+    let proof = BytesN::from_array(e, &s.keys[0].sign(&bytes).to_bytes());
+    assert!(s
+        .client
+        .try_sign(&s.w[0], &h(e, DOC), &0, &proof, &h(e, IMG), &None)
+        .is_err());
+    assert_eq!(s.client.get_document(&h(e, DOC)).signed_count, 0);
+}
+
+// ---- Signing ----
+
+#[test]
+fn the_final_copy_cannot_reuse_a_fingerprint_from_another_document() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, true);
+    s.sign(0, None);
+    s.sign(1, Some(FINAL));
+
+    s.create_doc(2, 12, 2, true);
+    let p0 = s.proof_for(2, &s.keys[0], 0, &s.w[2]);
+    s.client.sign(&s.w[2], &h(e, 2), &0, &p0, &h(e, IMG), &None);
+    let p1 = s.proof_for(2, &s.keys[1], 1, &s.w[3]);
+    // Another document's final copy, then another document's original.
+    for taken in [FINAL, ORIGINAL] {
+        assert_eq!(
+            s.client
+                .try_sign(&s.w[3], &h(e, 2), &1, &p1, &h(e, IMG), &Some(h(e, taken))),
+            Err(Ok(Error::HashInUse))
+        );
+    }
+    s.client
+        .sign(&s.w[3], &h(e, 2), &1, &p1, &h(e, IMG), &Some(h(e, 21)));
+    assert_eq!(s.client.get_document(&h(e, 2)).status, Status::Completed);
+}
+
+#[test]
+fn one_wallet_can_sign_different_documents() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    s.create_doc(2, 12, 2, false);
+    s.sign(0, None);
+    let proof = s.proof_for(2, &s.keys[0], 0, &s.w[0]);
+    s.client
+        .sign(&s.w[0], &h(e, 2), &0, &proof, &h(e, IMG), &None);
+    assert_eq!(s.client.get_document(&h(e, 2)).signed_count, 1);
+}
+
+#[test]
+fn the_sender_can_also_be_a_signer() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, true);
+    let proof = s.proof(&s.keys[0], 0, &s.sender);
+    s.client
+        .sign(&s.sender, &h(e, DOC), &0, &proof, &h(e, IMG), &None);
+    s.sign(1, Some(FINAL));
+    let sigs = s.client.get_signatures(&h(e, DOC));
+    assert_eq!(sigs.get(0).unwrap().unwrap().signer, s.sender);
+    assert_eq!(s.client.get_document(&h(e, DOC)).status, Status::Completed);
+}
+
+// ---- Storage and events ----
+
+#[test]
+fn every_stored_entry_lives_about_30_days() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, true);
+    s.sign(0, None);
+    s.sign(1, Some(FINAL));
+    let keys = [
+        DataKey::Doc(h(e, DOC)),
+        DataKey::OriginalHash(h(e, ORIGINAL)),
+        DataKey::FinalHash(h(e, FINAL)),
+        DataKey::Sig(h(e, DOC), 0),
+        DataKey::Sig(h(e, DOC), 1),
+        DataKey::Wallet(h(e, DOC), s.w[0].clone()),
+        DataKey::Wallet(h(e, DOC), s.w[1].clone()),
+    ];
+    e.as_contract(&s.client.address, || {
+        for key in keys.iter() {
+            assert_eq!(e.storage().persistent().get_ttl(key), BUMP_TO);
+        }
+    });
+}
+
+#[test]
+fn decline_and_cancel_each_emit_their_event() {
+    let s = setup();
+    s.create(2, false);
+    s.try_decline(1).unwrap();
+    assert_eq!(event_names(&s.env), ["declined"]);
+
+    let s = setup();
+    s.create(2, false);
+    s.client.cancel(&s.sender, &h(&s.env, DOC));
+    assert_eq!(event_names(&s.env), ["cancelled"]);
 }
