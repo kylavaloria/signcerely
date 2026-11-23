@@ -82,6 +82,7 @@ permanent, public proof on Stellar that anyone can check for free.
 - [⚡ Run it locally](#-run-it-locally)
 - [🔹 Testing](#-testing)
   - [Test results](#test-results)
+- [🔄 CI/CD](#-cicd)
 - [🚧 Limitations](#-limitations)
 - [🏆 About the builder](#-about-the-builder)
 - [📒 License](#-license)
@@ -390,6 +391,57 @@ The screenshots in this README come from a real run of the app: **Actions → RE
 
 _Updated automatically after every test run on `main`. Click a result to open that run._
 <!-- test-results:end -->
+
+<br />
+
+## 🔄 CI/CD
+
+Every change goes through a pull request. Checks only run for the parts of the code that changed, Vercel deploys a preview for each branch, and merging to `main` deploys to production.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#eef4fd","primaryTextColor":"#12305c","primaryBorderColor":"#1f6fd6","lineColor":"#2f7ae5","textColor":"#2f7ae5","edgeLabelBackground":"#ffdd1f","clusterBkg":"#f7faff","clusterBorder":"#1f6fd6","titleColor":"#12305c","actorBkg":"#1f6fd6","actorBorder":"#12305c","actorTextColor":"#ffffff","actorLineColor":"#2f7ae5","signalColor":"#2f7ae5","signalTextColor":"#2f7ae5","noteBkgColor":"#ffdd1f","noteBorderColor":"#c9a800","noteTextColor":"#12305c","sequenceNumberColor":"#ffffff"}}}%%
+flowchart TB
+  subgraph checks["Checks on every pull request"]
+    app["App<br/>lint, types, unit tests, build"]
+    con["Contract<br/>tests, WASM build"]
+    e2e["End-to-end<br/>real browser, local Stellar + Supabase"]
+    prev["Vercel<br/>preview deploy"]
+  end
+  pr(["Pull request"]) --> app & con & e2e & prev
+  app & con & e2e & prev --> merge(["Merge to main"])
+  merge --> prod["Vercel production<br/>signcerely.site"]
+  merge --> again["App, Contract, End-to-end<br/>run again on main"]
+  merge --> testnet["Testnet integration<br/>full signing flow on Stellar testnet"]
+  again --> results["Test results<br/>README table updates itself"]
+  testnet --> results
+
+  classDef blue fill:#1f6fd6,stroke:#12305c,color:#ffffff
+  classDef yellow fill:#ffdd1f,stroke:#c9a800,color:#12305c
+  classDef soft fill:#eef4fd,stroke:#1f6fd6,color:#12305c
+  class pr,merge yellow
+  class prod,testnet blue
+  class app,con,e2e,prev,again,results soft
+```
+
+| Workflow | When it runs | What it checks or does |
+|---|---|---|
+| [App](.github/workflows/app.yml) | Pull requests, merges | Lint, type check and unit tests for the invite-key crypto, signed-PDF stamping, signer identity and access rules, then a production build |
+| [Contract](.github/workflows/contract.yml) | Pull requests, merges | Contract tests for signing order, copied proofs, one wallet per spot, final-fingerprint rules, decline, cancel and events, then the WASM build with the Stellar CLI |
+| [End-to-end](.github/workflows/e2e.yml) | Pull requests, merges, manual | A real browser (Playwright) runs the whole product on throwaway infrastructure: a private Stellar network with the contract freshly deployed, a local Supabase built from our migrations, a test wallet standing in for Varial, and emails captured to disk. See below |
+| [Testnet integration](.github/workflows/testnet-integration.yml) | Merges to `main`, manual | Runs against the deployed contract on Stellar testnet: create, sign in order, complete and find the final copy by fingerprint; reject a proof made for another wallet; decline; cancel |
+| [Test results](.github/workflows/test-results.yml) | After the checks on `main`, manual | Reads the Vitest, cargo and Playwright results and rewrites the results table in this README |
+| [Deploy to testnet](.github/workflows/deploy-testnet.yml) | Manual | Runs the contract tests, creates and funds a fresh deployer account, builds and deploys the contract, and saves the deployment record |
+| [README screenshots](.github/workflows/readme-shots.yml) | Manual | Starts the same throwaway stack as end-to-end and records the README screenshots and the website's How it works clips from a real run |
+| [Keep database awake](.github/workflows/keep-alive.yml) | Every 3 days, manual | Calls `/api/health`, which queries the database, so the free Supabase project is never paused |
+
+**What the end-to-end suite proves**, in a real browser on every pull request:
+
+- Signers sign one after another, everyone receives the signed copy, and that copy passes Verify.
+- Only the invited person can open and sign their invite, even with the link.
+- A signer can decline, which stops the document, and the sender is told why.
+- One confirmed email belongs to one account.
+
+"Manual" means the workflow can be started anytime from the **Actions** tab (`workflow_dispatch`). Database changes live in `supabase/migrations/` and are applied before the code that needs them is merged.
 
 <br />
 
