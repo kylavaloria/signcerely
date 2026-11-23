@@ -389,6 +389,8 @@ What it proves on every pull request:
 - Signers sign one after another, everyone receives the signed copy, and that copy passes Verify.
 - Only the invited person can open and sign their invite, even with the link.
 - A signer can decline, which stops the document, and the sender is told why.
+- The sender can cancel after someone has signed, and everyone invited is told.
+- A file that was never signed doesn't verify.
 - One confirmed email belongs to one account.
 
 To run it on your computer, see [app/e2e/README.md](app/e2e/README.md).
