@@ -1,0 +1,31 @@
+name: Test cases
+
+on:
+  pull_request:
+    paths:
+      - "app/src/**/*.test.ts"
+      - "app/e2e/signing.spec.ts"
+      - "contracts/signing/src/test.rs"
+      - "scripts/list-test-cases.mjs"
+      - "docs/TEST_CASES.md"
+      - ".github/workflows/test-cases.yml"
+  push:
+    branches: [main]
+    paths:
+      - "app/src/**/*.test.ts"
+      - "app/e2e/signing.spec.ts"
+      - "contracts/signing/src/test.rs"
+      - "scripts/list-test-cases.mjs"
+      - "docs/TEST_CASES.md"
+      - ".github/workflows/test-cases.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: docs/TEST_CASES.md matches the tests
+        run: node scripts/list-test-cases.mjs --check
