@@ -83,6 +83,7 @@ permanent, public proof on Stellar that anyone can check for free.
 - [🔹 Testing](#-testing)
   - [Test results](#test-results)
 - [🚧 Limitations](#-limitations)
+- [🏆 About the builder](#-about-the-builder)
 - [📒 License](#-license)
 - [Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md)
 
@@ -430,6 +431,17 @@ _Updated automatically after every test run on `main`. Click a result to open th
 - The fingerprint of the final signed copy is supplied by the last signer's app. A wrong value can't fake anyone's signature, but the real signed copy would then not match on Verify.
 - Names are typed by the sender and confirmed by each signer; they aren't checked against an ID.
 - Copying an invite link from the document page gives the sender that invite's key. The signer's email check still applies.
+
+<br />
+
+## 🏆 About the builder
+
+Signcerely is built by Kyla Mae Valoria, a Computer Science graduate of the Polytechnic University of the Philippines and an active builder in the Stellar Philippines community.
+
+| Milestone | Proof |
+|---|---|
+| Winner of the Rise In × Stellar "Journey to Mastery" Monthly Builder Challenge for **Paluwagan Go**, a Soroban contract for rotating savings groups. Featured by Stellar Philippines (June 2026). | [Announcement](https://x.com/PHI_Stellar/status/2063946202224427334) · [Repo](https://github.com/kylavaloria/paluwagan-go) · [Live app](https://paluwagan-go.vercel.app/) |
+| **Signcerely**: a live app with its signing contract on Stellar testnet, and contract, app and end-to-end tests running in CI. | [signcerely.site](https://signcerely.site) · [Smart contract](#-smart-contract) · [Test results](#test-results) |
 
 <br />
 
