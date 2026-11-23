@@ -4,8 +4,8 @@ extern crate std;
 use super::*;
 use ed25519_dalek::{Signer as _, SigningKey};
 use soroban_sdk::{
-    testutils::{Address as _, Events as _, Ledger as _},
-    Address, BytesN, Env, Vec,
+    testutils::{storage::Persistent as _, Address as _, Events as _, Ledger as _},
+    xdr, Address, BytesN, Env, Vec,
 };
 
 const T0: u64 = 1_762_560_000;
@@ -424,6 +424,21 @@ fn every_step_emits_an_event() {
     assert_eq!(e.events().all().events().len(), 2);
 }
 
+/// The second topic of each event from the last call, e.g. "declined".
+fn event_names(e: &Env) -> std::vec::Vec<std::string::String> {
+    e.events()
+        .all()
+        .events()
+        .iter()
+        .map(|ev| match &ev.body {
+            xdr::ContractEventBody::V0(b) => match &b.topics[1] {
+                xdr::ScVal::Symbol(sym) => std::string::String::from_utf8(sym.0.to_vec()).unwrap(),
+                _ => std::string::String::new(),
+            },
+        })
+        .collect()
+}
+
 // ---- Decline ----
 
 #[test]
@@ -598,4 +613,96 @@ fn a_proof_made_for_another_deployment_is_rejected() {
         .try_sign(&s.w[0], &h(e, DOC), &0, &proof, &h(e, IMG), &None)
         .is_err());
     assert_eq!(s.client.get_document(&h(e, DOC)).signed_count, 0);
+}
+
+// ---- Signing ----
+
+#[test]
+fn the_final_copy_cannot_reuse_a_fingerprint_from_another_document() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, true);
+    s.sign(0, None);
+    s.sign(1, Some(FINAL));
+
+    s.create_doc(2, 12, 2, true);
+    let p0 = s.proof_for(2, &s.keys[0], 0, &s.w[2]);
+    s.client.sign(&s.w[2], &h(e, 2), &0, &p0, &h(e, IMG), &None);
+    let p1 = s.proof_for(2, &s.keys[1], 1, &s.w[3]);
+    // Another document's final copy, then another document's original.
+    for taken in [FINAL, ORIGINAL] {
+        assert_eq!(
+            s.client
+                .try_sign(&s.w[3], &h(e, 2), &1, &p1, &h(e, IMG), &Some(h(e, taken))),
+            Err(Ok(Error::HashInUse))
+        );
+    }
+    s.client
+        .sign(&s.w[3], &h(e, 2), &1, &p1, &h(e, IMG), &Some(h(e, 21)));
+    assert_eq!(s.client.get_document(&h(e, 2)).status, Status::Completed);
+}
+
+#[test]
+fn one_wallet_can_sign_different_documents() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, false);
+    s.create_doc(2, 12, 2, false);
+    s.sign(0, None);
+    let proof = s.proof_for(2, &s.keys[0], 0, &s.w[0]);
+    s.client
+        .sign(&s.w[0], &h(e, 2), &0, &proof, &h(e, IMG), &None);
+    assert_eq!(s.client.get_document(&h(e, 2)).signed_count, 1);
+}
+
+#[test]
+fn the_sender_can_also_be_a_signer() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, true);
+    let proof = s.proof(&s.keys[0], 0, &s.sender);
+    s.client
+        .sign(&s.sender, &h(e, DOC), &0, &proof, &h(e, IMG), &None);
+    s.sign(1, Some(FINAL));
+    let sigs = s.client.get_signatures(&h(e, DOC));
+    assert_eq!(sigs.get(0).unwrap().unwrap().signer, s.sender);
+    assert_eq!(s.client.get_document(&h(e, DOC)).status, Status::Completed);
+}
+
+// ---- Storage and events ----
+
+#[test]
+fn every_stored_entry_lives_about_30_days() {
+    let s = setup();
+    let e = &s.env;
+    s.create(2, true);
+    s.sign(0, None);
+    s.sign(1, Some(FINAL));
+    let keys = [
+        DataKey::Doc(h(e, DOC)),
+        DataKey::OriginalHash(h(e, ORIGINAL)),
+        DataKey::FinalHash(h(e, FINAL)),
+        DataKey::Sig(h(e, DOC), 0),
+        DataKey::Sig(h(e, DOC), 1),
+        DataKey::Wallet(h(e, DOC), s.w[0].clone()),
+        DataKey::Wallet(h(e, DOC), s.w[1].clone()),
+    ];
+    e.as_contract(&s.client.address, || {
+        for key in keys.iter() {
+            assert_eq!(e.storage().persistent().get_ttl(key), BUMP_TO);
+        }
+    });
+}
+
+#[test]
+fn decline_and_cancel_each_emit_their_event() {
+    let s = setup();
+    s.create(2, false);
+    s.try_decline(1).unwrap();
+    assert_eq!(event_names(&s.env), ["declined"]);
+
+    let s = setup();
+    s.create(2, false);
+    s.client.cancel(&s.sender, &h(&s.env, DOC));
+    assert_eq!(event_names(&s.env), ["cancelled"]);
 }
