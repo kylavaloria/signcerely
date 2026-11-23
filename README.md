@@ -4,10 +4,6 @@
 
 <p align="center">
   <a href="https://signcerely.site"><b>signcerely.site</b></a>
-  &nbsp;·&nbsp; <a href="#how-it-works">How it works</a>
-  &nbsp;·&nbsp; <a href="#features">Features</a>
-  &nbsp;·&nbsp; <a href="#run-it-locally">Run it locally</a>
-  &nbsp;·&nbsp; <a href="#smart-contract">Smart contract</a>
 </p>
 
 <p align="center">
@@ -60,36 +56,37 @@ permanent, public proof on Stellar that anyone can check for free.
 
 <br />
 
-## 📂 Contents
+<h2 align="center">📂 Contents</h2>
 
+<div align="center">
 <table>
 <tr>
-<td width="50%" valign="top">
-
-- [📘 How it works](#-how-it-works)
-- [✨ Features](#-features)
-- [🔒 Security and privacy](#-security-and-privacy)
-- [💠 Architecture](#-architecture)
-  - [System](#system)
-  - [Signing flow](#signing-flow)
-- [💎 Tech stack](#-tech-stack)
-- [📁 Repo layout](#-repo-layout)
-
+<td width="260" valign="top">
+<b>Product</b><br />
+<a href="#-how-it-works">📘 How it works</a><br />
+<a href="#-features">✨ Features</a><br />
+<a href="#-security-and-privacy">🔒 Security and privacy</a><br /><br />
+<b>Technical</b><br />
+<a href="#-architecture">💠 Architecture</a><br />
+<a href="#-tech-stack">💎 Tech stack</a><br />
+<a href="#-repo-layout">📁 Repo layout</a><br />
+<a href="#-smart-contract">🔷 Smart contract</a>
 </td>
-<td width="50%" valign="top">
-
-- [🔷 Smart contract](#-smart-contract)
-- [⚡ Run it locally](#-run-it-locally)
-- [🔹 Testing](#-testing)
-  - [Test results](#test-results)
-- [🚧 Limitations](#-limitations)
-- [🏆 About the builder](#-about-the-builder)
-- [📒 License](#-license)
-- [Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md)
-
+<td width="260" valign="top">
+<b>Develop</b><br />
+<a href="#-run-it-locally">⚡ Run it locally</a><br />
+<a href="#-testing">🔹 Testing</a><br />
+<a href="#-cicd">🔄 CI/CD</a><br /><br />
+<b>More</b><br />
+<a href="#-limitations">🚧 Limitations</a><br />
+<a href="#-about-the-builder">🏆 About the builder</a><br />
+<a href="#-license">📒 License</a><br />
+<a href="CONTRIBUTING.md">🤝 Contributing</a><br />
+<a href="SECURITY.md">🔐 Security policy</a>
 </td>
 </tr>
 </table>
+</div>
 
 <br />
 
@@ -200,10 +197,10 @@ browser and the file never leaves the device.
 </tr>
 </table>
 
-| | |
+| Feature | What it does |
 |---|---|
-| **Your signature, your way** | Draw it or upload a photo, and save it for next time |
-| **Email at every turn** | Invites, "your turn", reminders, declines, cancellations and "everyone has signed" |
+| **Signature input** | Draw it or upload a photo, and save it for next time |
+| **Email notifications** | Invites, "your turn", reminders, declines, cancellations and "everyone has signed" |
 | **Signing order** | One after another, or all at once |
 | **Signers** | 2 to 20 per document; you can include yourself |
 | **Signature boxes** | Placed on any page, or skipped so signatures go on the summary page |
@@ -297,7 +294,7 @@ sequenceDiagram
 | `contracts/signing/` | Soroban smart contract |
 | `supabase/` | Database migrations and local config |
 | `scripts/` | Contract deploy script |
-| `.github/workflows/` | CI: app checks, contract tests, end-to-end, testnet deploy |
+| `.github/workflows/` | CI/CD workflows (see [CI/CD](#-cicd)) |
 
 <br />
 
@@ -372,10 +369,27 @@ No local setup? Open **Actions → Deploy to testnet → Run workflow**.
 |---|---|
 | `cd app && npm test` | Unit tests (Vitest) |
 | `cargo test` | Contract tests |
-| `cd app && npm run test:e2e` | End-to-end: a real browser signs documents against a local Supabase and a private Stellar network ([how it's set up](app/e2e/README.md)) |
+| `cd app && npm run test:e2e` | End-to-end tests (Playwright) |
 
-Every pull request runs lint, type checks, unit, contract and end-to-end tests in CI.
-The screenshots in this README come from a real run of the app: **Actions → README screenshots**.
+### End-to-end tests
+
+A real browser ([Playwright](https://playwright.dev)) clicks through the built app exactly as a person would: sign in, upload, add signers, place boxes, send, sign, decline and verify. Everything runs on throwaway infrastructure, never the live services:
+
+| Piece | In the tests |
+|---|---|
+| Blockchain | A private Stellar network (`stellar/quickstart --local`) with the contract freshly built and deployed |
+| Database | A local Supabase built from `supabase/migrations` |
+| Wallet | A stand-in for Varial that signs with a test key, only in test builds |
+| Email | Captured to disk, so the tests open the real invite and confirmation links |
+
+What it proves on every pull request:
+
+- Signers sign one after another, everyone receives the signed copy, and that copy passes Verify.
+- Only the invited person can open and sign their invite, even with the link.
+- A signer can decline, which stops the document, and the sender is told why.
+- One confirmed email belongs to one account.
+
+To run it on your computer, see [app/e2e/README.md](app/e2e/README.md).
 
 ### Test results
 
@@ -390,6 +404,50 @@ The screenshots in this README come from a real run of the app: **Actions → RE
 
 _Updated automatically after every test run on `main`. Click a result to open that run._
 <!-- test-results:end -->
+
+<br />
+
+## 🔄 CI/CD
+
+Every change goes through a pull request. Checks only run for the parts of the code that changed, Vercel deploys a preview for each branch, and merging to `main` deploys to production.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#eef4fd","primaryTextColor":"#12305c","primaryBorderColor":"#1f6fd6","lineColor":"#2f7ae5","textColor":"#2f7ae5","edgeLabelBackground":"#ffdd1f","clusterBkg":"#f7faff","clusterBorder":"#1f6fd6","titleColor":"#12305c","actorBkg":"#1f6fd6","actorBorder":"#12305c","actorTextColor":"#ffffff","actorLineColor":"#2f7ae5","signalColor":"#2f7ae5","signalTextColor":"#2f7ae5","noteBkgColor":"#ffdd1f","noteBorderColor":"#c9a800","noteTextColor":"#12305c","sequenceNumberColor":"#ffffff"}}}%%
+flowchart TB
+  subgraph checks["Checks on every pull request"]
+    app["App<br/>lint, types, unit tests, build"]
+    con["Contract<br/>tests, WASM build"]
+    e2e["End-to-end<br/>real browser, local Stellar + Supabase"]
+    prev["Vercel<br/>preview deploy"]
+  end
+  pr(["Pull request"]) --> app & con & e2e & prev
+  app & con & e2e & prev --> merge(["Merge to main"])
+  merge --> prod["Vercel production<br/>signcerely.site"]
+  merge --> again["App, Contract, End-to-end<br/>run again on main"]
+  merge --> testnet["Testnet integration<br/>full signing flow on Stellar testnet"]
+  again --> results["Test results<br/>README table updates itself"]
+  testnet --> results
+
+  classDef blue fill:#1f6fd6,stroke:#12305c,color:#ffffff
+  classDef yellow fill:#ffdd1f,stroke:#c9a800,color:#12305c
+  classDef soft fill:#eef4fd,stroke:#1f6fd6,color:#12305c
+  class pr,merge yellow
+  class prod,testnet blue
+  class app,con,e2e,prev,again,results soft
+```
+
+| Workflow | When it runs | What it checks or does |
+|---|---|---|
+| [App](.github/workflows/app.yml) | Pull requests, merges | Lint, type check, unit tests, then a production build |
+| [Contract](.github/workflows/contract.yml) | Pull requests, merges | Contract tests, then the WASM build with the Stellar CLI |
+| [End-to-end](.github/workflows/e2e.yml) | Pull requests, merges, manual | Full browser tests on throwaway infrastructure (see [End-to-end tests](#end-to-end-tests)) |
+| [Testnet integration](.github/workflows/testnet-integration.yml) | Merges to `main`, manual | Runs the signing flow against the deployed contract on Stellar testnet |
+| [Test results](.github/workflows/test-results.yml) | After the checks on `main`, manual | Reads the Vitest, cargo and Playwright results and rewrites the results table in this README |
+| [Deploy to testnet](.github/workflows/deploy-testnet.yml) | Manual | Runs the contract tests, creates and funds a fresh deployer account, builds and deploys the contract, and saves the deployment record |
+| [README screenshots](.github/workflows/readme-shots.yml) | Manual | Starts the same throwaway stack as end-to-end and records the README screenshots and the website's How it works clips from a real run |
+| [Keep database awake](.github/workflows/keep-alive.yml) | Every 3 days, manual | Calls `/api/health`, which queries the database, so the free Supabase project is never paused |
+
+"Manual" means the workflow can be started anytime from the **Actions** tab (`workflow_dispatch`). Database changes live in `supabase/migrations/` and are applied before the code that needs them is merged.
 
 <br />
 
