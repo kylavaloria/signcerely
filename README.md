@@ -56,38 +56,37 @@ permanent, public proof on Stellar that anyone can check for free.
 
 <br />
 
-## 📂 Contents
+<h2 align="center">📂 Contents</h2>
 
+<div align="center">
 <table>
 <tr>
-<td width="50%" valign="top">
-
-- [📘 How it works](#-how-it-works)
-- [✨ Features](#-features)
-- [🔒 Security and privacy](#-security-and-privacy)
-- [💠 Architecture](#-architecture)
-  - [System](#system)
-  - [Signing flow](#signing-flow)
-- [💎 Tech stack](#-tech-stack)
-- [📁 Repo layout](#-repo-layout)
-
+<td width="260" valign="top">
+<b>Product</b><br />
+<a href="#-how-it-works">📘 How it works</a><br />
+<a href="#-features">✨ Features</a><br />
+<a href="#-security-and-privacy">🔒 Security and privacy</a><br /><br />
+<b>Technical</b><br />
+<a href="#-architecture">💠 Architecture</a><br />
+<a href="#-tech-stack">💎 Tech stack</a><br />
+<a href="#-repo-layout">📁 Repo layout</a><br />
+<a href="#-smart-contract">🔷 Smart contract</a>
 </td>
-<td width="50%" valign="top">
-
-- [🔷 Smart contract](#-smart-contract)
-- [⚡ Run it locally](#-run-it-locally)
-- [🔹 Testing](#-testing)
-  - [End-to-end tests](#end-to-end-tests)
-  - [Test results](#test-results)
-- [🔄 CI/CD](#-cicd)
-- [🚧 Limitations](#-limitations)
-- [🏆 About the builder](#-about-the-builder)
-- [📒 License](#-license)
-- [Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md)
-
+<td width="260" valign="top">
+<b>Develop</b><br />
+<a href="#-run-it-locally">⚡ Run it locally</a><br />
+<a href="#-testing">🔹 Testing</a><br />
+<a href="#-cicd">🔄 CI/CD</a><br /><br />
+<b>More</b><br />
+<a href="#-limitations">🚧 Limitations</a><br />
+<a href="#-about-the-builder">🏆 About the builder</a><br />
+<a href="#-license">📒 License</a><br />
+<a href="CONTRIBUTING.md">🤝 Contributing</a><br />
+<a href="SECURITY.md">🔐 Security policy</a>
 </td>
 </tr>
 </table>
+</div>
 
 <br />
 
