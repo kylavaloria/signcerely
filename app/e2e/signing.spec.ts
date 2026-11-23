@@ -132,7 +132,7 @@ test("the sender can cancel after a signature, and everyone invited is told", as
   const alice = await newUser(browser, "Alice Canceller");
   const bob = await newUser(browser, "Bob Early");
   const carol = await newUser(browser, "Carol Later");
-  const title = `Quote ${runId} cancelled`;
+  const title = `Quote ${runId} withdrawn`;
 
   await signIn(alice);
   const id = await sendDocument(alice, { title, signers: [bob, carol], inOrder: false });
@@ -151,7 +151,7 @@ test("the sender can cancel after a signature, and everyone invited is told", as
 
   // Both invitees get the note.
   for (const u of [bob, carol]) {
-    const notice = await waitForMail(u.email, /cancelled/);
+    const notice = await waitForMail(u.email, /cancelled Quote/);
     expect(notice.text).toContain("Sending a new version");
   }
 
