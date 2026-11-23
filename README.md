@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://signcerely.site"><b>signcerely.site</b></a>
+  🌐 <a href="https://signcerely.site"><b>signcerely.site</b></a>
 </p>
 
 <p align="center">
