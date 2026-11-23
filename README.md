@@ -436,7 +436,7 @@ _Updated automatically after every test run on `main`. Click a result to open th
 
 ## 🏆 About the builder
 
-Signcerely is built by Kyla Mae Valoria, a Computer Science graduate of the Polytechnic University of the Philippines and an active builder in the Stellar Philippines community.
+Signcerely is built by Kyla Mae Valoria, from the Polytechnic University of the Philippines, and an active builder in the Stellar Philippines community.
 
 | Milestone | Proof |
 |---|---|
