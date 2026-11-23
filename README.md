@@ -374,10 +374,7 @@ No local setup? Open **Actions → Deploy to testnet → Run workflow**.
 |---|---|
 | `cd app && npm test` | Unit tests (Vitest) |
 | `cargo test` | Contract tests |
-| `cd app && npm run test:e2e` | End-to-end: a real browser signs documents against a local Supabase and a private Stellar network ([how it's set up](app/e2e/README.md)) |
-
-Every pull request runs lint, type checks, unit, contract and end-to-end tests in CI.
-The screenshots in this README come from a real run of the app: **Actions → README screenshots**.
+| `cd app && npm run test:e2e` | End-to-end tests (Playwright) |
 
 ### End-to-end tests
 
