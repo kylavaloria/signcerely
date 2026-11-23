@@ -81,6 +81,7 @@ permanent, public proof on Stellar that anyone can check for free.
 - [🔷 Smart contract](#-smart-contract)
 - [⚡ Run it locally](#-run-it-locally)
 - [🔹 Testing](#-testing)
+  - [End-to-end tests](#end-to-end-tests)
   - [Test results](#test-results)
 - [🔄 CI/CD](#-cicd)
 - [🚧 Limitations](#-limitations)
@@ -378,6 +379,26 @@ No local setup? Open **Actions → Deploy to testnet → Run workflow**.
 Every pull request runs lint, type checks, unit, contract and end-to-end tests in CI.
 The screenshots in this README come from a real run of the app: **Actions → README screenshots**.
 
+### End-to-end tests
+
+A real browser ([Playwright](https://playwright.dev)) clicks through the built app exactly as a person would: sign in, upload, add signers, place boxes, send, sign, decline and verify. Everything runs on throwaway infrastructure, never the live services:
+
+| Piece | In the tests |
+|---|---|
+| Blockchain | A private Stellar network (`stellar/quickstart --local`) with the contract freshly built and deployed |
+| Database | A local Supabase built from `supabase/migrations` |
+| Wallet | A stand-in for Varial that signs with a test key, only in test builds |
+| Email | Captured to disk, so the tests open the real invite and confirmation links |
+
+What it proves on every pull request:
+
+- Signers sign one after another, everyone receives the signed copy, and that copy passes Verify.
+- Only the invited person can open and sign their invite, even with the link.
+- A signer can decline, which stops the document, and the sender is told why.
+- One confirmed email belongs to one account.
+
+To run it on your computer, see [app/e2e/README.md](app/e2e/README.md).
+
 ### Test results
 
 <!-- test-results:start -->
@@ -427,19 +448,12 @@ flowchart TB
 |---|---|---|
 | [App](.github/workflows/app.yml) | Pull requests, merges | Lint, type check and unit tests for the invite-key crypto, signed-PDF stamping, signer identity and access rules, then a production build |
 | [Contract](.github/workflows/contract.yml) | Pull requests, merges | Contract tests for signing order, copied proofs, one wallet per spot, final-fingerprint rules, decline, cancel and events, then the WASM build with the Stellar CLI |
-| [End-to-end](.github/workflows/e2e.yml) | Pull requests, merges, manual | A real browser (Playwright) runs the whole product on throwaway infrastructure: a private Stellar network with the contract freshly deployed, a local Supabase built from our migrations, a test wallet standing in for Varial, and emails captured to disk. See below |
+| [End-to-end](.github/workflows/e2e.yml) | Pull requests, merges, manual | Full browser tests on throwaway infrastructure (see [End-to-end tests](#end-to-end-tests)) |
 | [Testnet integration](.github/workflows/testnet-integration.yml) | Merges to `main`, manual | Runs against the deployed contract on Stellar testnet: create, sign in order, complete and find the final copy by fingerprint; reject a proof made for another wallet; decline; cancel |
 | [Test results](.github/workflows/test-results.yml) | After the checks on `main`, manual | Reads the Vitest, cargo and Playwright results and rewrites the results table in this README |
 | [Deploy to testnet](.github/workflows/deploy-testnet.yml) | Manual | Runs the contract tests, creates and funds a fresh deployer account, builds and deploys the contract, and saves the deployment record |
 | [README screenshots](.github/workflows/readme-shots.yml) | Manual | Starts the same throwaway stack as end-to-end and records the README screenshots and the website's How it works clips from a real run |
 | [Keep database awake](.github/workflows/keep-alive.yml) | Every 3 days, manual | Calls `/api/health`, which queries the database, so the free Supabase project is never paused |
-
-**What the end-to-end suite proves**, in a real browser on every pull request:
-
-- Signers sign one after another, everyone receives the signed copy, and that copy passes Verify.
-- Only the invited person can open and sign their invite, even with the link.
-- A signer can decline, which stops the document, and the sender is told why.
-- One confirmed email belongs to one account.
 
 "Manual" means the workflow can be started anytime from the **Actions** tab (`workflow_dispatch`). Database changes live in `supabase/migrations/` and are applied before the code that needs them is merged.
 
