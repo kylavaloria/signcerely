@@ -23,7 +23,7 @@ const SUITES = [
     workflow: "app.yml",
     name: "Unit tests",
     tool: "Vitest",
-    covers: "Sign-in messages, invite keys, who may sign, document rules, file names, the signed copy, error messages, contract calls",
+    covers: "Sign-in messages, invite keys, who may sign, invite access, verify lookups, document rules, file names, the signed copy, error messages, contract calls",
     parse: vitest,
   },
   {
@@ -37,7 +37,7 @@ const SUITES = [
     workflow: "e2e.yml",
     name: "End-to-end",
     tool: "Playwright",
-    covers: "A real browser against a local Supabase and a private Stellar network: signing in order through to verify, only the invited person can sign, decline with a reason, one confirmed email per account",
+    covers: "A real browser against a local Supabase and a private Stellar network: signing in order through to verify, only the invited person can sign, decline with a reason, cancel after a signature, an unsigned file not verifying, one confirmed email per account",
     parse: playwright,
   },
   {
